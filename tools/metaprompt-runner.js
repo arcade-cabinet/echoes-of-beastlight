@@ -118,9 +118,29 @@ class MetapromptRunner {
         const rustMatch = content.match(/```rust\n([\s\S]*?)\n```/);
         return rustMatch ? rustMatch[1] : content;
       case 'yaml':
-        return yaml.load(content);
+        try {
+          // Try to extract YAML from code blocks first
+          const yamlMatch = content.match(/```ya?ml\n([\s\S]*?)\n```/);
+          if (yamlMatch) {
+            return yaml.load(yamlMatch[1]);
+          }
+          return yaml.load(content);
+        } catch (error) {
+          this.log(`YAML parse error: ${error.message}`, 'warning');
+          // Return as string if YAML parsing fails
+          return content;
+        }
       case 'json':
-        return JSON.parse(content);
+        try {
+          const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
+          if (jsonMatch) {
+            return JSON.parse(jsonMatch[1]);
+          }
+          return JSON.parse(content);
+        } catch (error) {
+          this.log(`JSON parse error: ${error.message}`, 'warning');
+          return content;
+        }
       default:
         return content;
     }

@@ -1,0 +1,44 @@
+Here is the `Cargo.toml` file for your Bevy game project "Echoes of Beastlight":
+
+```toml
+[package]
+name = "echoes_of_beastlight"
+version = "0.1.0"
+edition = "2018"
+
+[workspace]
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+
+[dependencies]
+bevy = { version = "0.12", features = ["dynamic", "wayland", "webgl2"] }
+bevy_ecs_tilemap = { version = "0.12", features = ["atlas"] }
+bevy_yoleck = { version = "0.17", features = ["vpeol_2d"] }
+mapgen = { version = "0.5" }
+bevy_egui = { version = "0.23" }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = { version = "0.9" }
+rand = { version = "0.8" }
+
+[features]
+default = ["std"]
+std = [
+    "bevy/std",
+    "bevy_ecs_tilemap/std",
+    "bevy_yoleck/std",
+    "mapgen/std",
+    "bevy_egui/std",
+    "serde/std",
+    "serde_yaml/std",
+    "rand/std",
+]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+```
+
+This `Cargo.toml` file includes the workspace setup, WASM features, and optimization profiles as requested. The dependencies are specified with the exact versions and features you provided. The `std` feature is enabled by default for all dependencies that support it. For the WASM target, the `wasm-bindgen` dependency is added.
