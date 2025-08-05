@@ -252,6 +252,7 @@ Output only the Cargo.toml content, no explanations.`;
     
     const cargoContent = await this.generate(cargoPrompt, { temperature: 0.2 });
     await fs.writeFile('Cargo.toml', cargoContent);
+    this.state.generated.add('Cargo.toml');
     console.log(chalk.green('  ✓ Cargo.toml'));
     
     // Generate main.rs with Bevy app setup
@@ -399,6 +400,146 @@ Output as structured JSON.`;
     
     await fs.writeFile('assets/audio/audio_specs.json', JSON.stringify(audio, null, 2));
     console.log(chalk.green('  ✓ audio specifications'));
+    
+    // Generate actual assets
+    console.log(chalk.yellow('🖼️  Generating actual image assets...'));
+    await this.generateActualSprites();
+    
+    console.log(chalk.yellow('🎵 Generating actual audio assets...'));
+    await this.generateActualAudio();
+  }
+  
+  async generateActualSprites() {
+    // Generate a simple 32x32 pixel sprite for the hero
+    const heroSpritePrompt = `Generate a 32x32 pixel art sprite for the hero Cael.
+Create a simple pixel art character with:
+- Green cloak/clothing
+- Brown hair
+- Crystal arm bracer (light blue)
+- Facing right, standing pose
+
+Output as a base64-encoded PNG image data URL.
+Start with: data:image/png;base64,
+Include only the data URL, no other text.`;
+    
+    const heroSprite = await this.generate(heroSpritePrompt, { 
+      temperature: 0.1,
+      maxTokens: 8000 
+    });
+    
+    // Save the base64 as an actual PNG file
+    if (heroSprite.startsWith('data:image/png;base64,')) {
+      const base64Data = heroSprite.replace('data:image/png;base64,', '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      await fs.writeFile('assets/sprites/hero.png', buffer);
+      console.log(chalk.green('  ✓ hero.png'));
+    }
+    
+    // Generate a simple tileset
+    const tilesetPrompt = `Generate a 16x16 pixel tileset with 4 basic tiles arranged in a 2x2 grid (32x32 total):
+- Top-left: Grass tile (green)
+- Top-right: Stone tile (gray)
+- Bottom-left: Water tile (blue)
+- Bottom-right: Dirt tile (brown)
+
+Each tile should be 16x16 pixels with simple patterns.
+Output as a base64-encoded PNG image data URL.
+Start with: data:image/png;base64,
+Include only the data URL, no other text.`;
+    
+    const tileset = await this.generate(tilesetPrompt, { 
+      temperature: 0.1,
+      maxTokens: 8000 
+    });
+    
+    if (tileset.startsWith('data:image/png;base64,')) {
+      const base64Data = tileset.replace('data:image/png;base64,', '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      await fs.writeFile('assets/sprites/basic_tileset.png', buffer);
+      console.log(chalk.green('  ✓ basic_tileset.png'));
+    }
+    
+    // Generate monster sprites
+    const monsterPrompt = `Generate a 32x32 pixel art sprite for a Crystal Beast monster.
+Create a simple creature made of blue crystals with:
+- Angular crystal body
+- Glowing blue core
+- Four legs
+- Facing left
+
+Output as a base64-encoded PNG image data URL.
+Start with: data:image/png;base64,
+Include only the data URL, no other text.`;
+    
+    const monsterSprite = await this.generate(monsterPrompt, {
+      temperature: 0.1,
+      maxTokens: 8000
+    });
+    
+    if (monsterSprite.startsWith('data:image/png;base64,')) {
+      const base64Data = monsterSprite.replace('data:image/png;base64,', '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      await fs.writeFile('assets/sprites/crystal_beast.png', buffer);
+      console.log(chalk.green('  ✓ crystal_beast.png'));
+    }
+  }
+  
+  async generateActualAudio() {
+    // Generate a simple 8-bit style audio file
+    const audioPrompt = `Generate a simple 8-bit chiptune melody for a game menu.
+Create a 2-second loop at 120 BPM in C major.
+Use basic square wave synthesis.
+
+Output as a base64-encoded WAV audio data URL.
+Start with: data:audio/wav;base64,
+Include only the data URL, no other text.`;
+    
+    const menuAudio = await this.generate(audioPrompt, {
+      temperature: 0.1,
+      maxTokens: 10000
+    });
+    
+    if (menuAudio.startsWith('data:audio/wav;base64,')) {
+      const base64Data = menuAudio.replace('data:audio/wav;base64,', '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      await fs.writeFile('assets/audio/menu_theme.wav', buffer);
+      console.log(chalk.green('  ✓ menu_theme.wav'));
+    }
+    
+    // Generate sound effects
+    const sfxPrompts = [
+      { 
+        name: 'coin_pickup.wav',
+        prompt: 'Generate a short coin pickup sound effect (0.5 seconds). Classic 8-bit style ascending tone.'
+      },
+      {
+        name: 'menu_select.wav', 
+        prompt: 'Generate a menu selection sound effect (0.2 seconds). Quick blip sound.'
+      },
+      {
+        name: 'attack_hit.wav',
+        prompt: 'Generate an attack hit sound effect (0.3 seconds). Sharp impact noise.'
+      }
+    ];
+    
+    for (const sfx of sfxPrompts) {
+      const fullPrompt = `${sfx.prompt}
+Output as a base64-encoded WAV audio data URL.
+Start with: data:audio/wav;base64,
+Include only the data URL, no other text.`;
+      
+      const audio = await this.generate(fullPrompt, {
+        temperature: 0.1,
+        maxTokens: 10000
+      });
+      
+      if (audio.startsWith('data:audio/wav;base64,')) {
+        const base64Data = audio.replace('data:audio/wav;base64,', '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        await fs.writeFile(`assets/audio/${sfx.name}`, buffer);
+        console.log(chalk.green(`  ✓ ${sfx.name}`));
+      }
+    }
   }
   
   async generateCombatSystem() {
