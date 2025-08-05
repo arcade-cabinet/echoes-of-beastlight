@@ -1,0 +1,14 @@
+{
+  "name": "e2e",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "commands": ["echo 'E2E tests would run here'"]
+      }
+    }
+  }
+}

@@ -1,19 +1,20 @@
-Here is the `Cargo.toml` file for your Bevy game project "Echoes of Beastlight":
+Here is the generated `Cargo.toml` file:
 
 ```toml
 [package]
-name = "echoes_of_beastlight"
+name = "beastlight"
 version = "0.1.0"
 edition = "2018"
 
+# The workspace configuration allows for managing multiple related packages in a single file
 [workspace]
+members = ["beastlight"]
 
-[profile.dev]
-opt-level = 0
+# The build target configuration for WebAssembly
+[build]
+target = "wasm32-unknown-unknown"
 
-[profile.release]
-opt-level = 3
-
+# The dependencies for the project with exact versions and specified features
 [dependencies]
 bevy = { version = "0.12", features = ["dynamic", "wayland", "webgl2"] }
 bevy_ecs_tilemap = { version = "0.12", features = ["atlas"] }
@@ -24,21 +25,30 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = { version = "0.9" }
 rand = { version = "0.8" }
 
-[features]
-default = ["std"]
-std = [
-    "bevy/std",
-    "bevy_ecs_tilemap/std",
-    "bevy_yoleck/std",
-    "mapgen/std",
-    "bevy_egui/std",
-    "serde/std",
-    "serde_yaml/std",
-    "rand/std",
-]
+# The release profile configurations for optimization
+[profile.release]
+# Optimize for size on web builds
+codegen-units = 1
+debug = false
+incremental = false
+lto = true
+opt-level = 'z'
+overflow-checks = true
+panic = 'abort'
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen = "0.2"
+[profile.dev]
+# Optimize for performance on native builds
+debug = true
+incremental = true
+lto = false
+opt-level = 3
+overflow-checks = false
+panic = 'unwind'
+
+# The feature flags for web builds
+[features]
+default = ["web"]
+web = ["bevy/webgl2"]
 ```
 
-This `Cargo.toml` file includes the workspace setup, WASM features, and optimization profiles as requested. The dependencies are specified with the exact versions and features you provided. The `std` feature is enabled by default for all dependencies that support it. For the WASM target, the `wasm-bindgen` dependency is added.
+This `Cargo.toml` file specifies the package information, workspace configuration, build target, dependencies, release profiles, and feature flags. The `profile.release` section is configured for size optimization which is suitable for web builds, while the `profile.dev` section is configured for performance optimization which is suitable for native builds. The `features` section specifies the default features to be used in web builds.
