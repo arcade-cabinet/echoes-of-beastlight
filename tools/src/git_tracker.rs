@@ -450,3 +450,239 @@ impl GitGenerationTracker {
         Ok(stale)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+    use std::fs;
+    
+    fn setup_test_repo() -> Result<(TempDir, Repository)> {
+        let temp_dir = TempDir::new()?;
+        let repo = Repository::init(&temp_dir)?;
+        
+        // Create initial commit
+        let sig = Signature::now("Test User", "test@example.com")?;
+        let tree_id = {
+            let mut index = repo.index()?;
+            index.write_tree()?
+        };
+        let tree = repo.find_tree(tree_id)?;
+        repo.commit(
+            Some("HEAD"),
+            &sig,
+            &sig,
+            "Initial commit",
+            &tree,
+            &[],
+        )?;
+        
+        Ok((temp_dir, repo))
+    }
+    
+    #[test]
+    fn test_new_tracker() {
+        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
+        assert_eq!(tracker.generation_branch, "ai-generation-tracking");
+    }
+    
+    #[test]
+    fn test_start_generation() {
+        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
+        
+        let config = serde_json::json!({
+            "game": {
+                "title": "Test Game"
+            }
+        });
+        
+        let manifest = tracker.start_generation(&config).unwrap();
+        
+        assert!(manifest.parent_commit.is_some());
+        assert_eq!(manifest.cascade_tree.root_prompt.id, "root");
+        assert_eq!(manifest.cascade_tree.total_api_calls, 0);
+        assert_eq!(manifest.cascade_tree.total_cost_estimate, 0.0);
+        assert_eq!(manifest.config_snapshot, config);
+    }
+    
+    #[test]
+    fn test_track_prompt() {
+        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
+        
+        let config = serde_json::json!({});
+        let mut manifest = tracker.start_generation(&config).unwrap();
+        
+        let prompt_node = PromptNode {
+            id: "test-prompt".to_string(),
+            prompt_type: "component".to_string(),
+            prompt_hash: "abc123".to_string(),
+            system_prompt: "You are a game developer".to_string(),
+            user_prompt: "Create a player component".to_string(),
+            children: vec![],
+            generated_files: vec![],
+            cache_hit: false,
+        };
+        
+        tracker.track_prompt(&mut manifest, prompt_node.clone(), None).unwrap();
+        
+        assert_eq!(manifest.cascade_tree.root_prompt.children.len(), 1);
+        assert_eq!(manifest.cascade_tree.root_prompt.children[0].id, "test-prompt");
+        assert_eq!(manifest.cascade_tree.total_api_calls, 1);
+        assert!(manifest.cascade_tree.total_cost_estimate > 0.0);
+    }
+    
+    #[test]
+    fn test_track_file() {
+        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
+        
+        let mut manifest = GenerationManifest {
+            id: Uuid::new_v4(),
+            timestamp: Utc::now(),
+            parent_commit: Some("abc123".to_string()),
+            cascade_tree: CascadeTree {
+                root_prompt: PromptNode {
+                    id: "root".to_string(),
+                    prompt_type: "root".to_string(),
+                    prompt_hash: "".to_string(),
+                    system_prompt: "".to_string(),
+                    user_prompt: "".to_string(),
+                    children: vec![],
+                    generated_files: vec![],
+                    cache_hit: false,
+                },
+                total_api_calls: 5,
+                total_cost_estimate: 0.25,
+            },
+            generated_files: HashMap::new(),
+            cache_keys: HashMap::new(),
+            config_snapshot: serde_json::Value::Null,
+        };
+        
+        let file_path = PathBuf::from("test.txt");
+        let content = b"test content";
+        
+        tracker.track_file(&mut manifest, &file_path, content, "prompt123", vec![]).unwrap();
+        
+        assert!(manifest.generated_files.contains_key(&file_path));
+        let metadata = &manifest.generated_files[&file_path];
+        assert_eq!(metadata.size, 12);
+        assert_eq!(metadata.prompt_hash, "prompt123");
+        assert!(!metadata.hash.is_empty());
+    }
+    
+    #[test]
+    fn test_can_skip_generation() {
+        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
+        
+        // First generation
+        let config = serde_json::json!({
+            "game": { "title": "Test" }
+        });
+        let mut manifest = tracker.start_generation(&config).unwrap();
+        
+        // Track a file
+        let file_path = temp_dir.path().join("test.txt");
+        fs::write(&file_path, "content").unwrap();
+        tracker.track_file(&mut manifest, &PathBuf::from("test.txt"), b"content", "hash1", vec![]).unwrap();
+        
+        // Save manifest
+        let manifest_path = temp_dir.path().join(".ai-generation/manifest.json");
+        fs::create_dir_all(manifest_path.parent().unwrap()).unwrap();
+        fs::write(&manifest_path, serde_json::to_string_pretty(&manifest).unwrap()).unwrap();
+        
+        // Check if we can skip
+        assert!(tracker.can_skip_generation(&config).unwrap());
+        
+        // Change config
+        let new_config = serde_json::json!({
+            "game": { "title": "Different" }
+        });
+        assert!(!tracker.can_skip_generation(&new_config).unwrap());
+    }
+    
+    #[test]
+    fn test_prompt_node_serialization() {
+        let node = PromptNode {
+            id: "test".to_string(),
+            prompt_type: "system".to_string(),
+            prompt_hash: "hash123".to_string(),
+            system_prompt: "System".to_string(),
+            user_prompt: "User".to_string(),
+            children: vec![],
+            generated_files: vec![PathBuf::from("file.txt")],
+            cache_hit: true,
+        };
+        
+        let json = serde_json::to_string(&node).unwrap();
+        let deserialized: PromptNode = serde_json::from_str(&json).unwrap();
+        
+        assert_eq!(node.id, deserialized.id);
+        assert_eq!(node.prompt_type, deserialized.prompt_type);
+        assert_eq!(node.cache_hit, deserialized.cache_hit);
+        assert_eq!(node.generated_files, deserialized.generated_files);
+    }
+    
+    #[test]
+    fn test_generation_manifest_serialization() {
+        let manifest = GenerationManifest {
+            id: Uuid::new_v4(),
+            timestamp: Utc::now(),
+            parent_commit: Some("abc123".to_string()),
+            cascade_tree: CascadeTree {
+                root_prompt: PromptNode {
+                    id: "root".to_string(),
+                    prompt_type: "root".to_string(),
+                    prompt_hash: "".to_string(),
+                    system_prompt: "".to_string(),
+                    user_prompt: "".to_string(),
+                    children: vec![],
+                    generated_files: vec![],
+                    cache_hit: false,
+                },
+                total_api_calls: 5,
+                total_cost_estimate: 0.25,
+            },
+            generated_files: HashMap::new(),
+            cache_keys: HashMap::new(),
+            config_snapshot: serde_json::json!({"test": true}),
+        };
+        
+        let json = serde_json::to_string(&manifest).unwrap();
+        let deserialized: GenerationManifest = serde_json::from_str(&json).unwrap();
+        
+        assert_eq!(manifest.id, deserialized.id);
+        assert_eq!(manifest.parent_commit, deserialized.parent_commit);
+        assert_eq!(manifest.cascade_tree.total_api_calls, deserialized.cascade_tree.total_api_calls);
+        assert_eq!(manifest.config_snapshot, deserialized.config_snapshot);
+    }
+    
+    #[test]
+    fn test_calculate_file_hash() {
+        let content1 = b"Hello, world!";
+        let content2 = b"Hello, world!";
+        let content3 = b"Different content";
+        
+        let hash1 = GitGenerationTracker::calculate_file_hash(content1);
+        let hash2 = GitGenerationTracker::calculate_file_hash(content2);
+        let hash3 = GitGenerationTracker::calculate_file_hash(content3);
+        
+        assert_eq!(hash1, hash2); // Same content = same hash
+        assert_ne!(hash1, hash3); // Different content = different hash
+    }
+    
+    #[test]
+    fn test_estimate_cost() {
+        // Test with known token counts
+        let cost1 = GitGenerationTracker::estimate_cost(100, 50);
+        let cost2 = GitGenerationTracker::estimate_cost(1000, 500);
+        
+        assert!(cost1 > 0.0);
+        assert!(cost2 > cost1); // More tokens = higher cost
+        assert!(cost2 < 1.0); // Reasonable upper bound for test
+    }
+}
