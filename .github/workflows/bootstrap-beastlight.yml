@@ -1,0 +1,324 @@
+name: Bootstrap Beastlight Game
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'game-config.yaml'
+      - '.github/workflows/bootstrap-beastlight.yml'
+
+jobs:
+  # Read configuration
+  read-config:
+    runs-on: ubuntu-latest
+    outputs:
+      config: ${{ steps.read.outputs.config }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Read game config
+        id: read
+        run: |
+          CONFIG=$(cat game-config.yaml | jq -Rs .)
+          echo "config=$CONFIG" >> $GITHUB_OUTPUT
+
+  # Phase 1: Generate workflow generators
+  generate-workflows:
+    needs: read-config
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workflow:
+          - name: "generate-assets"
+            path: ".github/workflows/generate-assets.yml"
+            prompt: "Create a workflow that generates game assets (sprites, maps, audio) based on config"
+          - name: "generate-code"
+            path: ".github/workflows/generate-code.yml"
+            prompt: "Create a workflow that generates C++ game code based on config"
+          - name: "generate-data"
+            path: ".github/workflows/generate-data.yml"
+            prompt: "Create a workflow that generates game data files (quests, monsters, items) based on config"
+          
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Generate ${{ matrix.workflow.name }} workflow
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: ${{ matrix.workflow.path }}
+          temperature: 0.3
+          systemPrompt: |
+            You are an expert in GitHub Actions and game development workflows.
+            The game config will be available as an input.
+            Use the generate-file.yml workflow to create files.
+            Always read from the config to get game-specific details.
+          userPrompt: |
+            ${{ matrix.workflow.prompt }}
+            
+            The workflow should:
+            - Accept a 'config' input containing the game configuration
+            - Parse the config to extract relevant sections
+            - Use the generate-file.yml workflow to create appropriate files
+            - Handle cross-platform requirements (Windows, Linux, macOS)
+            - Include proper error handling and logging
+
+  # Phase 2: Generate game assets
+  generate-game-assets:
+    needs: [read-config, generate-workflows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Generate DALL-E prompts
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: assets/prompts/dalle_prompts.txt
+          temperature: 0.7
+          systemPrompt: |
+            You are an expert in creating DALL-E prompts for retro pixel art games.
+            Focus on the Final Fantasy VI and Pokemon GSC aesthetic.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate DALL-E prompts for:
+            1. Hero sprite sheet (Cael with crystal bracer)
+            2. Monster sprites (Shadowbiter, Bramblehorn, Cryosprite)
+            3. Tile sets for each environment zone
+            4. UI elements (health bars, menus, dialog boxes)
+            
+            Each prompt should specify:
+            - 16x16 pixel art style
+            - Limited color palette
+            - Multiple animation frames where needed
+            - Palette swap variations
+
+      - name: Generate audio descriptions
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: assets/audio/audio_specs.yaml
+          temperature: 0.5
+          systemPrompt: |
+            You are an audio designer for retro-style games.
+            Create specifications for game music and sound effects.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate detailed audio specifications in YAML format for:
+            - Title screen music (mysterious + hopeful)
+            - Overworld theme (ambient + curious)
+            - Dungeon theme (tense + exploring)
+            - Boss battle theme (tense + heroic)
+            - Sound effects (jump, attack, tame, damage, menu, item)
+            
+            Include tempo, key, instruments, and loop points.
+
+  # Phase 3: Generate game code
+  generate-game-code:
+    needs: [read-config, generate-workflows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Generate main game engine
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/main.cpp
+          temperature: 0.3
+          systemPrompt: |
+            You are a C++ game developer creating cross-platform SDL2 games.
+            Write clean, modular, memory-efficient code.
+            Comment like a 90s programmer: terse but effective.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate the main game loop for Echoes of Beastlight:
+            - SDL2 initialization for Windows/Linux/macOS
+            - 60Hz game loop with frame limiting
+            - State management (overworld, battle, menu, shop)
+            - Input handling (arrows + action buttons)
+            - Basic renderer setup for 16x16 tiles
+            
+            Include proper cross-platform setup and error handling.
+
+      - name: Generate map generator
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/map_generator.cpp
+          temperature: 0.4
+          systemPrompt: |
+            You are an expert in procedural generation algorithms.
+            Focus on creating efficient, deterministic map generation.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate a procedural map generator with:
+            - 12x12 outdoor maps using DAG algorithm
+            - Guaranteed traversal from any edge to another
+            - Ocean/mountain blockers that don't break traversal
+            - Dungeon placement (guaranteed every 5 maps)
+            - Shop placement (20-40% chance)
+            - Tile recoloring system for variety
+            - Maze algorithm for dungeons with 3+ false paths
+            
+            Use the tile symbols from config (W, ., D, S, !, N, E).
+
+      - name: Generate monster system
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/monster_system.cpp
+          temperature: 0.4
+          systemPrompt: |
+            You are creating a Pokemon-inspired monster system.
+            Focus on the tame vs slay mechanics.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate a monster system with:
+            - Monster data structures (stats, abilities, level)
+            - Taming mechanics (weaken then capture)
+            - Battle system (turn-based like Pokemon/FF)
+            - XP/leveling system (logarithmic scaling)
+            - Party management (starts at 0, +1 per dungeon)
+            - Procedural ability assignment from word lists
+            - Boss scaling based on last 5 maps
+
+  # Phase 4: Generate game data
+  generate-game-data:
+    needs: [read-config, generate-workflows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Generate monster database
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: data/monsters.yaml
+          temperature: 0.8
+          systemPrompt: |
+            You are creating a monster database for a JRPG.
+            Use the word lists to create unique combinations.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate 20+ unique monsters using combinations of:
+            Nouns: crystal, beast, shadow, thorn, mist, ember, root, glyph
+            Verbs: slash, bite, guard, dash, volley, drain, shimmer, howl
+            Adjectives: arcane, wild, ancient, corrupted, mystical, feral, glowing
+            
+            Each monster should have:
+            - Unique name combining words
+            - Base stats (HP, ATK, DEF, SPD)
+            - 1-2 abilities from verb list
+            - Element/type
+            - Tame difficulty
+            - XP reward
+
+      - name: Generate quest templates
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: data/quest_templates.yaml
+          temperature: 0.6
+          systemPrompt: |
+            You are designing procedural quest templates.
+            Keep them simple but engaging.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate 10 quest templates that can be procedurally filled:
+            - Taming quests (capture specific monster type)
+            - Exploration quests (reach certain map count)
+            - Combat quests (defeat X monsters)
+            - Collection quests (gather X gold)
+            - Boss quests (clear dungeon)
+            
+            Include NPC dialog templates with 90s quirky tone.
+
+      - name: Generate item database
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: data/items.yaml
+          temperature: 0.5
+          systemPrompt: |
+            You are creating an item system for a retro JRPG.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate items including:
+            - Potions (scaling with map level)
+            - Weapons (various stat boosts)
+            - Armor (defense boosts)
+            - Special items (taming aids, escape items)
+            
+            Include costs, effects, and shop availability.
+
+  # Phase 5: Generate build system
+  generate-build-system:
+    needs: [read-config, generate-workflows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Generate CMakeLists
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: CMakeLists.txt
+          temperature: 0.2
+          systemPrompt: |
+            You are an expert in cross-platform C++ build systems.
+          userPrompt: |
+            Generate a CMakeLists.txt for Echoes of Beastlight that:
+            - Supports Windows, Linux, macOS
+            - Links SDL2, SDL2_image, SDL2_mixer
+            - Sets up proper include directories
+            - Handles debug/release builds
+            - Copies assets to build directory
+
+      - name: Generate README
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: README.md
+          temperature: 0.5
+          systemPrompt: |
+            You are writing documentation for a retro-style game project.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate a README.md that includes:
+            - ASCII art title
+            - Game description and features
+            - Build instructions for all platforms
+            - How to play guide
+            - Credits and acknowledgments
+            - Retro-style formatting
+
+  # Phase 6: Generate metaprompt improvement workflow
+  generate-self-improvement:
+    needs: [read-config, generate-workflows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Generate config optimizer
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: .github/workflows/optimize-config.yml
+          temperature: 0.6
+          systemPrompt: |
+            You are an AI system optimization expert.
+            Create workflows that improve the game generation process.
+          userPrompt: |
+            Create a workflow that:
+            - Analyzes the current game-config.yaml
+            - Suggests improvements and additions
+            - Tests generated code for issues
+            - Proposes balance changes
+            - Creates a new optimized config version
+            
+            This creates a self-improving loop.

@@ -1,0 +1,76 @@
+name: Generate File via OpenAI
+
+on:
+  workflow_call:
+    inputs:
+      outPath:
+        required: true
+        type: string
+        description: "Output file path"
+      systemPrompt:
+        required: true
+        type: string
+        description: "System prompt for OpenAI"
+      userPrompt:
+        required: true
+        type: string
+        description: "User prompt for OpenAI"
+      temperature:
+        required: false
+        type: number
+        default: 0.7
+        description: "Temperature for OpenAI generation"
+      model:
+        required: false
+        type: string
+        default: "gpt-4"
+        description: "OpenAI model to use"
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Generate content via OpenAI
+        id: openai
+        uses: Just-Moh-it/openai@v0.0.1
+        with:
+          api_key: ${{ secrets.OPENAI_API_KEY }}
+          model: ${{ inputs.model }}
+          messages: |
+            [
+              {
+                "role": "system",
+                "content": "${{ inputs.systemPrompt }}"
+              },
+              {
+                "role": "user",
+                "content": "${{ inputs.userPrompt }}"
+              }
+            ]
+          temperature: ${{ inputs.temperature }}
+          
+      - name: Create output directory
+        run: |
+          mkdir -p $(dirname "${{ inputs.outPath }}")
+          
+      - name: Write generated content to file
+        run: |
+          cat > "${{ inputs.outPath }}" << 'EOF'
+          ${{ steps.openai.outputs.content }}
+          EOF
+          
+      - name: Commit generated file
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add "${{ inputs.outPath }}"
+          git commit -m "Generate ${{ inputs.outPath }} via OpenAI" || echo "No changes to commit"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
