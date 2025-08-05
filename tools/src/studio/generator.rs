@@ -422,15 +422,117 @@ impl ConsistentAssetGenerator {
         match operation {
             BatchOp::ApplyStyle { style_id, strength } => {
                 // Apply style transfer
-                todo!()
+                // First, get the asset from cache
+                let cache_result = tokio::runtime::Handle::current()
+                    .block_on(self.smart_cache.get_asset(asset_id))?;
+                
+                if let Some((asset_data, metadata)) = cache_result {
+                    // Load the image
+                    let image = image::load_from_memory(&asset_data)?;
+                    
+                    // Get the style to apply
+                    if let Some(style_features) = self.style_transfer.style_embeddings.get(style_id) {
+                        // Apply style transfer
+                        let styled = tokio::runtime::Handle::current()
+                            .block_on(self.style_transfer.apply_style_transfer(
+                                &image,
+                                &style_features,
+                                *strength
+                            ))?;
+                        
+                        Ok(GenerationOutput {
+                            data: image_to_bytes(&styled)?,
+                            metadata: AssetMetadata {
+                                style_consistency: strength,
+                                ..metadata
+                            },
+                        })
+                    } else {
+                        Err(anyhow::anyhow!("Style {} not found", style_id))
+                    }
+                } else {
+                    Err(anyhow::anyhow!("Asset {} not found in cache", asset_id))
+                }
             }
             BatchOp::Resize { dimensions } => {
                 // Resize asset
-                todo!()
+                let cache_result = tokio::runtime::Handle::current()
+                    .block_on(self.smart_cache.get_asset(asset_id))?;
+                
+                if let Some((asset_data, mut metadata)) = cache_result {
+                    let image = image::load_from_memory(&asset_data)?;
+                    let resized = image.resize_exact(
+                        dimensions.0,
+                        dimensions.1,
+                        image::imageops::FilterType::Nearest
+                    );
+                    
+                    metadata.dimensions = Some(*dimensions);
+                    
+                    Ok(GenerationOutput {
+                        data: image_to_bytes(&resized)?,
+                        metadata,
+                    })
+                } else {
+                    Err(anyhow::anyhow!("Asset {} not found in cache", asset_id))
+                }
             }
             BatchOp::Recolor { palette } => {
                 // Recolor with new palette
-                todo!()
+                let cache_result = tokio::runtime::Handle::current()
+                    .block_on(self.smart_cache.get_asset(asset_id))?;
+                
+                if let Some((asset_data, metadata)) = cache_result {
+                    let mut image = image::load_from_memory(&asset_data)?;
+                    
+                    // Simple palette swap - map existing colors to new palette
+                    let rgba = image.to_rgba8();
+                    let mut result = rgba.clone();
+                    
+                    // Extract unique colors from the image
+                    let mut unique_colors = std::collections::HashSet::new();
+                    for pixel in rgba.pixels() {
+                        unique_colors.insert(*pixel);
+                    }
+                    
+                    // Sort colors by luminance
+                    let mut sorted_colors: Vec<_> = unique_colors.into_iter().collect();
+                    sorted_colors.sort_by_key(|p| {
+                        let r = p[0] as u32;
+                        let g = p[1] as u32;
+                        let b = p[2] as u32;
+                        // Luminance formula
+                        (r * 299 + g * 587 + b * 114) / 1000
+                    });
+                    
+                    // Create color mapping
+                    let color_map: HashMap<Rgba<u8>, Rgba<u8>> = sorted_colors.iter()
+                        .zip(palette.iter().cycle())
+                        .map(|(old_color, new_color)| {
+                            let rgba = Rgba([
+                                (new_color.r() * 255.0) as u8,
+                                (new_color.g() * 255.0) as u8,
+                                (new_color.b() * 255.0) as u8,
+                                old_color[3], // Keep original alpha
+                            ]);
+                            (*old_color, rgba)
+                        })
+                        .collect();
+                    
+                    // Apply color mapping
+                    for (x, y, pixel) in result.enumerate_pixels_mut() {
+                        if let Some(new_color) = color_map.get(&rgba.get_pixel(x, y)) {
+                            *pixel = *new_color;
+                        }
+                    }
+                    
+                    Ok(GenerationOutput {
+                        data: image_to_bytes(&DynamicImage::ImageRgba8(result))?,
+                        metadata,
+                    })
+                } else {
+                    Err(anyhow::anyhow!("Asset {} not found in cache", asset_id))
+                }
             }
         }
     }

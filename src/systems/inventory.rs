@@ -58,13 +58,13 @@ pub trait Saveable {
 // Implement the Saveable trait for the Inventory component
 impl Saveable for Inventory {
     fn save(&self) -> String {
-        // TODO: implement save functionality
-        String::new()
+        // Serialize inventory to JSON string
+        serde_json::to_string(&self).unwrap_or_default()
     }
 
     fn load(data: &str) -> Self {
-        // TODO: implement load functionality
-        Inventory::default()
+        // Deserialize inventory from JSON string
+        serde_json::from_str(data).unwrap_or_default()
     }
 }
 
