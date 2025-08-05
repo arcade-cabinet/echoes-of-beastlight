@@ -24,6 +24,10 @@ This project demonstrates a closed-loop metaprompt system where:
 .
 ├── game-config.yaml              # Master configuration file
 ├── init.sh                       # Project initialization script
+├── .cursorrules                  # Cursor AI assistant rules
+├── environment.json              # Background agent configuration
+├── Dockerfile                    # Development environment
+├── docker-compose.yml            # Multi-service development setup
 ├── .github/workflows/
 │   ├── generate-file.yml         # Base workflow for OpenAI generation
 │   ├── bootstrap-beastlight.yml  # Main bootstrapping workflow
@@ -37,6 +41,7 @@ This project demonstrates a closed-loop metaprompt system where:
 │   ├── data/                     # Game data (monsters, quests)
 │   ├── sprites/                  # Sprite specifications
 │   └── audio/                    # Audio specifications
+├── tools/                        # Build and validation tools
 ├── Cargo.toml                    # Rust dependencies
 ├── build-web.sh                  # Web build script
 └── index.html                    # Web deployment page
@@ -69,6 +74,50 @@ This project demonstrates a closed-loop metaprompt system where:
    - Option 1: Push a change to `game-config.yaml`
    - Option 2: Go to Actions → Select a workflow → Run workflow
 
+## 🤖 Cursor Integration
+
+This project includes advanced Cursor AI integration for enhanced development experience.
+
+### Cursor Rules (`.cursorrules`)
+The project includes comprehensive rules that help Cursor understand:
+- Project structure and conventions
+- Code generation patterns for Rust + Bevy
+- How to use the custom OpenAI action
+- Best practices for tilemaps, levels, and monsters
+- Common tasks and workflows
+
+### Background Agent Setup
+To enable Cursor's background agent for automatic improvements:
+
+1. **Copy environment variables**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your API keys
+   ```
+
+2. **Using Docker** (recommended):
+   ```bash
+   docker-compose up -d
+   ```
+   This starts:
+   - Development environment with auto-reload
+   - Asset validator running continuously
+   - Optional web server for WASM testing
+
+3. **Manual setup**:
+   The `environment.json` configures background tasks:
+   - Auto-formatting on save
+   - YAML validation
+   - Continuous build checks
+   - Asset validation every 5 minutes
+   - Config change monitoring
+
+### Background Agent Features
+- **Auto-fix**: Formats Rust code and validates YAML on save
+- **Validation**: Continuously checks asset integrity
+- **Monitoring**: Detects config changes and suggests regeneration
+- **Health checks**: Ensures both native and WASM builds work
+
 ## 🎮 Game Mechanics
 
 ### Core Gameplay Loop
@@ -99,6 +148,12 @@ Complex multi-phase workflow that:
 
 ### 3. `metaprompt-executor.yml`
 Simpler workflow that executes the vintage game metaprompt directly.
+
+### 4. `generate-tilemaps.yml`
+Specialized workflow for bevy_ecs_tilemap integration.
+
+### 5. `generate-levels.yml`
+Creates levels using bevy-yoleck and mapgen.rs algorithms.
 
 ## 📝 Configuration Schema
 
@@ -134,6 +189,21 @@ To modify the game:
    - Quest templates
    - Build configurations
    - Web deployment files
+
+### Using Docker for Development
+```bash
+# Start development environment
+docker-compose up
+
+# Run specific services
+docker-compose up dev        # Main development container
+docker-compose up validator  # Asset validation only
+docker-compose --profile web up  # Include web server
+
+# Run commands in container
+docker-compose exec dev cargo test
+docker-compose exec dev ./build-web.sh
+```
 
 ## 🎨 Asset Generation
 
@@ -185,6 +255,7 @@ This project is open source. The metaprompt system and workflows are free to use
 - Inspired by classic JRPGs (Final Fantasy, Pokémon)
 - Powered by OpenAI GPT-4
 - Built with Rust + Bevy
+- Enhanced with bevy_ecs_tilemap, bevy-yoleck, mapgen.rs
 - Deployed via GitHub Actions
 
 ---
