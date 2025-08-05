@@ -3,6 +3,10 @@ name = "ai-game-generator"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "ai_game_generator"
+path = "src/lib.rs"
+
 [[bin]]
 name = "ai-gen"
 path = "src/main.rs"
@@ -87,3 +91,26 @@ ron = "0.8"
 
 # Git integration
 git2 = { version = "0.18", default-features = false, features = ["vendored-openssl"] }
+
+[dev-dependencies]
+# Testing framework
+tokio-test = "0.4"
+mockall = "0.12"
+proptest = "1.4"
+pretty_assertions = "1.4"
+
+# HTTP mocking for OpenAI API tests
+reqwest-middleware = "0.2"
+reqwest-retry = "0.3"
+wiremock = "0.6"
+
+# File system testing
+tempfile = "3.10"
+assert_fs = "1.1"
+predicates = "3.1"
+
+# Serialization testing
+serde_test = "1.0"
+
+# Async testing utilities
+futures-test = "0.3"
