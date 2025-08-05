@@ -10,6 +10,7 @@ assignees: ''
 <!-- A clear and concise description of what the bug is -->
 
 ## To Reproduce
+
 Steps to reproduce the behavior:
 1. Run command '...'
 2. With configuration '...'
@@ -22,11 +23,13 @@ Steps to reproduce the behavior:
 <!-- What actually happened -->
 
 ## Error messages
+
 ```
 Paste any error messages here
 ```
 
 ## Environment
+
 - OS: [e.g. Ubuntu 22.04, macOS 14.0, Windows 11]
 - Rust version: [e.g. 1.88.0]
 - Tool version: [e.g. 0.1.0]

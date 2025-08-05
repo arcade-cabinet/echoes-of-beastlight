@@ -14,6 +14,7 @@ Yoleck Format Structure:
 - Entities is an array of [entity_metadata, entity_components] tuples
 
 Example structure:
+
 ```json
 [
   {
@@ -32,6 +33,7 @@ Example structure:
   ]
 ]
 ```
+
 </system>
 
 <user>

@@ -7,6 +7,15 @@ edition = "2024"
 name = "ai_game_generator"
 path = "src/lib.rs"
 
+# Integration tests need to be rewritten to use public API
+# [[test]]
+# name = "openai_api_test"
+# path = "tests/integration/openai_api_test.rs"
+#
+# [[test]]
+# name = "full_generation_test"
+# path = "tests/integration/full_generation_test.rs"
+
 [[bin]]
 name = "ai-gen"
 path = "src/main.rs"

@@ -2,7 +2,7 @@ Sprite: Grass Tile
 Size: 16x16
 Palette: Starter
 Description:
-  Base: The base grass tile should have a vibrant green color (#00FF00). The texture should reflect short, mowed grass, with a pattern of darker and lighter green pixels to represent the grass blades' shadows and highlights. 
+  Base: The base grass tile should have a vibrant green color (#00FF00). The texture should reflect short, mowed grass, with a pattern of darker and lighter green pixels to represent the grass blades' shadows and highlights.
 
   Variants:
     1. Wild Grass: This variant should have longer, wilder grass. Introduce a few pixels of a darker green (#008000) to represent the taller blades.

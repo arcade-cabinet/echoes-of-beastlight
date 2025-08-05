@@ -5,6 +5,7 @@ Thank you @gemini-code-assist for the thorough review! I've addressed all your s
 ## Changes Made
 
 ### 1. ✅ Enhanced Script Robustness (`init.sh`)
+
 - Added `set -euo pipefail` at the beginning of the script for better error handling
   - `set -e`: Script exits immediately if any command fails
   - `set -u`: Treats unset variables as errors
@@ -12,6 +13,7 @@ Thank you @gemini-code-assist for the thorough review! I've addressed all your s
 - This makes the initialization script more reliable and prevents silent failures
 
 ### 2. ✅ Documented init.sh in README
+
 - Added the initialization script to the project structure diagram
 - Created a new step (Step 2) in the Setup section documenting:
   - Purpose of the script
@@ -20,6 +22,7 @@ Thank you @gemini-code-assist for the thorough review! I've addressed all your s
 - Renumbered subsequent steps for clarity
 
 ### 3. ✅ Fixed Missing Newlines
+
 - Added newline at the end of `init.sh`
 - Added newline at the end of `README.md`
 - Both files now properly conform to POSIX standards

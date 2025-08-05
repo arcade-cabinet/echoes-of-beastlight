@@ -11,22 +11,21 @@ entities:
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: Monster
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: Treasure
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: Exit
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      

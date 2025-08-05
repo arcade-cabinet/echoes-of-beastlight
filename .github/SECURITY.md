@@ -36,16 +36,19 @@ We take security vulnerabilities seriously. If you discover a security vulnerabi
 When contributing to this project, please follow these security best practices:
 
 ### Dependencies
+
 - Keep dependencies up to date
 - Review Dependabot and Renovate alerts promptly
 - Audit new dependencies before adding them
 
 ### API Keys and Secrets
+
 - Never commit API keys or secrets to the repository
 - Use environment variables for sensitive configuration
 - Document required environment variables in `.env.example`
 
 ### Code Review
+
 - All code must be reviewed before merging
 - Pay special attention to:
   - Input validation
@@ -54,6 +57,7 @@ When contributing to this project, please follow these security best practices:
   - Cryptographic operations
 
 ### Rust-Specific Security
+
 - Use `#![forbid(unsafe_code)]` where possible
 - When `unsafe` is necessary, document why and ensure it's reviewed
 - Prefer strong typing over string parsing

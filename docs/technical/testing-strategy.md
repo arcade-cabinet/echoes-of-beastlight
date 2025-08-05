@@ -15,6 +15,7 @@ This document outlines the comprehensive testing strategy for the AI Game Genera
 ## Test Layers
 
 ### 1. Unit Tests
+
 Located in module-level `#[cfg(test)]` blocks within source files.
 
 **Purpose**: Test individual functions and methods in isolation
@@ -28,6 +29,7 @@ Located in module-level `#[cfg(test)]` blocks within source files.
 - Git tracking logic
 
 **Example**:
+
 ```rust
 #[test]
 fn test_cache_key_generation() {
@@ -37,6 +39,7 @@ fn test_cache_key_generation() {
 ```
 
 ### 2. Integration Tests
+
 Located in `tests/integration/` directory.
 
 **Purpose**: Test interactions between modules and external systems
@@ -49,21 +52,23 @@ Located in `tests/integration/` directory.
 - Cache behavior
 
 **Example**:
+
 ```rust
 #[tokio::test]
 async fn test_full_generation_with_mocked_api() {
     let mock_server = MockServer::start().await;
     setup_mocks(&mock_server).await;
-    
+
     let mut generator = AIGameGenerator::new();
     let result = generator.generate_game().await;
-    
+
     assert!(result.is_ok());
     verify_all_files_created();
 }
 ```
 
 ### 3. Property-Based Tests
+
 Using `proptest` for generative testing.
 
 **Purpose**: Test with randomly generated inputs to find edge cases
@@ -75,6 +80,7 @@ Using `proptest` for generative testing.
 - Cache key determinism
 
 **Example**:
+
 ```rust
 proptest! {
     #[test]
@@ -89,6 +95,7 @@ proptest! {
 ## Mocking Strategy
 
 ### OpenAI API Mocking
+
 Using `wiremock` for HTTP mocking:
 
 ```rust
@@ -108,6 +115,7 @@ Mock::given(method("POST"))
 - Invalid responses
 
 ### File System Mocking
+
 Using `tempfile` for isolated file operations:
 
 ```rust
@@ -118,12 +126,14 @@ std::env::set_current_dir(&temp_dir).unwrap();
 ## Test Data Management
 
 ### Fixtures
+
 Located in `tests/fixtures/`:
 - `test-config.yaml`: Complete game configuration
 - Mock response templates
 - Sample generated content
 
 ### Test Builders
+
 Helper functions to create test data:
 
 ```rust
@@ -141,6 +151,7 @@ fn create_test_config() -> GameConfig {
 ## Error Testing
 
 ### Expected Failures
+
 Test error conditions explicitly:
 
 ```rust
@@ -153,6 +164,7 @@ fn test_missing_config_file() {
 ```
 
 ### Error Categories Tested
+
 1. Missing configuration files
 2. Invalid YAML syntax
 3. API failures
@@ -163,6 +175,7 @@ fn test_missing_config_file() {
 ## Performance Testing
 
 ### Benchmarks
+
 Using Rust's built-in benchmark framework:
 
 ```rust
@@ -176,6 +189,7 @@ fn bench_token_counting(b: &mut Bencher) {
 ```
 
 ### Performance Targets
+
 - Token counting: <1ms for typical prompts
 - Cache lookup: <10ms
 - File writing: <50ms per file
@@ -184,6 +198,7 @@ fn bench_token_counting(b: &mut Bencher) {
 ## Test Execution
 
 ### Local Development
+
 ```bash
 # Run all tests
 cargo test
@@ -199,6 +214,7 @@ cargo tarpaulin --out Html
 ```
 
 ### Continuous Integration
+
 GitHub Actions workflow runs on every push:
 1. Format checking (`cargo fmt`)
 2. Linting (`cargo clippy`)
@@ -209,6 +225,7 @@ GitHub Actions workflow runs on every push:
 ## Test Maintenance
 
 ### Best Practices
+
 1. **Keep tests focused**: One assertion per test when possible
 2. **Use descriptive names**: `test_config_parsing_handles_missing_fields`
 3. **Avoid test interdependence**: Each test should be runnable in isolation
@@ -216,6 +233,7 @@ GitHub Actions workflow runs on every push:
 5. **Test public APIs**: Focus on public interfaces, not implementation details
 
 ### Test Review Checklist
+
 - [ ] Does the test have a clear purpose?
 - [ ] Is the test name descriptive?
 - [ ] Are assertions specific and meaningful?
@@ -226,6 +244,7 @@ GitHub Actions workflow runs on every push:
 ## Coverage Goals
 
 ### Target Coverage by Module
+
 - `config.rs`: 90%+ (critical parsing logic)
 - `generator.rs`: 85%+ (core functionality)
 - `templates.rs`: 95%+ (simple, testable)
@@ -233,6 +252,7 @@ GitHub Actions workflow runs on every push:
 - Integration: 100% of major workflows
 
 ### Coverage Reporting
+
 - Local: `cargo tarpaulin --out Html`
 - CI: Automated upload to Codecov
 - Review: Coverage required for PR approval

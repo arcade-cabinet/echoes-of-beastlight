@@ -5,11 +5,13 @@
 The Echoes of Beastlight AI Game Studio is built as a pure Rust application with two main components:
 
 ### 1. Core Game (Main Crate)
+
 - **Engine**: Bevy 0.14
 - **Architecture**: Entity Component System (ECS)
 - **Target Platforms**: Native (Windows/Mac/Linux) and WebAssembly
 
 ### 2. AI Generation Studio (Tools Crate)
+
 - **UI Framework**: egui with bevy_egui integration
 - **AI Integration**: async-openai for GPT-4/DALL-E 3
 - **Style Transfer**: Custom neural style transfer implementation

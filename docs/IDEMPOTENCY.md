@@ -15,7 +15,7 @@ Every AI generation request is converted into a deterministic cache key based on
 - Any additional context
 
 ```rust
-let cache_key = format!("{}:{}:{}", 
+let cache_key = format!("{}:{}:{}",
     md5::compute(&system_prompt),
     md5::compute(&user_prompt),
     md5::compute(&params)
@@ -25,11 +25,13 @@ let cache_key = format!("{}:{}:{}",
 ### 2. Multi-Level Caching
 
 #### Memory Cache (LRU)
+
 - Fast in-memory cache for frequently accessed assets
 - Limited to 100 most recent items
 - Instant retrieval for hot assets
 
 #### Disk Cache (Compressed)
+
 - Persistent storage using Zstd compression
 - Survives application restarts
 - Organized by content hash
@@ -48,6 +50,7 @@ let cache_key = format!("{}:{}:{}",
 ### 3. File Tracking System
 
 #### Generated Files Manifest
+
 Every generation run produces a `GENERATION_SUMMARY.json`:
 
 ```json
@@ -73,6 +76,7 @@ Every generation run produces a `GENERATION_SUMMARY.json`:
 ```
 
 #### File State Tracking
+
 The generator maintains a `HashSet<PathBuf>` of all files written during the current session:
 
 ```rust
@@ -137,17 +141,20 @@ pub struct AssetMetadata {
 ## Idempotency Workflow
 
 1. **Request Received**
+
    ```
    User requests: Generate character sprite for "Fire Mage"
    ```
 
 2. **Cache Key Generation**
+
    ```
    Key = hash("character" + "Fire Mage" + style_params)
    Key = "a1b2c3d4e5f6g7h8"
    ```
 
 3. **Cache Lookup**
+
    ```rust
    if let Some((data, metadata)) = cache.get_asset(&key).await? {
        // Return cached result
@@ -162,6 +169,7 @@ pub struct AssetMetadata {
    - Save to cache with metadata
 
 5. **File Writing**
+
    ```rust
    async fn write_file(&mut self, path: P, content: &[u8]) -> Result<()> {
        fs::write(path, content)?;
@@ -192,7 +200,7 @@ For cascading generations (where one prompt generates multiple sub-prompts):
       "generated_file": "levels/verdant_flats.yol"
     },
     {
-      "type": "entities", 
+      "type": "entities",
       "prompt_hash": "child_entities_789",
       "generated_file": "levels/verdant_flats_entities.yol"
     }

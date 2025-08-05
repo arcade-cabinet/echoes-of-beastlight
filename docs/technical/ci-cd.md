@@ -7,6 +7,7 @@ This project uses a comprehensive CI/CD pipeline with automated dependency manag
 ## GitHub Actions Workflows
 
 ### 1. Rust Tests (`rust-tests.yml`)
+
 **Trigger**: Push to main/develop, PRs to main
 **Purpose**: Run all tests and generate coverage reports
 
@@ -18,6 +19,7 @@ This project uses a comprehensive CI/CD pipeline with automated dependency manag
 - Code coverage with Tarpaulin
 
 ### 2. Code Quality (`code-quality.yml`)
+
 **Trigger**: Push to main/develop, PRs to main
 **Purpose**: Ensure code quality standards
 
@@ -29,6 +31,7 @@ This project uses a comprehensive CI/CD pipeline with automated dependency manag
 - Unused dependency detection
 
 ### 3. Security Audit (`security-audit.yml`)
+
 **Trigger**: Push/PR with Cargo changes, weekly schedule
 **Purpose**: Scan for security vulnerabilities
 
@@ -39,6 +42,7 @@ This project uses a comprehensive CI/CD pipeline with automated dependency manag
 - Outdated dependency check
 
 ### 4. Release (`release.yml`)
+
 **Trigger**: Push of version tags (v*)
 **Purpose**: Build and publish releases
 
@@ -50,6 +54,7 @@ This project uses a comprehensive CI/CD pipeline with automated dependency manag
 ## Dependency Management
 
 ### Renovate Bot
+
 Configuration: `.github/renovate.json`
 
 **Features**:
@@ -65,6 +70,7 @@ Configuration: `.github/renovate.json`
 - Testing tools
 
 ### Dependabot
+
 Configuration: `.github/dependabot.yml`
 
 **Monitors**:
@@ -74,6 +80,7 @@ Configuration: `.github/dependabot.yml`
 - Grouped updates for related packages
 
 ### cargo-deny
+
 Configuration: `deny.toml`
 
 **Checks**:
@@ -85,6 +92,7 @@ Configuration: `deny.toml`
 ## Security Policies
 
 ### Vulnerability Reporting
+
 See `.github/SECURITY.md` for:
 - Supported versions
 - Reporting process
@@ -92,6 +100,7 @@ See `.github/SECURITY.md` for:
 - Security best practices
 
 ### Automated Security
+
 - Weekly security audits
 - Immediate alerts for critical vulnerabilities
 - Automated PRs for security fixes
@@ -100,6 +109,7 @@ See `.github/SECURITY.md` for:
 ## Development Workflow
 
 ### 1. Feature Development
+
 ```bash
 # Create feature branch
 git checkout -b feature/your-feature
@@ -114,6 +124,7 @@ git push origin feature/your-feature
 ```
 
 ### 2. PR Requirements
+
 All PRs must pass:
 - [ ] Format check
 - [ ] Clippy (no warnings)
@@ -122,6 +133,7 @@ All PRs must pass:
 - [ ] Documentation build
 
 ### 3. Merge Strategy
+
 - Squash and merge for features
 - Regular merge for dependency updates
 - Require up-to-date branches
@@ -130,6 +142,7 @@ All PRs must pass:
 ## Release Process
 
 ### 1. Version Bump
+
 ```bash
 # Update version in Cargo.toml files
 # Update CHANGELOG.md
@@ -137,6 +150,7 @@ git commit -m "chore: bump version to X.Y.Z"
 ```
 
 ### 2. Create Release
+
 ```bash
 # Create and push tag
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -144,6 +158,7 @@ git push origin vX.Y.Z
 ```
 
 ### 3. Automated Release
+
 The release workflow will:
 1. Build binaries for all platforms
 2. Create GitHub release with changelog
@@ -153,6 +168,7 @@ The release workflow will:
 ## Local Development
 
 ### Required Tools
+
 ```bash
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -170,7 +186,9 @@ sudo apt-get install libsdl2-dev pkg-config libssl-dev
 ```
 
 ### Pre-commit Checks
+
 Run before committing:
+
 ```bash
 # Format code
 cargo fmt --all
@@ -189,11 +207,13 @@ cargo deny check
 ## Monitoring and Alerts
 
 ### Dependency Updates
+
 - Check Renovate dashboard: `/dependency-dashboard`
 - Review Dependabot PRs weekly
 - Monitor security advisories
 
 ### Build Status
+
 - GitHub Actions tab shows all workflow runs
 - Failed builds trigger notifications
 - Coverage reports available in PR checks
@@ -201,18 +221,21 @@ cargo deny check
 ## Best Practices
 
 ### 1. Dependencies
+
 - Review all dependency updates
 - Group related updates
 - Test thoroughly after updates
 - Keep dependencies minimal
 
 ### 2. Security
+
 - Never commit secrets
 - Review security advisories promptly
 - Update vulnerable dependencies immediately
 - Use `cargo audit` locally
 
 ### 3. Releases
+
 - Follow semantic versioning
 - Update changelog for each release
 - Test release builds locally first
@@ -238,6 +261,7 @@ cargo deny check
 - If can't update, document in `deny.toml`
 
 ### Getting Help
+
 1. Check workflow logs
 2. Review this documentation
 3. Search existing issues

@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 mod components;
 mod systems;
 mod tilemaps;
@@ -88,7 +99,7 @@ fn setup_main_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         }),
     );
-    
+
     // Seed input UI
     commands.spawn((
         NodeBundle {
@@ -139,28 +150,28 @@ fn main_menu_system(
         // Generate random world
         let world_seed = WorldSeed::new_random();
         info!("Starting new world: {} (seed: {})", world_seed.world_name, world_seed.seed);
-        
+
         commands.insert_resource(world_seed);
-        
+
         // Clean up menu
         for entity in menu_query.iter() {
             commands.entity(entity).despawn_recursive();
         }
-        
+
         next_state.set(GameState::WorldGeneration);
     } else if keyboard.just_pressed(KeyCode::KeyS) {
         // TODO: Show seed input dialog
         // For now, use a hardcoded seed
         let world_seed = WorldSeed::from_seed(12345);
         info!("Starting world: {} (seed: {})", world_seed.world_name, world_seed.seed);
-        
+
         commands.insert_resource(world_seed);
-        
+
         // Clean up menu
         for entity in menu_query.iter() {
             commands.entity(entity).despawn_recursive();
         }
-        
+
         next_state.set(GameState::WorldGeneration);
     }
 }
@@ -203,15 +214,15 @@ fn finalize_world_generation(
     for entity in loading_query.iter() {
         commands.entity(entity).despawn_recursive();
     }
-    
+
     // Load the starting level
     // In a real implementation, this would load from the generated world DAG
     let level_handle = asset_server.load("levels/starting_area.yol");
     commands.spawn(YoleckLoadLevel(level_handle));
-    
+
     // Spawn player
     spawn_player(&mut commands, &asset_server);
-    
+
     // Show world name
     commands.spawn((
         TextBundle::from_section(
@@ -230,7 +241,7 @@ fn finalize_world_generation(
         }),
         WorldNameText,
     ));
-    
+
     next_state.set(GameState::Playing);
 }
 

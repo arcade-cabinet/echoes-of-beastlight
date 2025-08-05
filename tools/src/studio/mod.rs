@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 use bevy_inspector_egui::prelude::*;
@@ -34,10 +45,10 @@ impl Plugin for GameGeneratorStudioPlugin {
             .init_resource::<ProjectDatabase>()
             .init_resource::<AssetCache>()
             .init_resource::<GenerationTasks>()
-            
+
             // Communication channels
             .insert_resource(create_generation_channels())
-            
+
             // Plugins
             .add_plugins(DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
@@ -49,7 +60,7 @@ impl Plugin for GameGeneratorStudioPlugin {
             }))
             .add_plugins(EguiPlugin)
             .add_plugins(WorldInspectorPlugin::new())
-            
+
             // Systems
             .add_systems(Startup, setup_studio)
             .add_systems(Update, (
@@ -58,7 +69,7 @@ impl Plugin for GameGeneratorStudioPlugin {
                 live_preview_updater,
                 asset_hot_reload_system,
             ).chain())
-            
+
             // States
             .init_state::<StudioPhase>()
             .add_systems(OnEnter(StudioPhase::Setup), enter_setup_wizard)
@@ -125,10 +136,10 @@ pub fn studio_ui_system(
     mut editor_state: ResMut<EditorState>,
 ) {
     let ctx = contexts.ctx_mut();
-    
+
     // Apply custom theme
     apply_studio_theme(ctx, &studio_state.theme);
-    
+
     // Top menu bar
     egui::TopBottomPanel::top("menu_bar").show(ctx, |ui| {
         egui::menu::bar(ui, |ui| {
@@ -141,7 +152,7 @@ pub fn studio_ui_system(
                     // Open project dialog
                     if let Some(path) = rfd::FileDialog::new()
                         .add_filter("Game Config", &["yaml"])
-                        .pick_file() 
+                        .pick_file()
                     {
                         // Load project
                         studio_state.notifications.push(Notification::info(
@@ -161,7 +172,7 @@ pub fn studio_ui_system(
                     std::process::exit(0);
                 }
             });
-            
+
             ui.menu_button("Edit", |ui| {
                 if ui.button("↩️ Undo").clicked() {
                     // Undo last action
@@ -177,7 +188,7 @@ pub fn studio_ui_system(
                     // Batch processing
                 }
             });
-            
+
             ui.menu_button("View", |ui| {
                 if ui.button("🔧 Reset Layout").clicked() {
                     studio_state.dock_state = Arc::new(Mutex::new(create_default_dock_state()));
@@ -186,7 +197,7 @@ pub fn studio_ui_system(
                 ui.checkbox(&mut studio_state.theme.show_fps, "Show FPS");
                 ui.checkbox(&mut studio_state.theme.show_diagnostics, "Show Diagnostics");
             });
-            
+
             ui.menu_button("Tools", |ui| {
                 if ui.button("🎨 Style Guide Manager").clicked() {
                     // Open style guide
@@ -198,7 +209,7 @@ pub fn studio_ui_system(
                     // Open map editor
                 }
             });
-            
+
             ui.menu_button("Help", |ui| {
                 if ui.button("📚 Documentation").clicked() {
                     // Open docs
@@ -216,7 +227,7 @@ pub fn studio_ui_system(
             });
         });
     });
-    
+
     // Status bar
     egui::TopBottomPanel::bottom("status_bar").show(ctx, |ui| {
         ui.horizontal(|ui| {
@@ -228,7 +239,7 @@ pub fn studio_ui_system(
             };
             ui.label(format!("{} Phase: {:?}", phase_icon, current_phase.get()));
             ui.separator();
-            
+
             // Generation progress
             if current_phase.get() == &StudioPhase::Generation {
                 let progress = generation_state.overall_progress();
@@ -236,17 +247,17 @@ pub fn studio_ui_system(
                     .text(format!("{:.0}% - {}", progress * 100.0, generation_state.current_task))
                     .desired_width(200.0));
             }
-            
+
             // Memory usage
             ui.separator();
             ui.label(format!("Mem: {:.1} MB", get_memory_usage_mb()));
-            
+
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if studio_state.theme.show_fps {
                     // TODO: Get real FPS from Bevy diagnostics
                     ui.label(format!("FPS: {:.1}", 60.0));
                 }
-                
+
                 // Connection status
                 if generation_state.openai_connected {
                     ui.colored_label(egui::Color32::GREEN, "🟢 OpenAI Connected");
@@ -256,11 +267,11 @@ pub fn studio_ui_system(
             });
         });
     });
-    
+
     // Main content area with docking
     egui::CentralPanel::default().show(ctx, |ui| {
         let mut dock_state = studio_state.dock_state.lock().unwrap();
-        
+
         DockArea::new(&mut *dock_state)
             .style(DockStyle::from_egui(ui.style()))
             .show_inside(ui, &mut TabViewer {
@@ -276,7 +287,7 @@ pub fn studio_ui_system(
                 studio_state: &mut studio_state,
             });
     });
-    
+
     // Notifications
     show_notifications(ctx, &mut studio_state.notifications);
 }
@@ -297,7 +308,7 @@ struct TabViewer<'a> {
 
 impl egui_dock::TabViewer for TabViewer<'_> {
     type Tab = DockTab;
-    
+
     fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
         match tab {
             DockTab::ProjectWizard => "🎮 Project Setup".into(),
@@ -311,7 +322,7 @@ impl egui_dock::TabViewer for TabViewer<'_> {
             DockTab::Documentation => "📚 Documentation".into(),
         }
     }
-    
+
     fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
         match tab {
             DockTab::ProjectWizard => wizard::show_project_wizard(
@@ -346,18 +357,18 @@ impl egui_dock::TabViewer for TabViewer<'_> {
 /// Create default dock layout
 fn create_default_dock_state() -> DockState<DockTab> {
     let mut state = DockState::new(vec![DockTab::ProjectWizard]);
-    
+
     // Create default layout
     let tree = state.main_surface_mut();
-    
+
     let [left, right] = tree.split_left(egui_dock::NodeIndex::root(), 0.2, vec![DockTab::AssetGallery]);
     let [center, bottom] = tree.split_below(right, 0.7, vec![DockTab::Console]);
     let [preview, inspector] = tree.split_right(center, 0.7, vec![DockTab::Inspector]);
-    
+
     tree.set_focused_node(preview);
     tree.push_to_focused_leaf(DockTab::LivePreview);
     tree.push_to_focused_leaf(DockTab::CodeEditor);
-    
+
     state
 }
 
@@ -365,9 +376,9 @@ fn create_default_dock_state() -> DockState<DockTab> {
 fn show_timeline(ui: &mut egui::Ui) {
     ui.heading("⏱️ Timeline");
     ui.separator();
-    
+
     ui.label("Animation timeline will appear here");
-    
+
     // TODO: Implement timeline with keyframes
 }
 
@@ -375,11 +386,11 @@ fn show_timeline(ui: &mut egui::Ui) {
 fn show_style_guide(ui: &mut egui::Ui, generation_state: &GeneratorState) {
     ui.heading("🎯 Style Guide");
     ui.separator();
-    
+
     ui.label("Maintaining consistent visual style across all assets");
-    
+
     ui.add_space(10.0);
-    
+
     // Color palette
     ui.group(|ui| {
         ui.heading("Color Palette");
@@ -397,9 +408,9 @@ fn show_style_guide(ui: &mut egui::Ui, generation_state: &GeneratorState) {
             }
         });
     });
-    
+
     ui.add_space(10.0);
-    
+
     // Reference sprites
     ui.group(|ui| {
         ui.heading("Reference Sprites");
@@ -415,9 +426,9 @@ fn show_style_guide(ui: &mut egui::Ui, generation_state: &GeneratorState) {
             }
         });
     });
-    
+
     ui.add_space(10.0);
-    
+
     if ui.button("🔄 Regenerate Style Guide").clicked() {
         // Regenerate style guide
     }
@@ -427,7 +438,7 @@ fn show_style_guide(ui: &mut egui::Ui, generation_state: &GeneratorState) {
 fn show_documentation(ui: &mut egui::Ui) {
     ui.heading("📚 Documentation");
     ui.separator();
-    
+
     egui::ScrollArea::vertical().show(ui, |ui| {
         ui.collapsing("Getting Started", |ui| {
             ui.label("1. Create a new project using the Project Wizard");
@@ -435,14 +446,14 @@ fn show_documentation(ui: &mut egui::Ui) {
             ui.label("3. Generate initial assets");
             ui.label("4. Use the live editor to refine");
         });
-        
+
         ui.collapsing("Keyboard Shortcuts", |ui| {
             ui.label("Ctrl+N - New Project");
             ui.label("Ctrl+O - Open Project");
             ui.label("Ctrl+S - Save Project");
             ui.label("F5 - Regenerate Current Asset");
         });
-        
+
         ui.collapsing("API Reference", |ui| {
             ui.label("See online documentation for API details");
         });
@@ -453,7 +464,7 @@ fn show_documentation(ui: &mut egui::Ui) {
 fn setup_studio(mut commands: Commands) {
     // Setup default camera for UI
     commands.spawn(Camera2dBundle::default());
-    
+
     info!("Game Generator Studio initialized");
 }
 
@@ -510,7 +521,7 @@ pub struct GenerationReceiver(pub Receiver<GenerationResult>);
 fn create_generation_channels() -> (GenerationSender, GenerationReceiver) {
     let (tx, rx) = unbounded();
     let (result_tx, result_rx) = unbounded();
-    
+
     // Spawn async runtime for generation tasks
     std::thread::spawn(move || {
         let runtime = tokio::runtime::Runtime::new().unwrap();
@@ -518,7 +529,7 @@ fn create_generation_channels() -> (GenerationSender, GenerationReceiver) {
             generator::run_generation_loop(rx, result_tx).await;
         });
     });
-    
+
     (GenerationSender(tx), GenerationReceiver(result_rx))
 }
 
@@ -552,20 +563,20 @@ impl Notification {
 
 fn show_notifications(ctx: &egui::Context, notifications: &mut Vec<Notification>) {
     let mut to_remove = Vec::new();
-    
+
     for (i, notif) in notifications.iter().enumerate() {
         let elapsed = notif.timestamp.elapsed().as_secs_f32();
         if elapsed > 5.0 {
             to_remove.push(i);
             continue;
         }
-        
+
         let opacity = if elapsed > 4.0 {
             1.0 - (elapsed - 4.0)
         } else {
             1.0
         };
-        
+
         egui::Window::new("notification")
             .id(egui::Id::new(i))
             .fixed_pos(egui::pos2(ctx.screen_rect().width() - 320.0, 50.0 + i as f32 * 80.0))
@@ -574,14 +585,14 @@ fn show_notifications(ctx: &egui::Context, notifications: &mut Vec<Notification>
             .title_bar(false)
             .show(ctx, |ui| {
                 ui.set_opacity(opacity);
-                
+
                 let color = match notif.level {
                     NotificationLevel::Info => egui::Color32::LIGHT_BLUE,
                     NotificationLevel::Warning => egui::Color32::YELLOW,
                     NotificationLevel::Error => egui::Color32::RED,
                     NotificationLevel::Success => egui::Color32::GREEN,
                 };
-                
+
                 ui.horizontal(|ui| {
                     ui.colored_label(color, match notif.level {
                         NotificationLevel::Info => "ℹ️",
@@ -593,7 +604,7 @@ fn show_notifications(ctx: &egui::Context, notifications: &mut Vec<Notification>
                 });
             });
     }
-    
+
     for i in to_remove.into_iter().rev() {
         notifications.remove(i);
     }

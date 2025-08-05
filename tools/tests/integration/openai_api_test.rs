@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use wiremock::{MockServer, Mock, ResponseTemplate};
 use wiremock::matchers::{method, path, header, body_json};
 use serde_json::json;
@@ -9,7 +20,7 @@ use std::env;
 async fn test_openai_chat_completion_success() {
     // Start a mock server
     let mock_server = MockServer::start().await;
-    
+
     // Set up the mock response
     let mock_response = json!({
         "id": "chatcmpl-123",
@@ -29,27 +40,27 @@ async fn test_openai_chat_completion_success() {
             "total_tokens": 150
         }
     });
-    
+
     Mock::given(method("POST"))
         .and(path("/v1/chat/completions"))
         .and(header("authorization", "Bearer test-key"))
         .respond_with(ResponseTemplate::new(200).set_body_json(&mock_response))
         .mount(&mock_server)
         .await;
-    
+
     // Set up test environment
     env::set_var("OPENAI_API_KEY", "test-key");
     env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     let mut generator = AIGameGenerator::new()
         .with_use_cache(false);
-    
+
     // Test the API call
     let result = generator.generate_with_ai(
         "You are a game developer",
         "Generate a player component"
     ).await;
-    
+
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), "Generated game content here");
 }
@@ -57,31 +68,31 @@ async fn test_openai_chat_completion_success() {
 #[tokio::test]
 async fn test_openai_chat_completion_error() {
     let mock_server = MockServer::start().await;
-    
+
     Mock::given(method("POST"))
         .and(path("/v1/chat/completions"))
         .respond_with(ResponseTemplate::new(500).set_body_string("Internal Server Error"))
         .mount(&mock_server)
         .await;
-    
+
     env::set_var("OPENAI_API_KEY", "test-key");
     env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     let mut generator = AIGameGenerator::new()
         .with_use_cache(false);
-    
+
     let result = generator.generate_with_ai(
         "System prompt",
         "User prompt"
     ).await;
-    
+
     assert!(result.is_err());
 }
 
 #[tokio::test]
 async fn test_openai_image_generation_success() {
     let mock_server = MockServer::start().await;
-    
+
     let mock_response = json!({
         "created": 1677652288,
         "data": [{
@@ -89,14 +100,14 @@ async fn test_openai_image_generation_success() {
             "revised_prompt": "A detailed prompt"
         }]
     });
-    
+
     // Mock the image generation endpoint
     Mock::given(method("POST"))
         .and(path("/v1/images/generations"))
         .respond_with(ResponseTemplate::new(200).set_body_json(&mock_response))
         .mount(&mock_server)
         .await;
-    
+
     // Mock the image download
     Mock::given(method("GET"))
         .and(path("/generated-image.png"))
@@ -106,17 +117,17 @@ async fn test_openai_image_generation_success() {
         )
         .mount(&mock_server)
         .await;
-    
+
     env::set_var("OPENAI_API_KEY", "test-key");
     env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     let temp_dir = TempDir::new().unwrap();
     env::set_current_dir(&temp_dir).unwrap();
     std::fs::create_dir_all("assets/sprites").unwrap();
-    
+
     let mut generator = AIGameGenerator::new();
     let result = generator.generate_image("A hero sprite", "hero.png").await;
-    
+
     assert!(result.is_ok());
     assert!(std::path::Path::new("assets/sprites/hero.png").exists());
 }
@@ -124,7 +135,7 @@ async fn test_openai_image_generation_success() {
 #[tokio::test]
 async fn test_caching_behavior() {
     let mock_server = MockServer::start().await;
-    
+
     let mock_response = json!({
         "id": "chatcmpl-123",
         "object": "chat.completion",
@@ -143,7 +154,7 @@ async fn test_caching_behavior() {
             "total_tokens": 15
         }
     });
-    
+
     // This mock should only be called once due to caching
     Mock::given(method("POST"))
         .and(path("/v1/chat/completions"))
@@ -151,21 +162,21 @@ async fn test_caching_behavior() {
         .expect(1)
         .mount(&mock_server)
         .await;
-    
+
     env::set_var("OPENAI_API_KEY", "test-key");
     env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     let temp_dir = TempDir::new().unwrap();
     env::set_current_dir(&temp_dir).unwrap();
-    
+
     let mut generator = AIGameGenerator::new()
         .with_use_cache(true);
-    
+
     // First call - should hit the API
     let result1 = generator.generate_with_ai("System", "User").await;
     assert!(result1.is_ok());
     assert_eq!(result1.unwrap(), "Cached response");
-    
+
     // Second call - should use cache
     let result2 = generator.generate_with_ai("System", "User").await;
     assert!(result2.is_ok());
@@ -175,7 +186,7 @@ async fn test_caching_behavior() {
 #[tokio::test]
 async fn test_token_counting() {
     let mock_server = MockServer::start().await;
-    
+
     // Set up a mock that validates the max_tokens parameter
     Mock::given(method("POST"))
         .and(path("/v1/chat/completions"))
@@ -194,26 +205,26 @@ async fn test_token_counting() {
         })))
         .mount(&mock_server)
         .await;
-    
+
     env::set_var("OPENAI_API_KEY", "test-key");
     env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     let mut generator = AIGameGenerator::new()
         .with_use_cache(false);
-    
+
     // The generator should properly count tokens and set max_tokens
     let result = generator.generate_with_ai(
         "Short system prompt",
         "Short user prompt"
     ).await;
-    
+
     assert!(result.is_ok());
 }
 
 #[tokio::test]
 async fn test_rate_limit_handling() {
     let mock_server = MockServer::start().await;
-    
+
     // First request returns rate limit error
     Mock::given(method("POST"))
         .and(path("/v1/chat/completions"))
@@ -231,7 +242,7 @@ async fn test_rate_limit_handling() {
         .up_to_n_times(1)
         .mount(&mock_server)
         .await;
-    
+
     // Second request succeeds
     Mock::given(method("POST"))
         .and(path("/v1/chat/completions"))
@@ -244,16 +255,16 @@ async fn test_rate_limit_handling() {
         })))
         .mount(&mock_server)
         .await;
-    
+
     env::set_var("OPENAI_API_KEY", "test-key");
     env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     let mut generator = AIGameGenerator::new()
         .with_use_cache(false);
-    
+
     // Should retry and eventually succeed
     let result = generator.generate_with_ai("System", "User").await;
-    
+
     // Note: This test assumes retry logic is implemented
     // If not implemented yet, this test documents the expected behavior
     assert!(result.is_ok() || result.is_err()); // Adjust based on implementation

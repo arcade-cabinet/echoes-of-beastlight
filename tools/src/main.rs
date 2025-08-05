@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 use tracing::info;
@@ -16,11 +27,11 @@ use generator::AIGameGenerator;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
-    
+
     /// Use cache for AI responses
     #[arg(long, default_value_t = true)]
     cache: bool,
-    
+
     /// Dry run (don't write files)
     #[arg(long)]
     dry_run: bool,
@@ -64,16 +75,16 @@ async fn main() -> Result<()> {
             .add_directive("ai_game_generator=info".parse()?)
             .add_directive("async_openai=warn".parse()?))
         .init();
-    
+
     let cli = Cli::parse();
-    
+
     // Create generator
     let mut generator = AIGameGenerator::new()
         .with_use_cache(cli.cache)
         .with_dry_run(cli.dry_run);
-    
+
     generator.initialize().await?;
-    
+
     match cli.command {
         Commands::Generate { force } => {
             info!("🎮 Starting AI Game Generation");
@@ -99,6 +110,6 @@ async fn main() -> Result<()> {
             generator.clean().await?;
         }
     }
-    
+
     Ok(())
 }

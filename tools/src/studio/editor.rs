@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use bevy::prelude::*;
 use bevy_egui::egui;
 
@@ -12,7 +23,7 @@ pub struct EditorState {
 pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
     ui.heading("📝 Code Editor");
     ui.separator();
-    
+
     // File tabs
     ui.horizontal(|ui| {
         if ui.selectable_label(editor_state.current_file == Some("main.rs".into()), "main.rs").clicked() {
@@ -27,14 +38,14 @@ pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
             editor_state.current_file = Some("combat.rs".into());
             editor_state.file_content = get_sample_code("combat.rs");
         }
-        
+
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             ui.checkbox(&mut editor_state.syntax_highlight, "Syntax Highlight");
         });
     });
-    
+
     ui.separator();
-    
+
     // Editor toolbar
     ui.horizontal(|ui| {
         if ui.button("💾 Save").clicked() {
@@ -54,16 +65,16 @@ pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
         if ui.button("🔄 Replace").clicked() {
             // Open replace dialog
         }
-        
+
         if editor_state.modified {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 ui.colored_label(egui::Color32::YELLOW, "● Modified");
             });
         }
     });
-    
+
     ui.separator();
-    
+
     // Code editor area
     egui::ScrollArea::both()
         .auto_shrink([false; 2])
@@ -78,7 +89,7 @@ pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
                         .desired_width(f32::INFINITY)
                         .desired_rows(30)
                 );
-                
+
                 if response.changed() {
                     editor_state.modified = true;
                 }
@@ -88,27 +99,27 @@ pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
 
 fn show_highlighted_code(ui: &mut egui::Ui, code: &str) {
     use egui::{text::LayoutJob, TextFormat, Color32, FontId};
-    
+
     let mut job = LayoutJob::default();
-    
+
     // Simple Rust syntax highlighting
     let keywords = vec![
         "use", "mod", "fn", "let", "mut", "const", "struct", "impl", "pub", "if", "else",
         "for", "while", "loop", "match", "return", "self", "Self", "true", "false",
     ];
-    
+
     let lines = code.lines();
     for line in lines {
         let mut remaining = line;
         let indent = line.len() - line.trim_start().len();
-        
+
         // Add indentation
         if indent > 0 {
             job.append(&" ".repeat(indent), 0.0, TextFormat::default());
         }
-        
+
         remaining = remaining.trim_start();
-        
+
         // Check for comments
         if remaining.starts_with("//") {
             job.append(
@@ -132,7 +143,7 @@ fn show_highlighted_code(ui: &mut egui::Ui, code: &str) {
                 } else {
                     Color32::from_gray(200) // Default text
                 };
-                
+
                 job.append(
                     word,
                     0.0,
@@ -141,16 +152,16 @@ fn show_highlighted_code(ui: &mut egui::Ui, code: &str) {
                         ..Default::default()
                     },
                 );
-                
+
                 if i < words.len() - 1 {
                     job.append(" ", 0.0, TextFormat::default());
                 }
             }
         }
-        
+
         job.append("\n", 0.0, TextFormat::default());
     }
-    
+
     ui.label(job);
 }
 
@@ -169,7 +180,7 @@ fn main() {
 fn setup(mut commands: Commands) {
     // Spawn camera
     commands.spawn(Camera2dBundle::default());
-    
+
     // Spawn player
     commands.spawn((
         SpriteBundle {
@@ -179,7 +190,7 @@ fn setup(mut commands: Commands) {
         Player { speed: 150.0 },
     ));
 }"#.to_string(),
-        
+
         "player.rs" => r#"use bevy::prelude::*;
 
 #[derive(Component)]
@@ -194,7 +205,7 @@ pub fn player_movement(
 ) {
     for mut transform in &mut query {
         let mut direction = Vec3::ZERO;
-        
+
         if keyboard.pressed(KeyCode::ArrowLeft) {
             direction.x -= 1.0;
         }
@@ -207,14 +218,14 @@ pub fn player_movement(
         if keyboard.pressed(KeyCode::ArrowDown) {
             direction.y -= 1.0;
         }
-        
+
         if direction.length() > 0.0 {
             direction = direction.normalize();
             transform.translation += direction * 150.0 * time.delta_seconds();
         }
     }
 }"#.to_string(),
-        
+
         _ => "// Generated code will appear here".to_string(),
     }
 }

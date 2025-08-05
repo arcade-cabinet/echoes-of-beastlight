@@ -28,11 +28,13 @@ Echoes of Beastlight captures the essence of these classics while ensuring you'l
 ## 🦾 Why Procedural?
 
 ### The Problem with Traditional JRPGs
+
 - Once you've played them, the mystery is gone
 - Guides and wikis remove all surprise
 - Limited replay value
 
 ### Our Solution
+
 - AI-driven world generation creates endless variety
 - Consistent art style maintains the classic feel
 - Every player's journey is truly their own
@@ -55,14 +57,17 @@ Our procedural audio system creates music that:
 ## 🚀 Getting Started
 
 ### Quick Play (Web)
+
 *Coming Soon* - Play directly in your browser!
 
 ### Download (Desktop)
+
 Available for Windows, macOS, and Linux on:
 - [Steam](https://store.steampowered.com) *(Coming Soon)*
 - [itch.io](https://itch.io) *(Coming Soon)*
 
 ### Build from Source
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/echoes-of-beastlight
@@ -83,11 +88,13 @@ cargo run --release
 ## 🤝 Community
 
 ### Share Your Adventures
+
 - **Discord**: Join our community server *(Coming Soon)*
 - **Reddit**: r/EchoesOfBeastlight *(Coming Soon)*
 - **Seeds Database**: Share and discover amazing worlds
 
 ### Content Creators
+
 Perfect for streaming and Let's Plays:
 - Every playthrough is unique content
 - Audience can share seeds for you to try
@@ -105,6 +112,7 @@ Perfect for streaming and Let's Plays:
 ## 📊 System Requirements
 
 ### Minimum
+
 - **OS**: Windows 10, macOS 10.15, Ubuntu 20.04
 - **Processor**: Dual Core 2.0 GHz
 - **Memory**: 4 GB RAM
@@ -112,6 +120,7 @@ Perfect for streaming and Let's Plays:
 - **Storage**: 500 MB available space
 
 ### Recommended
+
 - **Processor**: Quad Core 3.0 GHz
 - **Memory**: 8 GB RAM
 - **Graphics**: Dedicated GPU with 2GB VRAM
@@ -120,6 +129,7 @@ Perfect for streaming and Let's Plays:
 ## 🎯 Roadmap
 
 ### Phase 1: Launch (Current)
+
 - ✅ Core gameplay loop
 - ✅ Procedural world generation
 - ✅ Monster taming system
@@ -127,12 +137,14 @@ Perfect for streaming and Let's Plays:
 - 🚧 Steam release preparation
 
 ### Phase 2: Expansion
+
 - 🔄 Multiplayer seed sharing
 - 🔄 Trading system
 - 🔄 Advanced evolution trees
 - 🔄 New biomes and mechanics
 
 ### Phase 3: Community
+
 - 📋 Full mod support
 - 📋 Tournament modes
 - 📋 Mobile ports

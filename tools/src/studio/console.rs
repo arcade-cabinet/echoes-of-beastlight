@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use bevy::prelude::*;
 use bevy_egui::egui;
 use std::collections::VecDeque;
@@ -59,15 +70,15 @@ impl ConsoleState {
             message: message.into(),
             source: None,
         });
-        
+
         // Keep only last 1000 entries
         while self.logs.len() > 1000 {
             self.logs.pop_front();
         }
-        
+
         self.scroll_to_bottom = true;
     }
-    
+
     pub fn log_with_source(&mut self, level: ConsoleLevel, message: impl Into<String>, source: impl Into<String>) {
         self.logs.push_back(LogEntry {
             timestamp: std::time::Instant::now(),
@@ -75,39 +86,39 @@ impl ConsoleState {
             message: message.into(),
             source: Some(source.into()),
         });
-        
+
         while self.logs.len() > 1000 {
             self.logs.pop_front();
         }
-        
+
         self.scroll_to_bottom = true;
     }
-    
+
     pub fn clear(&mut self) {
         self.logs.clear();
     }
-    
+
     pub fn execute_command(&mut self, command: &str) {
         if !command.is_empty() {
             self.command_history.push(command.to_string());
             self.log(ConsoleLevel::Info, format!("> {}", command));
-            
+
             // Parse and execute command
             match self.parse_command(command) {
                 Ok(result) => self.log(ConsoleLevel::Success, result),
                 Err(error) => self.log(ConsoleLevel::Error, error),
             }
         }
-        
+
         self.current_command.clear();
     }
-    
+
     fn parse_command(&self, command: &str) -> Result<String, String> {
         let parts: Vec<&str> = command.split_whitespace().collect();
         if parts.is_empty() {
             return Err("Empty command".into());
         }
-        
+
         match parts[0] {
             "help" => Ok(self.show_help()),
             "clear" => Ok("Console cleared".into()),
@@ -122,7 +133,7 @@ impl ConsoleState {
             _ => Err(format!("Unknown command: {}", parts[0])),
         }
     }
-    
+
     fn show_help(&self) -> String {
         "Available commands:\n\
          help - Show this help message\n\
@@ -136,7 +147,7 @@ impl ConsoleState {
 pub fn show_console(ui: &mut egui::Ui, console_state: &mut ConsoleState) {
     ui.heading("📜 Console");
     ui.separator();
-    
+
     // Filter controls
     ui.horizontal(|ui| {
         ui.label("Filter:");
@@ -145,25 +156,25 @@ pub fn show_console(ui: &mut egui::Ui, console_state: &mut ConsoleState) {
         ui.checkbox(&mut console_state.filter.show_errors, "❌ Errors");
         ui.checkbox(&mut console_state.filter.show_success, "✅ Success");
         ui.checkbox(&mut console_state.filter.show_debug, "🐛 Debug");
-        
+
         ui.separator();
-        
+
         ui.label("Search:");
         ui.text_edit_singleline(&mut console_state.filter.search_term);
-        
+
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             if ui.button("Clear").clicked() {
                 console_state.clear();
             }
         });
     });
-    
+
     ui.separator();
-    
+
     // Log display
     let text_height = ui.text_style_height(&egui::TextStyle::Monospace);
     let num_rows = ((ui.available_height() - 50.0) / text_height).floor() as usize;
-    
+
     egui::ScrollArea::vertical()
         .auto_shrink([false; 2])
         .max_height(ui.available_height() - 50.0)
@@ -172,12 +183,12 @@ pub fn show_console(ui: &mut egui::Ui, console_state: &mut ConsoleState) {
                 if !should_show_entry(entry, &console_state.filter) {
                     continue;
                 }
-                
+
                 ui.horizontal(|ui| {
                     // Timestamp
                     let elapsed = entry.timestamp.elapsed();
                     ui.weak(format!("[{:>6.1}s]", elapsed.as_secs_f32()));
-                    
+
                     // Level icon and color
                     let (icon, color) = match entry.level {
                         ConsoleLevel::Info => ("ℹ️", egui::Color32::LIGHT_BLUE),
@@ -186,40 +197,40 @@ pub fn show_console(ui: &mut egui::Ui, console_state: &mut ConsoleState) {
                         ConsoleLevel::Success => ("✅", egui::Color32::GREEN),
                         ConsoleLevel::Debug => ("🐛", egui::Color32::GRAY),
                     };
-                    
+
                     ui.colored_label(color, icon);
-                    
+
                     // Source if available
                     if let Some(source) = &entry.source {
                         ui.weak(format!("[{}]", source));
                     }
-                    
+
                     // Message
                     ui.label(&entry.message);
                 });
             }
-            
+
             // Auto-scroll to bottom
             if console_state.scroll_to_bottom {
                 ui.scroll_to_cursor(Some(egui::Align::BOTTOM));
                 console_state.scroll_to_bottom = false;
             }
         });
-    
+
     ui.separator();
-    
+
     // Command input
     ui.horizontal(|ui| {
         ui.label(">");
-        
+
         let response = ui.text_edit_singleline(&mut console_state.current_command);
-        
+
         // Handle Enter key
         if response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
             console_state.execute_command(&console_state.current_command.clone());
             response.request_focus();
         }
-        
+
         // Command history with up/down arrows
         if response.has_focus() {
             if ui.input(|i| i.key_pressed(egui::Key::ArrowUp)) {
@@ -240,11 +251,11 @@ fn should_show_entry(entry: &LogEntry, filter: &LogFilter) -> bool {
         ConsoleLevel::Success => filter.show_success,
         ConsoleLevel::Debug => filter.show_debug,
     };
-    
+
     if !level_match {
         return false;
     }
-    
+
     // Check search filter
     if !filter.search_term.is_empty() {
         let search_lower = filter.search_term.to_lowercase();
@@ -252,9 +263,9 @@ fn should_show_entry(entry: &LogEntry, filter: &LogFilter) -> bool {
         let source_match = entry.source.as_ref()
             .map(|s| s.to_lowercase().contains(&search_lower))
             .unwrap_or(false);
-        
+
         return message_lower.contains(&search_lower) || source_match;
     }
-    
+
     true
 }

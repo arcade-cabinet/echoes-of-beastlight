@@ -7,12 +7,14 @@ We're creating a unique fusion of classic JRPG nostalgia with modern AI-driven c
 ## Core Game Concept
 
 ### The Twist: Monster Taming meets Traditional JRPG
+
 - Players can tame and collect procedurally generated monsters
 - Each world seed creates unique creatures with distinct abilities
 - Classic turn-based combat with monster synergy mechanics
 - Evolution paths discovered through gameplay
 
 ### Procedural Nostalgia
+
 - Captures the essence of Secret of Mana, Chrono Trigger, Final Fantasy VI
 - AI ensures consistent art style across all generated assets
 - Familiar gameplay patterns with infinite variation
@@ -21,6 +23,7 @@ We're creating a unique fusion of classic JRPG nostalgia with modern AI-driven c
 ## Current Development Status
 
 ### ✅ Completed
+
 - Pure Rust architecture (game + generator)
 - AI integration with OpenAI (GPT-4 + DALL-E 3)
 - Style guide system for visual consistency
@@ -29,12 +32,14 @@ We're creating a unique fusion of classic JRPG nostalgia with modern AI-driven c
 - Git-based generation tracking
 
 ### 🚧 In Progress
+
 - Fixing final build issues
 - Integrating style transfer for pixel art consistency
 - Completing the Studio UI for asset review
 - Monster taming mechanics implementation
 
 ### 📋 Upcoming
+
 - Full procedural world generation from seeds
 - Neural style transfer for all game assets
 - Multiplayer support for shared seeds
@@ -45,6 +50,7 @@ We're creating a unique fusion of classic JRPG nostalgia with modern AI-driven c
 Your primary tool for reviewing and directing the game's development:
 
 ### Main Features
+
 1. **Project Wizard** - Configure game parameters step-by-step
 2. **Asset Gallery** - Browse and approve all generated sprites
 3. **Code Editor** - Review generated game logic with syntax highlighting
@@ -53,6 +59,7 @@ Your primary tool for reviewing and directing the game's development:
 6. **Console** - Monitor generation progress and logs
 
 ### Workflow
+
 1. Configure game parameters in the wizard
 2. AI generates all assets and code
 3. Review in the gallery and preview
@@ -62,17 +69,20 @@ Your primary tool for reviewing and directing the game's development:
 ## Creative Direction Guidelines
 
 ### Visual Style
+
 - **Pixel Art**: 32x32 sprites with black outlines
 - **Color Palette**: Cohesive, limited palette per biome
 - **Animation**: 3-4 frame cycles for smooth movement
 - **UI**: Clean, modern take on retro interfaces
 
 ### Audio Direction
+
 - **Music**: Chiptune-inspired but with modern production
 - **SFX**: Punchy, satisfying feedback sounds
 - **Ambience**: Subtle environmental audio per biome
 
 ### Gameplay Feel
+
 - **Pacing**: Deliberate, thoughtful combat
 - **Difficulty**: Accessible with optional depth
 - **Progression**: Clear power growth with monster evolution
@@ -81,12 +91,14 @@ Your primary tool for reviewing and directing the game's development:
 ## Technical Advantages
 
 ### Why Pure Rust?
+
 - **Performance**: Native speed for both game and tools
 - **Safety**: Memory safety prevents crashes
 - **WASM**: Easy web deployment
 - **Modern**: Latest language features and ecosystem
 
 ### AI-Driven Benefits
+
 - **Infinite Content**: New experiences every playthrough
 - **Consistent Quality**: AI maintains style guidelines
 - **Rapid Iteration**: Generate variations quickly
@@ -95,18 +107,21 @@ Your primary tool for reviewing and directing the game's development:
 ## Release Strategy
 
 ### Phase 1: Core Game (Current)
+
 - Single-player experience
 - 5-10 procedural biomes
 - 50+ monster types
 - Basic taming mechanics
 
 ### Phase 2: Enhanced Features
+
 - Multiplayer seed sharing
 - Monster trading
 - Expanded evolution trees
 - Steam Workshop support
 
 ### Phase 3: Community & Growth
+
 - Mod support
 - Tournament modes
 - Mobile ports

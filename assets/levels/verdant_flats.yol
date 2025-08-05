@@ -11,52 +11,51 @@ entities:
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      
+
   - type: undefined
     name: undefined
     components:
       Transform:
         translation: [undefined, undefined, 0]
-      

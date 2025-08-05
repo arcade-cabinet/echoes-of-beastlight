@@ -12,13 +12,14 @@ By participating in this project, you agree to abide by our code of conduct: be 
 
 1. Rust 1.88.0 or later
 2. System dependencies:
+
    ```bash
    # Ubuntu/Debian
    sudo apt-get install libsdl2-dev pkg-config libssl-dev
-   
+
    # macOS
    brew install sdl2 pkg-config
-   
+
    # Windows
    # Install Visual Studio Build Tools
    ```
@@ -27,15 +28,20 @@ By participating in this project, you agree to abide by our code of conduct: be 
 
 1. Fork the repository
 2. Clone your fork:
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/ai-game-generator.git
    cd ai-game-generator
    ```
+
 3. Add upstream remote:
+
    ```bash
    git remote add upstream https://github.com/ORIGINAL_OWNER/ai-game-generator.git
    ```
+
 4. Install pre-commit hooks:
+
    ```bash
    pip install pre-commit
    pre-commit install
@@ -148,18 +154,18 @@ See `.github/pull_request_template.md`
 
 ```rust
 /// Generates a new game component based on the configuration.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `config` - The game configuration
 /// * `component_type` - Type of component to generate
-/// 
+///
 /// # Returns
-/// 
+///
 /// Returns the generated component code as a string
-/// 
+///
 /// # Errors
-/// 
+///
 /// Returns an error if generation fails
 pub async fn generate_component(
     config: &GameConfig,
@@ -189,10 +195,10 @@ mod tests {
     fn test_component_generation() {
         // Arrange
         let config = create_test_config();
-        
+
         // Act
         let result = generate_component(&config, ComponentType::Player);
-        
+
         // Assert
         assert!(result.is_ok());
         assert!(result.unwrap().contains("struct Player"));
@@ -238,6 +244,7 @@ See `.github/SECURITY.md` for security policy.
 3. Verify it's actively maintained
 4. Consider the dependency size
 5. Run security audit:
+
    ```bash
    cargo audit
    cargo deny check
@@ -264,6 +271,7 @@ We use semantic versioning (SemVer):
 2. Update CHANGELOG.md
 3. Create PR with version bump
 4. After merge, tag the release:
+
    ```bash
    git tag -a v0.1.0 -m "Release v0.1.0"
    git push upstream v0.1.0

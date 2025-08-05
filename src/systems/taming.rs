@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 ```rust
 use bevy::prelude::*;
 use rand::Rng;
@@ -27,7 +38,7 @@ fn taming_system(
     for mut player in player_query.iter_mut() {
         if player.party.len() < 6 {
             for (monster_entity, monster) in monster_query.iter() {
-                let taming_chance = (monster.health as f32 / monster.max_health as f32) 
+                let taming_chance = (monster.health as f32 / monster.max_health as f32)
                     * (player.level as f32 / 100.0);
 
                 let bait_bonus = bait_query.iter().fold(0.0, |acc, bait| acc + bait.success_rate);

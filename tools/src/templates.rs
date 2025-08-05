@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use anyhow::Result;
 use handlebars::Handlebars;
 use serde_json::json;
@@ -15,16 +26,16 @@ impl Templates {
             handlebars,
         }
     }
-    
+
     pub async fn load(&mut self) -> Result<()> {
         // Register built-in templates
         self.register_component_template()?;
         self.register_system_template()?;
         self.register_tilemap_template()?;
-        
+
         Ok(())
     }
-    
+
     fn register_component_template(&mut self) -> Result<()> {
         let template = r#"use bevy::prelude::*;
 
@@ -77,7 +88,7 @@ pub struct Tameable {
 #[cfg(feature = "inspector")]
 impl bevy_inspector_egui::Inspectable for Player {
     type Attributes = ();
-    
+
     fn ui(&mut self, ui: &mut egui::Ui, _: Self::Attributes, _: &mut bevy_inspector_egui::Context) -> bool {
         let mut changed = false;
         changed |= ui.add(egui::DragValue::new(&mut self.health).prefix("Health: ")).changed();
@@ -86,11 +97,11 @@ impl bevy_inspector_egui::Inspectable for Player {
         changed
     }
 }"#;
-        
+
         self.handlebars.register_template_string("components", template)?;
         Ok(())
     }
-    
+
     fn register_system_template(&mut self) -> Result<()> {
         let template = r#"use bevy::prelude::*;
 use crate::components::*;
@@ -102,11 +113,11 @@ pub fn {{system_name}}_system(
 ) {
     {{body}}
 }"#;
-        
+
         self.handlebars.register_template_string("system", template)?;
         Ok(())
     }
-    
+
     fn register_tilemap_template(&mut self) -> Result<()> {
         let template = r#"use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
@@ -116,11 +127,11 @@ pub fn setup_{{zone_name}}_tilemap(
     asset_server: Res<AssetServer>,
 ) {
     let texture_handle = asset_server.load("sprites/{{zone_name}}_tiles.png");
-    
+
     let map_size = TilemapSize { x: 32, y: 32 };
     let tilemap_entity = commands.spawn_empty().id();
     let mut tile_storage = TileStorage::empty(map_size);
-    
+
     // Generate tiles
     for x in 0..map_size.x {
         for y in 0..map_size.y {
@@ -136,7 +147,7 @@ pub fn setup_{{zone_name}}_tilemap(
             tile_storage.set(&tile_pos, tile_entity);
         }
     }
-    
+
     commands.entity(tilemap_entity).insert(TilemapBundle {
         grid_size: TilemapGridSize { x: 16.0, y: 16.0 },
         size: map_size,
@@ -147,30 +158,45 @@ pub fn setup_{{zone_name}}_tilemap(
         ..Default::default()
     });
 }"#;
-        
+
         self.handlebars.register_template_string("tilemap", template)?;
         Ok(())
     }
-    
+
     pub fn render_components(&self) -> Result<String> {
         Ok(self.handlebars.render("components", &json!({}))?)
     }
-    
+
     pub fn render_system(&self, name: &str, queries: Vec<QueryDef>, body: &str) -> Result<String> {
         let data = json!({
             "system_name": name,
             "queries": queries,
             "body": body
         });
-        
+
         Ok(self.handlebars.render("system", &data)?)
     }
-    
+
     pub fn render_tilemap(&self, zone_name: &str) -> Result<String> {
+        // Properly sanitize the zone name for Rust function names
+        let sanitized_name = zone_name
+            .to_lowercase()
+            .chars()
+            .map(|c| {
+                if c.is_alphanumeric() {
+                    c
+                } else {
+                    '_'
+                }
+            })
+            .collect::<String>()
+            .trim_matches('_')
+            .to_string();
+
         let data = json!({
-            "zone_name": zone_name.to_lowercase().replace(' ', "_")
+            "zone_name": sanitized_name
         });
-        
+
         Ok(self.handlebars.render("tilemap", &data)?)
     }
 }
@@ -204,12 +230,12 @@ mod tests {
     async fn test_render_components() {
         let mut templates = Templates::new();
         templates.load().await.unwrap();
-        
+
         let result = templates.render_components();
         assert!(result.is_ok());
-        
+
         let rendered = result.unwrap();
-        
+
         // Check for key component definitions
         assert!(rendered.contains("pub struct Player"));
         assert!(rendered.contains("pub struct Monster"));
@@ -217,17 +243,17 @@ mod tests {
         assert!(rendered.contains("pub struct Velocity"));
         assert!(rendered.contains("pub struct Health"));
         assert!(rendered.contains("pub struct Tameable"));
-        
+
         // Check for proper derives
         assert!(rendered.contains("#[derive(Component, Debug, Clone)]"));
-        
+
         // Check for fields
         assert!(rendered.contains("pub health: i32"));
         assert!(rendered.contains("pub mana: i32"));
         assert!(rendered.contains("pub level: u32"));
         assert!(rendered.contains("pub species: String"));
         assert!(rendered.contains("pub tameable: bool"));
-        
+
         // Check for inspector support
         assert!(rendered.contains("#[cfg(feature = \"inspector\")]"));
         assert!(rendered.contains("impl bevy_inspector_egui::Inspectable for Player"));
@@ -237,22 +263,22 @@ mod tests {
     async fn test_render_system_simple() {
         let mut templates = Templates::new();
         templates.load().await.unwrap();
-        
+
         let queries = vec![
             QueryDef {
                 name: "mut player_query".to_string(),
                 types: "&mut Transform, &Player".to_string(),
             }
         ];
-        
+
         let body = "// System logic here";
         let result = templates.render_system("movement", queries, body);
-        
+
         assert!(result.is_ok());
         let rendered = result.unwrap();
-        
+
         println!("Rendered system template:\n{}", rendered);
-        
+
         assert!(rendered.contains("pub fn movement_system"));
         assert!(rendered.contains("mut player_query: Query<&mut Transform, &Player>"));
         assert!(rendered.contains("// System logic here"));
@@ -262,7 +288,7 @@ mod tests {
     async fn test_render_system_multiple_queries() {
         let mut templates = Templates::new();
         templates.load().await.unwrap();
-        
+
         let queries = vec![
             QueryDef {
                 name: "player_query".to_string(),
@@ -277,20 +303,20 @@ mod tests {
                 types: "&mut Health".to_string(),
             }
         ];
-        
+
         let body = r#"
     for (transform, player) in player_query.iter() {
         // Player logic
     }
-    
+
     for (transform, monster) in monster_query.iter() {
         // Monster logic
     }
 "#;
-        
+
         let result = templates.render_system("combat", queries, body);
         assert!(result.is_ok());
-        
+
         let rendered = result.unwrap();
         assert!(rendered.contains("pub fn combat_system"));
         assert!(rendered.contains("player_query: Query<&Transform, &Player>"));
@@ -303,24 +329,24 @@ mod tests {
     async fn test_render_tilemap() {
         let mut templates = Templates::new();
         templates.load().await.unwrap();
-        
+
         let result = templates.render_tilemap("Forest Zone");
         assert!(result.is_ok());
-        
+
         let rendered = result.unwrap();
-        
+
         // Check function name is properly formatted
         assert!(rendered.contains("pub fn setup_forest_zone_tilemap"));
-        
+
         // Check asset path is properly formatted
         assert!(rendered.contains("sprites/forest_zone_tiles.png"));
-        
+
         // Check for tilemap setup code
         assert!(rendered.contains("TilemapSize { x: 32, y: 32 }"));
         assert!(rendered.contains("TileStorage::empty(map_size)"));
         assert!(rendered.contains("TileBundle"));
         assert!(rendered.contains("TilemapBundle"));
-        
+
         // Check for proper grid and tile sizes
         assert!(rendered.contains("TilemapGridSize { x: 16.0, y: 16.0 }"));
         assert!(rendered.contains("TilemapTileSize { x: 16.0, y: 16.0 }"));
@@ -330,7 +356,7 @@ mod tests {
     async fn test_render_tilemap_special_characters() {
         let mut templates = Templates::new();
         templates.load().await.unwrap();
-        
+
         // Test with zone names containing special characters
         let test_cases = vec![
             ("Dark-Cave", "setup_dark_cave_tilemap"),
@@ -338,7 +364,7 @@ mod tests {
             ("Zone #1", "setup_zone__1_tilemap"),
             ("Multi  Space", "setup_multi__space_tilemap"),
         ];
-        
+
         for (zone_name, expected_fn) in test_cases {
             let result = templates.render_tilemap(zone_name);
             assert!(result.is_ok());
@@ -354,7 +380,7 @@ mod tests {
             name: "test_query".to_string(),
             types: "&Transform, &Player".to_string(),
         };
-        
+
         let json = serde_json::to_string(&query_def).unwrap();
         assert!(json.contains("\"name\":\"test_query\""));
         assert!(json.contains("\"types\":\"&Transform, &Player\""));
@@ -364,7 +390,7 @@ mod tests {
     async fn test_handlebars_error_handling() {
         let mut templates = Templates::new();
         // Don't load templates
-        
+
         let result = templates.render_components();
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Template not found"));
@@ -374,7 +400,7 @@ mod tests {
     async fn test_system_template_edge_cases() {
         let mut templates = Templates::new();
         templates.load().await.unwrap();
-        
+
         // Test with empty queries
         let queries = vec![];
         let result = templates.render_system("empty", queries, "// No queries");
@@ -382,7 +408,7 @@ mod tests {
         let rendered = result.unwrap();
         assert!(rendered.contains("pub fn empty_system("));
         assert!(rendered.contains(") {"));
-        
+
         // Test with complex query types
         let queries = vec![
             QueryDef {

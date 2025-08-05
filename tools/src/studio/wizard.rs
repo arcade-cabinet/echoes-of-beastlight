@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use bevy::prelude::*;
 use bevy_egui::egui;
 use serde::{Deserialize, Serialize};
@@ -16,10 +27,10 @@ impl WizardState {
     pub fn reset(&mut self) {
         *self = Self::default();
     }
-    
+
     pub fn validate_current_step(&mut self) -> bool {
         self.validation_errors.clear();
-        
+
         match self.current_step {
             WizardStep::BasicInfo => {
                 if self.game_config.name.is_empty() {
@@ -55,34 +66,34 @@ impl WizardState {
                 return self.validate_configuration();
             }
         }
-        
+
         self.validation_errors.is_empty()
     }
-    
+
     pub fn validate_configuration(&mut self) -> bool {
         self.validation_errors.clear();
-        
+
         // Comprehensive validation
         if self.game_config.name.is_empty() {
             self.validation_errors.push("Game name is required".into());
         }
-        
+
         if self.game_config.core_mechanics.is_empty() {
             self.validation_errors.push("At least one core mechanic is required".into());
         }
-        
+
         if self.game_config.platforms.is_empty() {
             self.validation_errors.push("At least one platform must be selected".into());
         }
-        
+
         self.validation_errors.is_empty()
     }
-    
+
     pub fn start_generation(&self, tx: &GenerationSender) {
         let request = GenerationRequest::FullGame {
             config: self.game_config.clone(),
         };
-        
+
         let _ = tx.0.send(request);
     }
 }
@@ -109,7 +120,7 @@ impl WizardStep {
             WizardStep::Review => WizardStep::Review,
         }
     }
-    
+
     pub fn previous(&self) -> Self {
         match self {
             WizardStep::BasicInfo => WizardStep::BasicInfo,
@@ -130,23 +141,23 @@ pub struct GameConfiguration {
     pub genre: GameGenre,
     pub tagline: String,
     pub target_audience: TargetAudience,
-    
+
     // Gameplay Design
     pub core_mechanics: Vec<CoreMechanic>,
     pub gameplay_loop: String,
     pub progression_system: ProgressionType,
     pub difficulty_curve: DifficultyCurve,
-    
+
     // Visual Style
     pub art_references: Vec<String>,
     pub color_mood: ColorMood,
     pub sprite_style: SpriteStyle,
     pub animation_complexity: AnimationComplexity,
-    
+
     // Features
     pub features: IndexMap<GameFeature, FeatureConfig>,
     pub platforms: Vec<Platform>,
-    
+
     // Technical
     pub map_size: MapSize,
     pub performance_target: PerformanceTarget,
@@ -162,11 +173,11 @@ pub fn show_project_wizard(
 ) {
     ui.heading("🎮 Game Project Setup Wizard");
     ui.separator();
-    
+
     // Progress indicator
     show_progress_indicator(ui, wizard_state.current_step);
     ui.separator();
-    
+
     // Current step content
     egui::ScrollArea::vertical().show(ui, |ui| {
         match wizard_state.current_step {
@@ -178,9 +189,9 @@ pub fn show_project_wizard(
             WizardStep::Review => show_review_step(ui, wizard_state),
         }
     });
-    
+
     ui.separator();
-    
+
     // Show validation errors
     if !wizard_state.validation_errors.is_empty() {
         ui.colored_label(egui::Color32::RED, "Please fix the following issues:");
@@ -189,7 +200,7 @@ pub fn show_project_wizard(
         }
         ui.separator();
     }
-    
+
     // Navigation buttons
     show_navigation_buttons(ui, wizard_state, next_phase, generation_tx);
 }
@@ -204,14 +215,14 @@ fn show_progress_indicator(ui: &mut egui::Ui, current_step: WizardStep) {
             ("🔧", WizardStep::TechnicalSettings, "Technical"),
             ("✅", WizardStep::Review, "Review"),
         ];
-        
+
         for (i, (icon, step, label)) in steps.iter().enumerate() {
             let is_current = *step == current_step;
             let is_complete = i < steps.iter().position(|(_, s, _)| *s == current_step).unwrap_or(0);
-            
+
             ui.vertical(|ui| {
                 ui.set_min_width(80.0);
-                
+
                 let response = if is_current {
                     ui.strong(format!("{} {}", icon, label))
                 } else if is_complete {
@@ -219,14 +230,14 @@ fn show_progress_indicator(ui: &mut egui::Ui, current_step: WizardStep) {
                 } else {
                     ui.weak(format!("{} {}", icon, label))
                 };
-                
+
                 if is_current {
                     ui.add(egui::widgets::ProgressBar::new(1.0)
                         .desired_height(2.0)
                         .fill(egui::Color32::from_rgb(0, 150, 255)));
                 }
             });
-            
+
             if i < steps.len() - 1 {
                 ui.label("→");
             }
@@ -237,7 +248,7 @@ fn show_progress_indicator(ui: &mut egui::Ui, current_step: WizardStep) {
 fn show_basic_info_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
     ui.heading("Basic Information");
     ui.add_space(10.0);
-    
+
     egui::Grid::new("basic_info_grid")
         .num_columns(2)
         .spacing([40.0, 10.0])
@@ -247,7 +258,7 @@ fn show_basic_info_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
                 .desired_width(300.0)
                 .hint_text("Enter your game's name"));
             ui.end_row();
-            
+
             ui.label("Genre:");
             egui::ComboBox::from_label("")
                 .selected_text(format!("{:?}", wizard_state.game_config.genre))
@@ -260,13 +271,13 @@ fn show_basic_info_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
                     ui.selectable_value(&mut wizard_state.game_config.genre, GameGenre::Strategy, "Strategy");
                 });
             ui.end_row();
-            
+
             ui.label("Tagline:");
             ui.add(egui::TextEdit::singleline(&mut wizard_state.game_config.tagline)
                 .desired_width(300.0)
                 .hint_text("A brief, catchy description"));
             ui.end_row();
-            
+
             ui.label("Target Audience:");
             ui.horizontal(|ui| {
                 ui.radio_value(&mut wizard_state.game_config.target_audience, TargetAudience::Casual, "Casual");
@@ -275,7 +286,7 @@ fn show_basic_info_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
             });
             ui.end_row();
         });
-    
+
     ui.add_space(20.0);
     ui.collapsing("💡 Tips", |ui| {
         ui.label("• Choose a memorable name that reflects your game's theme");
@@ -287,7 +298,7 @@ fn show_basic_info_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
 fn show_gameplay_design_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
     ui.heading("Gameplay Design");
     ui.add_space(10.0);
-    
+
     ui.label("Core Mechanics (select all that apply):");
     ui.indent("mechanics", |ui| {
         let mechanics = [
@@ -300,7 +311,7 @@ fn show_gameplay_design_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) 
             (CoreMechanic::Stealth, "🥷 Stealth", "Avoiding detection"),
             (CoreMechanic::Racing, "🏁 Racing", "Speed challenges"),
         ];
-        
+
         ui.columns(2, |columns| {
             for (i, (mechanic, label, desc)) in mechanics.iter().enumerate() {
                 let col = i / 4;
@@ -318,7 +329,7 @@ fn show_gameplay_design_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) 
             }
         });
     });
-    
+
     ui.add_space(10.0);
     ui.label("Gameplay Loop Description:");
     ui.add(
@@ -327,7 +338,7 @@ fn show_gameplay_design_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) 
             .desired_rows(4)
             .hint_text("Describe what players do repeatedly in your game...")
     );
-    
+
     ui.add_space(10.0);
     ui.horizontal(|ui| {
         ui.label("Progression System:");
@@ -340,7 +351,7 @@ fn show_gameplay_design_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) 
                 ui.selectable_value(&mut wizard_state.game_config.progression_system, ProgressionType::Metroidvania, "Metroidvania");
             });
     });
-    
+
     ui.add_space(10.0);
     ui.collapsing("Difficulty Settings", |ui| {
         ui.add(egui::Slider::new(&mut wizard_state.game_config.difficulty_curve.starting_difficulty, 0.0..=1.0)
@@ -355,7 +366,7 @@ fn show_gameplay_design_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) 
 fn show_visual_style_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
     ui.heading("Visual Style");
     ui.add_space(10.0);
-    
+
     ui.label("Reference Games (for inspiration):");
     ui.group(|ui| {
         let references = [
@@ -368,7 +379,7 @@ fn show_visual_style_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
             ("Stardew Valley", "🌾"),
             ("Hollow Knight", "🦋"),
         ];
-        
+
         ui.columns(2, |columns| {
             for (i, (reference, icon)) in references.iter().enumerate() {
                 let col = i / 4;
@@ -383,7 +394,7 @@ fn show_visual_style_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
             }
         });
     });
-    
+
     ui.add_space(10.0);
     ui.label("Color Mood:");
     ui.horizontal(|ui| {
@@ -395,7 +406,7 @@ fn show_visual_style_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
                 ColorMood::Earthy => egui::Color32::from_rgb(150, 100, 50),
                 ColorMood::Neon => egui::Color32::from_rgb(0, 255, 255),
             };
-            
+
             if ui.add(egui::RadioButton::new(
                 wizard_state.game_config.color_mood == mood,
                 format!("{:?}", mood)
@@ -404,21 +415,21 @@ fn show_visual_style_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
             }
         }
     });
-    
+
     ui.add_space(10.0);
     ui.group(|ui| {
         ui.label("Sprite Style:");
-        
+
         ui.horizontal(|ui| {
             ui.label("Detail Level:");
             ui.radio_value(&mut wizard_state.game_config.sprite_style.detail_level, DetailLevel::Minimal, "Minimal");
             ui.radio_value(&mut wizard_state.game_config.sprite_style.detail_level, DetailLevel::Moderate, "Moderate");
             ui.radio_value(&mut wizard_state.game_config.sprite_style.detail_level, DetailLevel::Detailed, "Detailed");
         });
-        
+
         ui.checkbox(&mut wizard_state.game_config.sprite_style.use_outline, "Use black outline");
         ui.checkbox(&mut wizard_state.game_config.sprite_style.pixel_perfect, "Pixel perfect rendering");
-        
+
         ui.horizontal(|ui| {
             ui.label("Animation Complexity:");
             ui.radio_value(&mut wizard_state.game_config.animation_complexity, AnimationComplexity::Simple, "Simple");
@@ -426,7 +437,7 @@ fn show_visual_style_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
             ui.radio_value(&mut wizard_state.game_config.animation_complexity, AnimationComplexity::Complex, "Complex");
         });
     });
-    
+
     // Visual preview area
     ui.add_space(20.0);
     ui.group(|ui| {
@@ -441,7 +452,7 @@ fn show_visual_style_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
 fn show_features_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
     ui.heading("Game Features");
     ui.add_space(10.0);
-    
+
     let features = [
         (GameFeature::CombatSystem, "⚔️ Combat System", "Real-time or turn-based combat"),
         (GameFeature::Inventory, "🎒 Inventory System", "Item management"),
@@ -454,7 +465,7 @@ fn show_features_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
         (GameFeature::Minimap, "🗺️ Minimap", "Navigation aid"),
         (GameFeature::Achievements, "🏆 Achievements", "Player accomplishments"),
     ];
-    
+
     egui::ScrollArea::vertical().max_height(400.0).show(ui, |ui| {
         for (feature, name, description) in features {
             ui.group(|ui| {
@@ -469,7 +480,7 @@ fn show_features_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
                     }
                     ui.weak(description);
                 });
-                
+
                 // Feature-specific configuration
                 if let Some(config) = wizard_state.game_config.features.get_mut(&feature) {
                     ui.indent("feature_config", |ui| {
@@ -514,7 +525,7 @@ fn show_features_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
 fn show_technical_settings_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
     ui.heading("Technical Settings");
     ui.add_space(10.0);
-    
+
     ui.group(|ui| {
         ui.label("World Size:");
         ui.horizontal(|ui| {
@@ -524,23 +535,23 @@ fn show_technical_settings_step(ui: &mut egui::Ui, wizard_state: &mut WizardStat
             ui.selectable_value(&mut wizard_state.game_config.map_size, MapSize::Massive, "Massive (500+ screens)");
         });
     });
-    
+
     ui.add_space(10.0);
     ui.group(|ui| {
         ui.label("Performance Target:");
         ui.vertical(|ui| {
-            ui.radio_value(&mut wizard_state.game_config.performance_target, 
-                PerformanceTarget::Low, 
+            ui.radio_value(&mut wizard_state.game_config.performance_target,
+                PerformanceTarget::Low,
                 "Low-end devices (integrated graphics, mobile)");
-            ui.radio_value(&mut wizard_state.game_config.performance_target, 
-                PerformanceTarget::Medium, 
+            ui.radio_value(&mut wizard_state.game_config.performance_target,
+                PerformanceTarget::Medium,
                 "Medium devices (entry gaming, modern laptops)");
-            ui.radio_value(&mut wizard_state.game_config.performance_target, 
-                PerformanceTarget::High, 
+            ui.radio_value(&mut wizard_state.game_config.performance_target,
+                PerformanceTarget::High,
                 "High-end devices (dedicated GPU, gaming rigs)");
         });
     });
-    
+
     ui.add_space(10.0);
     ui.group(|ui| {
         ui.label("Target Platforms:");
@@ -554,7 +565,7 @@ fn show_technical_settings_step(ui: &mut egui::Ui, wizard_state: &mut WizardStat
                     Platform::Steam => "♨️",
                     Platform::Itch => "🎮",
                 };
-                
+
                 let mut selected = wizard_state.game_config.platforms.contains(&platform);
                 if ui.checkbox(&mut selected, format!("{} {:?}", icon, platform)).changed() {
                     if selected {
@@ -566,7 +577,7 @@ fn show_technical_settings_step(ui: &mut egui::Ui, wizard_state: &mut WizardStat
             }
         });
     });
-    
+
     ui.add_space(10.0);
     ui.collapsing("Advanced Settings", |ui| {
         ui.checkbox(&mut wizard_state.game_config.multiplayer_support.enabled, "Multiplayer Support");
@@ -579,16 +590,16 @@ fn show_technical_settings_step(ui: &mut egui::Ui, wizard_state: &mut WizardStat
                 });
                 ui.horizontal(|ui| {
                     ui.label("Network Type:");
-                    ui.radio_value(&mut wizard_state.game_config.multiplayer_support.network_type, 
+                    ui.radio_value(&mut wizard_state.game_config.multiplayer_support.network_type,
                         NetworkType::Local, "Local");
-                    ui.radio_value(&mut wizard_state.game_config.multiplayer_support.network_type, 
+                    ui.radio_value(&mut wizard_state.game_config.multiplayer_support.network_type,
                         NetworkType::Online, "Online");
                 });
             });
         }
-        
+
         ui.separator();
-        
+
         ui.checkbox(&mut wizard_state.game_config.mod_support, "Mod Support");
         ui.checkbox(&mut wizard_state.game_config.controller_support, "Controller Support");
     });
@@ -597,7 +608,7 @@ fn show_technical_settings_step(ui: &mut egui::Ui, wizard_state: &mut WizardStat
 fn show_review_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
     ui.heading("Review Configuration");
     ui.add_space(10.0);
-    
+
     // Show configuration summary
     egui::ScrollArea::vertical().show(ui, |ui| {
         ui.group(|ui| {
@@ -607,12 +618,12 @@ fn show_review_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
             ui.label(format!("Tagline: {}", wizard_state.game_config.tagline));
             ui.label(format!("Audience: {:?}", wizard_state.game_config.target_audience));
         });
-        
+
         ui.add_space(10.0);
-        
+
         ui.group(|ui| {
             ui.heading("🎮 Gameplay");
-            ui.label(format!("Core Mechanics: {}", 
+            ui.label(format!("Core Mechanics: {}",
                 wizard_state.game_config.core_mechanics.iter()
                     .map(|m| format!("{:?}", m))
                     .collect::<Vec<_>>()
@@ -624,9 +635,9 @@ fn show_review_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
                 ui.weak(&wizard_state.game_config.gameplay_loop);
             });
         });
-        
+
         ui.add_space(10.0);
-        
+
         ui.group(|ui| {
             ui.heading("🎨 Visual Style");
             ui.label(format!("References: {}", wizard_state.game_config.art_references.join(", ")));
@@ -634,30 +645,30 @@ fn show_review_step(ui: &mut egui::Ui, wizard_state: &mut WizardState) {
             ui.label(format!("Sprite Detail: {:?}", wizard_state.game_config.sprite_style.detail_level));
             ui.label(format!("Animation: {:?}", wizard_state.game_config.animation_complexity));
         });
-        
+
         ui.add_space(10.0);
-        
+
         ui.group(|ui| {
             ui.heading("⚙️ Features");
             for (feature, _) in &wizard_state.game_config.features {
                 ui.label(format!("✓ {:?}", feature));
             }
         });
-        
+
         ui.add_space(10.0);
-        
+
         ui.group(|ui| {
             ui.heading("🔧 Technical");
             ui.label(format!("World Size: {:?}", wizard_state.game_config.map_size));
             ui.label(format!("Performance: {:?}", wizard_state.game_config.performance_target));
-            ui.label(format!("Platforms: {}", 
+            ui.label(format!("Platforms: {}",
                 wizard_state.game_config.platforms.iter()
                     .map(|p| format!("{:?}", p))
                     .collect::<Vec<_>>()
                     .join(", ")
             ));
             if wizard_state.game_config.multiplayer_support.enabled {
-                ui.label(format!("Multiplayer: Up to {} players", 
+                ui.label(format!("Multiplayer: Up to {} players",
                     wizard_state.game_config.multiplayer_support.max_players));
             }
         });
@@ -676,7 +687,7 @@ fn show_navigation_buttons(
                 wizard_state.current_step = wizard_state.current_step.previous();
             }
         }
-        
+
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             if wizard_state.current_step == WizardStep::Review {
                 let ready = wizard_state.validation_errors.is_empty();
@@ -695,7 +706,7 @@ fn show_navigation_buttons(
                     }
                 }
             }
-            
+
             if ui.button("Skip to Review").clicked() {
                 wizard_state.current_step = WizardStep::Review;
             }

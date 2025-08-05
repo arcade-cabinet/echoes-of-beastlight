@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use bevy::prelude::*;
 use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha8Rng;
@@ -195,50 +206,50 @@ pub fn generate_world_from_seed(
     mut commands: Commands,
 ) {
     let mut rng = seed.get_rng();
-    
+
     // Generate the world DAG
     let world_dag = generate_world_dag(&mut rng);
-    
+
     // Generate all locations
     for (node_id, node) in &world_dag.nodes {
         info!("Generating location: {} - {}", node_id, node.location.name);
-        
+
         // Each location gets its own sub-seed for consistent generation
         let location_seed = rng.gen::<u64>();
         let mut location_rng = ChaCha8Rng::seed_from_u64(location_seed);
-        
+
         // Generate the map using the appropriate algorithm
         generate_location_map(&node.location, &mut location_rng);
-        
+
         // Generate monsters for this location
         for monster in &node.monsters {
             spawn_procedural_monster(&mut commands, monster.clone(), &mut location_rng);
         }
     }
-    
+
     commands.insert_resource(world_dag);
 }
 
 fn generate_world_dag(rng: &mut ChaCha8Rng) -> WorldDAG {
     let mut nodes = HashMap::new();
     let mut edges = Vec::new();
-    
+
     // Generate 10-15 unique locations
     let location_count = rng.gen_range(10..=15);
     let mut location_ids = Vec::new();
-    
+
     for i in 0..location_count {
         let location = generate_procedural_location(rng, i as u32);
         let node_id = format!("loc_{}", i);
-        
+
         // Generate 3-8 monsters per location
         let monster_count = rng.gen_range(3..=8);
         let mut monsters = Vec::new();
-        
+
         for _ in 0..monster_count {
             monsters.push(generate_procedural_monster(rng, location.difficulty_tier));
         }
-        
+
         let node = WorldNode {
             id: node_id.clone(),
             location,
@@ -246,27 +257,27 @@ fn generate_world_dag(rng: &mut ChaCha8Rng) -> WorldDAG {
             connections: Vec::new(),
             unlock_requirements: generate_unlock_requirements(rng, i as u32),
         };
-        
+
         nodes.insert(node_id.clone(), node);
         location_ids.push(node_id);
     }
-    
+
     // Create connections between locations (ensuring it's a DAG)
     for i in 0..location_ids.len() {
         let from = &location_ids[i];
-        
+
         // Connect to 1-3 future locations
         let connection_count = rng.gen_range(1..=3).min(location_ids.len() - i - 1);
-        
+
         for _ in 0..connection_count {
             let to_index = rng.gen_range(i + 1..location_ids.len());
             let to = &location_ids[to_index];
-            
+
             edges.push((from.clone(), to.clone()));
             nodes.get_mut(from).unwrap().connections.push(to.clone());
         }
     }
-    
+
     WorldDAG {
         nodes,
         edges,
@@ -278,7 +289,7 @@ fn generate_procedural_location(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralLo
     let descriptor = LOCATION_DESCRIPTORS[rng.gen_range(0..LOCATION_DESCRIPTORS.len())];
     let location_type = LOCATION_TYPES[rng.gen_range(0..LOCATION_TYPES.len())];
     let name = format!("{} {}", descriptor, location_type);
-    
+
     let biome = match rng.gen_range(0..8) {
         0 => BiomeType::Forest,
         1 => BiomeType::Desert,
@@ -289,7 +300,7 @@ fn generate_procedural_location(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralLo
         6 => BiomeType::Crystal,
         _ => BiomeType::Void,
     };
-    
+
     let element = match rng.gen_range(0..7) {
         0 => ElementType::Fire,
         1 => ElementType::Water,
@@ -299,16 +310,16 @@ fn generate_procedural_location(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralLo
         5 => ElementType::Dark,
         _ => ElementType::Neutral,
     };
-    
+
     let algorithm = match &biome {
         BiomeType::Forest | BiomeType::Swamp => MapGenAlgorithm::VoronoiRegions,
         BiomeType::Desert | BiomeType::Tundra => MapGenAlgorithm::CellularAutomata,
         BiomeType::Mountain | BiomeType::Volcanic => MapGenAlgorithm::DrunkenWalk,
         BiomeType::Crystal | BiomeType::Void => MapGenAlgorithm::WaveFunctionCollapse,
     };
-    
+
     let mut features = Vec::new();
-    
+
     // Higher tier locations get more special features
     let feature_count = rng.gen_range(1..=(tier + 1).min(4));
     for _ in 0..feature_count {
@@ -326,7 +337,7 @@ fn generate_procedural_location(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralLo
             features.push(feature);
         }
     }
-    
+
     ProceduralLocation {
         name,
         biome,
@@ -345,9 +356,9 @@ fn generate_procedural_monster(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralMon
     } else {
         ""
     };
-    
+
     let name = format!("{} {}{}", prefix, base, suffix).trim().to_string();
-    
+
     let element = match prefix {
         "Flame" | "Burning" => ElementType::Fire,
         "Frost" | "Frozen" => ElementType::Water,
@@ -357,7 +368,7 @@ fn generate_procedural_monster(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralMon
         "Light" | "Crystal" => ElementType::Light,
         _ => ElementType::Neutral,
     };
-    
+
     let base_stats = 10 + (tier * 5);
     let stats = MonsterStats {
         health: base_stats + rng.gen_range(0..20),
@@ -366,7 +377,7 @@ fn generate_procedural_monster(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralMon
         speed: base_stats + rng.gen_range(0..10),
         magic: base_stats + rng.gen_range(0..15),
     };
-    
+
     let mut traits = Vec::new();
     let trait_count = rng.gen_range(1..=3);
     for _ in 0..trait_count {
@@ -384,17 +395,17 @@ fn generate_procedural_monster(rng: &mut ChaCha8Rng, tier: u32) -> ProceduralMon
             traits.push(trait_type);
         }
     }
-    
+
     // Higher tier monsters are less likely to be tameable
     let tameable = rng.gen_bool(0.7 / (tier as f64 + 1.0));
-    
+
     // Generate evolution paths
     let evolution_paths = if tameable && rng.gen_bool(0.5) {
         vec![format!("Mega {}", name), format!("{} Lord", name)]
     } else {
         vec![]
     };
-    
+
     ProceduralMonster {
         name,
         base_type: base.to_string(),
@@ -410,12 +421,12 @@ fn generate_unlock_requirements(rng: &mut ChaCha8Rng, tier: u32) -> Vec<UnlockRe
     if tier == 0 {
         return vec![]; // Starting location has no requirements
     }
-    
+
     let mut requirements = Vec::new();
-    
+
     // Higher tiers have more requirements
     let req_count = rng.gen_range(1..=(tier.min(3)));
-    
+
     for _ in 0..req_count {
         let req = match rng.gen_range(0..4) {
             0 => UnlockRequirement::DefeatBoss(format!("Boss_{}", tier - 1)),
@@ -425,13 +436,13 @@ fn generate_unlock_requirements(rng: &mut ChaCha8Rng, tier: u32) -> Vec<UnlockRe
         };
         requirements.push(req);
     }
-    
+
     requirements
 }
 
 fn generate_location_map(location: &ProceduralLocation, rng: &mut ChaCha8Rng) {
     info!("Generating map for {} using {:?}", location.name, location.map_algorithm);
-    
+
     // This would integrate with your mapgen.rs algorithms
     // Each algorithm generates different tile patterns
     match location.map_algorithm {

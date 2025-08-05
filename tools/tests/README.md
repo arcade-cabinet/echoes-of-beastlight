@@ -23,11 +23,13 @@ tests/
 ## Running Tests
 
 ### Run all tests:
+
 ```bash
 cargo test
 ```
 
 ### Run specific test modules:
+
 ```bash
 # Unit tests only
 cargo test --lib
@@ -40,11 +42,13 @@ cargo test config::tests
 ```
 
 ### Run with output:
+
 ```bash
 cargo test -- --nocapture
 ```
 
 ### Run tests in parallel:
+
 ```bash
 cargo test -- --test-threads=4
 ```
@@ -54,12 +58,14 @@ cargo test -- --test-threads=4
 ### 1. Unit Tests
 
 #### Config Module (`src/config.rs`)
+
 - YAML parsing and deserialization
 - Default value handling
 - Field validation
 - Serialization round-trips
 
 #### Templates Module (`src/templates.rs`)
+
 - Template registration
 - Component generation
 - System generation
@@ -67,6 +73,7 @@ cargo test -- --test-threads=4
 - Edge cases (special characters, empty inputs)
 
 #### Generator Module (`src/generator.rs`)
+
 - Directory setup
 - File writing (with and without dry-run)
 - Cache key generation
@@ -75,6 +82,7 @@ cargo test -- --test-threads=4
 - Error handling
 
 #### Git Tracker Module (`src/git_tracker.rs`)
+
 - Repository initialization
 - Manifest creation and tracking
 - File hash calculation
@@ -85,6 +93,7 @@ cargo test -- --test-threads=4
 ### 2. Integration Tests
 
 #### OpenAI API Tests
+
 - Successful chat completions
 - Image generation
 - Error handling (500 errors, rate limits)
@@ -92,6 +101,7 @@ cargo test -- --test-threads=4
 - Token counting validation
 
 #### Full Generation Tests
+
 - Complete generation flow with mocked APIs
 - Dry-run mode verification
 - Git tracking integration
@@ -108,6 +118,7 @@ Using `proptest` for:
 ## Mocking Strategy
 
 ### OpenAI API Mocking
+
 We use `wiremock` to mock OpenAI API responses:
 - Chat completions for text generation
 - Image generation endpoints
@@ -115,6 +126,7 @@ We use `wiremock` to mock OpenAI API responses:
 - Rate limiting scenarios
 
 ### File System Testing
+
 We use `tempfile` for isolated file system operations:
 - Each test gets its own temporary directory
 - No interference between tests
@@ -123,6 +135,7 @@ We use `tempfile` for isolated file system operations:
 ## Test Fixtures
 
 ### `test-config.yaml`
+
 A comprehensive test configuration that exercises all features:
 - Multiple zones and environments
 - Various generation rules
@@ -137,15 +150,16 @@ A comprehensive test configuration that exercises all features:
 ## Writing New Tests
 
 ### Unit Test Template
+
 ```rust
 #[test]
 fn test_feature_name() {
     // Arrange
     let input = create_test_input();
-    
+
     // Act
     let result = function_under_test(input);
-    
+
     // Assert
     assert!(result.is_ok());
     assert_eq!(result.unwrap(), expected_value);
@@ -153,19 +167,20 @@ fn test_feature_name() {
 ```
 
 ### Integration Test Template
+
 ```rust
 #[tokio::test]
 async fn test_integration_scenario() {
     // Setup environment
     let temp_dir = TempDir::new().unwrap();
     let mock_server = MockServer::start().await;
-    
+
     // Configure mocks
     setup_mocks(&mock_server).await;
-    
+
     // Run test
     let result = run_integration_test().await;
-    
+
     // Verify
     assert!(result.is_ok());
     verify_side_effects();
@@ -183,16 +198,19 @@ The test suite is designed to run in CI environments:
 ## Debugging Tests
 
 ### Enable logging:
+
 ```bash
 RUST_LOG=debug cargo test
 ```
 
 ### Run single test:
+
 ```bash
 cargo test test_name -- --exact
 ```
 
 ### Generate test coverage:
+
 ```bash
 cargo tarpaulin --out Html
 ```

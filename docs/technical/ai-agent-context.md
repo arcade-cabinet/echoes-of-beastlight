@@ -3,6 +3,7 @@
 ## Current System State (2025-08-05)
 
 ### Active Build Issues
+
 1. **String Literal Syntax Error** - Fixed by adding space in raw string: `"#f4f4f4 "`
 2. **Missing ImageResponseFormat** - Removed, not needed for URL response
 3. **Borrowing Issues** - Clone config values before async operations
@@ -12,6 +13,7 @@
 ### Architecture Decisions Made
 
 #### Pure Rust Implementation
+
 - **Rationale**: Single language for game + generator, better performance, type safety
 - **Key Libraries**:
   - `async-openai` (0.23) - OpenAI API client
@@ -21,12 +23,13 @@
   - `bevy-inspector-egui` (0.25) - Runtime inspection
 
 #### Division of Responsibility
+
 - **AI Generator (Headless)**: What I run
   - CLI tool for batch generation
   - No GUI dependencies for generator binary
   - Manages all AI API calls and caching
   - Git-based idempotency tracking
-  
+
 - **Studio (GUI)**: Director's tool
   - Full Bevy/Egui interface
   - Code review, asset gallery, live preview
@@ -39,7 +42,7 @@
 // Phase 1: Style Guide (MUST BE FIRST)
 generate_style_guide() -> {
     "assets/style/color-palette.json",
-    "assets/style/style-rules.md", 
+    "assets/style/style-rules.md",
     "assets/style/style-reference.png"
 }
 
@@ -82,6 +85,7 @@ generate_ui_assets() -> "assets/sprites/ui-elements.png"
 ### Idempotency System
 
 #### Git-Based Tracking
+
 ```rust
 struct GenerationManifest {
     id: Uuid,
@@ -93,6 +97,7 @@ struct GenerationManifest {
 ```
 
 #### File Tracking
+
 - Every file has metadata: hash, size, prompt_hash, generation_time
 - Parent asset dependencies tracked for cascade invalidation
 - Git commits preserve full generation history
@@ -106,6 +111,7 @@ struct GenerationManifest {
 ### API Integration Details
 
 #### OpenAI Configuration
+
 ```rust
 // Chat Completions
 model: "gpt-4-turbo-preview"
@@ -119,6 +125,7 @@ n: 1
 ```
 
 #### Token Management
+
 - Using tiktoken-rs for accurate counting
 - Logging token usage for cost tracking
 - Future: Implement request batching
@@ -126,6 +133,7 @@ n: 1
 ### Procedural World Generation
 
 #### Monster Taming System
+
 ```rust
 struct ProceduralMonster {
     name: String,        // Generated from word banks
@@ -139,6 +147,7 @@ struct ProceduralMonster {
 ```
 
 #### World DAG Structure
+
 ```rust
 struct WorldDAG {
     nodes: HashMap<NodeId, WorldNode>,
@@ -179,11 +188,13 @@ struct WorldNode {
 ### Build Configuration
 
 #### Edition 2024
+
 - Using Rust 1.88.0 for edition 2024 support
 - Enables latest language features
 - Required for some dependencies
 
 #### Feature Flags
+
 ```toml
 [features]
 default = []

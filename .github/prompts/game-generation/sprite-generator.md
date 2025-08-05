@@ -41,6 +41,7 @@ Generate enemy sprites based on zone types:
 ## Environmental Sprites
 
 ### Tilesets
+
 - **Base Tiles** (16x16 each, combine into {{sprite_size}}x{{sprite_size}}):
   - Grass variations (4 tiles)
   - Stone/rock variations (4 tiles)
@@ -48,6 +49,7 @@ Generate enemy sprites based on zone types:
   - Path/dirt variations (4 tiles)
 
 ### Interactive Objects
+
 - Treasure chests (closed/open states)
 - Doors (locked/unlocked states)
 - Switches/levers (on/off states)
@@ -56,12 +58,14 @@ Generate enemy sprites based on zone types:
 ## Effects Sprites
 
 ### Combat Effects
+
 - Slash effect (5 frames, directional)
 - Magic projectiles (3 types, 4 frames each)
 - Impact effects (small/medium/large)
 - Status effect overlays
 
 ### Environmental Effects
+
 - Weather particles (rain, snow, leaves)
 - Ambient animations (grass sway, water ripple)
 - Lighting effects (torch fire, magic glow)
@@ -69,6 +73,7 @@ Generate enemy sprites based on zone types:
 ## Sprite Sheet Organization
 
 Organize all sprites into efficient sprite sheets:
+
 ```
 characters.png:
 - Hero animations (grid layout)
@@ -103,6 +108,7 @@ ui.png:
 ## Validation Output
 
 For each sprite, provide:
+
 ```json
 {
   "sprite_name": "hero_idle",

@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -144,7 +155,7 @@ mod tests {
 
         let yaml = serde_yaml::to_string(&game_info).unwrap();
         let deserialized: GameInfo = serde_yaml::from_str(&yaml).unwrap();
-        
+
         assert_eq!(game_info.title, deserialized.title);
         assert_eq!(game_info.codename, deserialized.codename);
         assert_eq!(game_info.version, deserialized.version);
@@ -161,7 +172,7 @@ codename: "test_game"
 version: "1.0.0"
 "#;
         let game_info: GameInfo = serde_yaml::from_str(yaml).unwrap();
-        
+
         assert_eq!(game_info.genre, "JRPG"); // Should use default
         assert_eq!(game_info.theme, ""); // Should be empty
         assert_eq!(game_info.setting, ""); // Should be empty
@@ -181,7 +192,7 @@ version: "1.0.0"
 
         let yaml = serde_yaml::to_string(&zone).unwrap();
         let deserialized: Zone = serde_yaml::from_str(&yaml).unwrap();
-        
+
         assert_eq!(zone.name, deserialized.name);
         assert_eq!(zone.zone_type, deserialized.zone_type);
         assert_eq!(zone.description, deserialized.description);
@@ -205,13 +216,13 @@ type: "dungeon"
     #[test]
     fn test_full_config_serialization() {
         let config = create_test_config();
-        
+
         let yaml = serde_yaml::to_string(&config).unwrap();
         let deserialized: GameConfig = serde_yaml::from_str(&yaml).unwrap();
-        
+
         assert_eq!(config.game.title, deserialized.game.title);
         assert_eq!(config.hero.name, deserialized.hero.name);
-        assert_eq!(config.environments.outdoor_zones.len(), 
+        assert_eq!(config.environments.outdoor_zones.len(),
                    deserialized.environments.outdoor_zones.len());
         assert_eq!(config.graphics.tile_size, deserialized.graphics.tile_size);
         assert_eq!(config.audio.music_style, deserialized.audio.music_style);
@@ -221,7 +232,7 @@ type: "dungeon"
     async fn test_load_config_from_file() {
         let temp_dir = TempDir::new().unwrap();
         let config_path = temp_dir.path().join("test-config.yaml");
-        
+
         let yaml_content = r#"
 game:
   title: "Test Game"
@@ -250,12 +261,12 @@ graphics:
 audio:
   music_style: "chiptune"
 "#;
-        
+
         let mut file = File::create(&config_path).unwrap();
         file.write_all(yaml_content.as_bytes()).unwrap();
-        
+
         let config = GameConfig::load(&config_path).await.unwrap();
-        
+
         assert_eq!(config.game.title, "Test Game");
         assert_eq!(config.hero.name, "Hero");
         assert_eq!(config.environments.outdoor_zones.len(), 1);
@@ -273,10 +284,10 @@ audio:
     async fn test_load_config_invalid_yaml() {
         let temp_dir = TempDir::new().unwrap();
         let config_path = temp_dir.path().join("invalid.yaml");
-        
+
         let mut file = File::create(&config_path).unwrap();
         file.write_all(b"invalid: yaml: content: [").unwrap();
-        
+
         let result = GameConfig::load(&config_path).await;
         assert!(result.is_err());
     }

@@ -64,10 +64,11 @@ Dialog Style Guide:
 - Keep vocabulary accessible but flavorful
 
 Example dialog format:
+
 ```
 npc: "I lost my lucky tooth in the cave..."
      "Think you could find it for me?"
-player: 
+player:
   - "Sure, I'll help!" -> accept_quest
   - "What's in it for me?" -> negotiate
   - "Find it yourself." -> reject_quest

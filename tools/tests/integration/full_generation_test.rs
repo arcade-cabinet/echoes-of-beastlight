@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use ai_game_generator::{AIGameGenerator, GameConfig};
 use tempfile::TempDir;
 use std::fs;
@@ -11,30 +22,30 @@ async fn test_full_generation_flow_with_mocked_api() {
     // Setup
     let temp_dir = TempDir::new().unwrap();
     std::env::set_current_dir(&temp_dir).unwrap();
-    
+
     // Copy test config
     let config_content = include_str!("../fixtures/test-config.yaml");
     fs::write("game-config.yaml", config_content).unwrap();
-    
+
     // Start mock server
     let mock_server = MockServer::start().await;
     std::env::set_var("OPENAI_API_KEY", "test-key");
     std::env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     // Setup mocks for all expected API calls
     setup_generation_mocks(&mock_server).await;
-    
+
     // Create generator
     let mut generator = AIGameGenerator::new()
         .with_use_cache(false); // Disable cache for testing
-    
+
     // Run full generation
     let result = generator.generate_game().await;
     assert!(result.is_ok());
-    
+
     // Verify all expected files were created
     verify_generated_files(&temp_dir);
-    
+
     // Verify summary was created
     assert!(Path::new("GENERATION_SUMMARY.json").exists());
     let summary = fs::read_to_string("GENERATION_SUMMARY.json").unwrap();
@@ -66,7 +77,7 @@ async fn setup_generation_mocks(mock_server: &MockServer) {
         .expect(1..)
         .mount(mock_server)
         .await;
-    
+
     // Mock for component generation
     Mock::given(method("POST"))
         .and(mock_path("/v1/chat/completions"))
@@ -79,7 +90,7 @@ async fn setup_generation_mocks(mock_server: &MockServer) {
         })))
         .mount(mock_server)
         .await;
-    
+
     // Mock for image generation
     Mock::given(method("POST"))
         .and(mock_path("/v1/images/generations"))
@@ -90,7 +101,7 @@ async fn setup_generation_mocks(mock_server: &MockServer) {
         })))
         .mount(mock_server)
         .await;
-    
+
     // Mock for image download
     Mock::given(method("GET"))
         .and(mock_path("/test-image.png"))
@@ -109,12 +120,12 @@ fn verify_generated_files(temp_dir: &TempDir) {
     assert!(Path::new("src/systems").is_dir());
     assert!(Path::new("assets/sprites").is_dir());
     assert!(Path::new("assets/audio").is_dir());
-    
+
     // Check core files
     assert!(Path::new("Cargo.toml").exists());
     assert!(Path::new("src/main.rs").exists());
     assert!(Path::new("src/lib.rs").exists());
-    
+
     // Check style guide
     assert!(Path::new("assets/data/style_guide.json").exists());
 }
@@ -144,19 +155,19 @@ fn create_test_png() -> Vec<u8> {
 async fn test_dry_run_mode() {
     let temp_dir = TempDir::new().unwrap();
     std::env::set_current_dir(&temp_dir).unwrap();
-    
+
     // Copy test config
     let config_content = include_str!("../fixtures/test-config.yaml");
     fs::write("game-config.yaml", config_content).unwrap();
-    
+
     let mut generator = AIGameGenerator::new()
         .with_dry_run(true)
         .with_use_cache(false);
-    
+
     // In dry run mode, no files should be created
     let result = generator.generate_game().await;
     assert!(result.is_ok());
-    
+
     // Verify no files were actually written
     assert!(!Path::new("src/main.rs").exists());
     assert!(!Path::new("Cargo.toml").exists());
@@ -166,20 +177,20 @@ async fn test_dry_run_mode() {
 async fn test_cache_behavior_integration() {
     let temp_dir = TempDir::new().unwrap();
     std::env::set_current_dir(&temp_dir).unwrap();
-    
+
     // Copy test config
     let config_content = include_str!("../fixtures/test-config.yaml");
     fs::write("game-config.yaml", config_content).unwrap();
-    
+
     // Create cache directory with pre-cached response
     fs::create_dir_all(".cache/ai-gen").unwrap();
     let cache_key = "test_cache_key";
     let cached_content = "Cached response content";
     fs::write(format!(".cache/ai-gen/{}.txt", cache_key), cached_content).unwrap();
-    
+
     let generator = AIGameGenerator::new()
         .with_use_cache(true);
-    
+
     // Verify cache is used (this would need actual implementation testing)
     // For now, just verify cache directory exists
     assert!(Path::new(".cache/ai-gen").exists());
@@ -189,7 +200,7 @@ async fn test_cache_behavior_integration() {
 async fn test_git_tracking_integration() {
     let temp_dir = TempDir::new().unwrap();
     std::env::set_current_dir(&temp_dir).unwrap();
-    
+
     // Initialize git repo
     let repo = git2::Repository::init(&temp_dir).unwrap();
     let sig = git2::Signature::now("Test", "test@example.com").unwrap();
@@ -203,23 +214,23 @@ async fn test_git_tracking_integration() {
         &tree,
         &[],
     ).unwrap();
-    
+
     // Copy test config
     let config_content = include_str!("../fixtures/test-config.yaml");
     fs::write("game-config.yaml", config_content).unwrap();
-    
+
     let mock_server = MockServer::start().await;
     std::env::set_var("OPENAI_API_KEY", "test-key");
     std::env::set_var("OPENAI_API_BASE", mock_server.uri());
-    
+
     setup_generation_mocks(&mock_server).await;
-    
+
     let mut generator = AIGameGenerator::new()
         .with_use_cache(false);
-    
+
     let result = generator.generate_game().await;
     assert!(result.is_ok());
-    
+
     // Verify git tracking files were created
     assert!(Path::new(".ai-generation/manifest.json").exists());
     assert!(Path::new(".ai-generation/history.jsonl").exists());
@@ -229,11 +240,11 @@ async fn test_git_tracking_integration() {
 async fn test_error_handling_missing_config() {
     let temp_dir = TempDir::new().unwrap();
     std::env::set_current_dir(&temp_dir).unwrap();
-    
+
     // Don't create config file
     let mut generator = AIGameGenerator::new();
     let result = generator.generate_game().await;
-    
+
     assert!(result.is_err());
     assert!(result.unwrap_err().to_string().contains("game-config.yaml"));
 }
@@ -242,12 +253,12 @@ async fn test_error_handling_missing_config() {
 async fn test_error_handling_invalid_config() {
     let temp_dir = TempDir::new().unwrap();
     std::env::set_current_dir(&temp_dir).unwrap();
-    
+
     // Create invalid config
     fs::write("game-config.yaml", "invalid: [yaml: content").unwrap();
-    
+
     let mut generator = AIGameGenerator::new();
     let result = generator.generate_game().await;
-    
+
     assert!(result.is_err());
 }

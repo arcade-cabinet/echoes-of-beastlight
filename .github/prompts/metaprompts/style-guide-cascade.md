@@ -30,6 +30,7 @@ First, establish the fundamental visual identity:
 Generate the following prompts that will create the style guide assets:
 
 ### 1. Base Style Reference Image
+
 ```
 Create a style guide reference image showing:
 - Color swatches with hex codes
@@ -41,6 +42,7 @@ All in {{sprite_size}}x{{sprite_size}} pixel art style
 ```
 
 ### 2. Character Style Sheet
+
 ```
 Design a character style template showing:
 - Body proportions grid
@@ -51,6 +53,7 @@ Design a character style template showing:
 ```
 
 ### 3. Environment Tileset Template
+
 ```
 Create environment tile templates:
 - Base terrain types with palette
@@ -61,6 +64,7 @@ Create environment tile templates:
 ```
 
 ### 4. Effects and VFX Guide
+
 ```
 Design visual effects templates:
 - Particle effects (fire, magic, water)
@@ -71,6 +75,7 @@ Design visual effects templates:
 ```
 
 ### 5. Audio Style Guide (Procedural)
+
 ```json
 {
   "audio_style": {

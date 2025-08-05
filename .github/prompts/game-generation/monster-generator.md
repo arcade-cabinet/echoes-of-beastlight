@@ -45,7 +45,7 @@ For each monster, provide:
 7. Loot:
    - Common drop
    - Rare drop (10% chance)
-   
+
 8. Spawn zones: (list of compatible zones)
 
 Ensure variety in types, stats, and abilities. Make some monsters rare and powerful, others common and weak.

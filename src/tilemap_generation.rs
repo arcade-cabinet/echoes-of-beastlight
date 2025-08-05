@@ -1,3 +1,14 @@
+// AI Game Generator - Procedural game generation using AI
+// Copyright (C) 2024 AI Game Generator Contributors
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
 use bevy::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
 use rand::prelude::*;
@@ -48,21 +59,21 @@ pub fn generate_location_tilemap(
     let tile_size = TilemapTileSize { x: 32.0, y: 32.0 };
     let grid_size = tile_size.into();
     let map_type = TilemapType::default();
-    
+
     // Generate the base map using mapgen
     let mapgen_map = generate_base_map(&location.map_algorithm, map_size, rng);
-    
+
     // Create tilemap entity
     let tilemap_entity = commands.spawn_empty().id();
     let mut tile_storage = TileStorage::empty(map_size);
-    
+
     // Convert mapgen tiles to styled tiles
     for y in 0..map_size.y {
         for x in 0..map_size.x {
             let pos = TilePos { x, y };
             let idx = (y * map_size.x + x) as usize;
             let mapgen_tile = mapgen_map.tiles[idx];
-            
+
             let (tile_texture_index, is_animated) = select_styled_tile(
                 mapgen_tile,
                 &location.biome,
@@ -72,7 +83,7 @@ pub fn generate_location_tilemap(
                 x,
                 y,
             );
-            
+
             let tile_entity = if is_animated {
                 // Create animated tile
                 commands.spawn((
@@ -100,11 +111,11 @@ pub fn generate_location_tilemap(
                     ..Default::default()
                 }).id()
             };
-            
+
             tile_storage.set(&pos, tile_entity);
         }
     }
-    
+
     // Add special features based on location
     add_location_features(
         &location.special_features,
@@ -114,7 +125,7 @@ pub fn generate_location_tilemap(
         &styled_assets.tile_mappings,
         rng,
     );
-    
+
     // Finalize tilemap
     commands.entity(tilemap_entity).insert(TilemapBundle {
         grid_size,
@@ -126,7 +137,7 @@ pub fn generate_location_tilemap(
         transform: Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)),
         ..Default::default()
     });
-    
+
     tilemap_entity
 }
 
@@ -136,7 +147,7 @@ fn generate_base_map(
     rng: &mut ChaCha8Rng,
 ) -> Map {
     let mut builder = MapBuilder::new(size.x as usize, size.y as usize);
-    
+
     match algorithm {
         MapGenAlgorithm::CellularAutomata => {
             builder.with_cellular_automata(55, 5, rng);
@@ -158,7 +169,7 @@ fn generate_base_map(
             builder.with_cellular_automata(45, 4, rng);
         }
     }
-    
+
     builder.build()
 }
 
@@ -175,7 +186,7 @@ fn select_styled_tile(
     if is_transition_tile(map, x, y) {
         return select_transition_tile(map, x, y, mappings, biome);
     }
-    
+
     // Select base tile with variation
     match mapgen_tile {
         MapGenTileType::Floor => {
@@ -205,15 +216,15 @@ fn select_styled_tile(
 
 fn is_transition_tile(map: &Map, x: u32, y: u32) -> bool {
     let current = map.tiles[(y * map.width as u32 + x) as usize];
-    
+
     // Check adjacent tiles
     for dy in -1..=1 {
         for dx in -1..=1 {
             if dx == 0 && dy == 0 { continue; }
-            
+
             let nx = x as i32 + dx;
             let ny = y as i32 + dy;
-            
+
             if nx >= 0 && nx < map.width as i32 && ny >= 0 && ny < map.height as i32 {
                 let neighbor = map.tiles[(ny * map.width as i32 + nx) as usize];
                 if neighbor != current {
@@ -222,7 +233,7 @@ fn is_transition_tile(map: &Map, x: u32, y: u32) -> bool {
             }
         }
     }
-    
+
     false
 }
 
@@ -235,18 +246,18 @@ fn select_transition_tile(
 ) -> (u32, bool) {
     // Simplified transition logic - in production this would be more sophisticated
     let current = map.tiles[(y * map.width as u32 + x) as usize];
-    
+
     // Check what we're transitioning between
     for dy in -1..=1 {
         for dx in -1..=1 {
             if dx == 0 && dy == 0 { continue; }
-            
+
             let nx = x as i32 + dx;
             let ny = y as i32 + dy;
-            
+
             if nx >= 0 && nx < map.width as i32 && ny >= 0 && ny < map.height as i32 {
                 let neighbor = map.tiles[(ny * map.width as i32 + nx) as usize];
-                
+
                 match (current, neighbor) {
                     (MapGenTileType::Floor, MapGenTileType::Wall) |
                     (MapGenTileType::Wall, MapGenTileType::Floor) => {
@@ -261,7 +272,7 @@ fn select_transition_tile(
             }
         }
     }
-    
+
     // Default to base tile if no transition found
     select_styled_tile(current, biome, mappings, &mut rand::thread_rng(), map, x, y)
 }
@@ -275,7 +286,7 @@ fn add_location_features(
     rng: &mut ChaCha8Rng,
 ) {
     use crate::world_generation::LocationFeature;
-    
+
     for feature in features {
         match feature {
             LocationFeature::BossArena => {
@@ -312,7 +323,7 @@ pub fn animate_tiles(
 ) {
     for (mut texture_index, mut animated_tile) in query.iter_mut() {
         animated_tile.timer.tick(time.delta());
-        
+
         if animated_tile.timer.finished() {
             animated_tile.current_frame = (animated_tile.current_frame + 1) % animated_tile.frames.len();
             texture_index.0 = animated_tile.frames[animated_tile.current_frame];
