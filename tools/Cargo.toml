@@ -7,6 +7,10 @@ edition = "2021"
 name = "ai-gen"
 path = "src/main.rs"
 
+[[bin]]
+name = "studio"
+path = "src/studio_main.rs"
+
 [dependencies]
 tokio = { version = "1.35", features = ["full"] }
 async-openai = { version = "0.23", default-features = false, features = ["rustls"] }
@@ -30,3 +34,50 @@ futures = "0.3"
 md5 = "0.7"
 chrono = "0.4"
 colored = "2.0"
+
+# Bevy and UI dependencies
+bevy = { version = "0.14", default-features = false, features = [
+    "bevy_asset",
+    "bevy_winit",
+    "bevy_core_pipeline",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_pbr",
+    "bevy_gltf",
+    "bevy_audio",
+    "bevy_state",
+    "multi_threaded",
+    "png",
+    "jpeg",
+    "webgl2",
+    "x11",
+    "wayland",
+] }
+bevy_egui = "0.28"
+bevy-inspector-egui = "0.25"
+egui_dock = "0.13"
+egui_extras = "0.28"
+egui-notify = "0.15"
+
+# Advanced generation features
+dashmap = "5.5"
+petgraph = "0.6"
+lru = "0.12"
+zstd = "0.13"
+crossbeam = "0.8"
+crossbeam-channel = "0.5"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+indexmap = "2.2"
+rfd = "0.12"
+webbrowser = "0.8"
+imageproc = "0.23"
+nalgebra = "0.32"
+ndarray = "0.15"
+blake3 = "1.5"
+notify = "6.1"
+ron = "0.8"
+
+# Git integration
+git2 = { version = "0.18", default-features = false, features = ["vendored-openssl"] }
