@@ -7,56 +7,78 @@ edition = "2021"
 name = "ai-gen"
 path = "src/main.rs"
 
+[[bin]]
+name = "studio"
+path = "src/studio_main.rs"
+
 [dependencies]
-# Async runtime
 tokio = { version = "1.35", features = ["full"] }
-
-# OpenAI API (using rustls to avoid OpenSSL dependency)
 async-openai = { version = "0.23", default-features = false, features = ["rustls"] }
-
-# Token counting  
 tiktoken-rs = "0.5"
-
-# Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
-
-# Error handling
 anyhow = "1.0"
 thiserror = "1.0"
-
-# CLI and logging
 clap = { version = "4.4", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-# File system and paths
 walkdir = "2.4"
-
-# HTTP client for DALL-E (using rustls to avoid OpenSSL dependency)
 reqwest = { version = "0.11", default-features = false, features = ["json", "stream", "rustls-tls"] }
-
-# Image processing
 image = "0.24"
 base64 = "0.21"
-
-# Progress bars
 indicatif = "0.17"
-
-# Caching
 cacache = "12.0"
-
-# Templating
 handlebars = "5.0"
-
-# Parallel processing
 rayon = "1.8"
 futures = "0.3"
-
-# Additional dependencies
 md5 = "0.7"
 chrono = "0.4"
+
+# Bevy and UI dependencies
+bevy = { version = "0.14", default-features = false, features = [
+    "bevy_asset",
+    "bevy_winit",
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_gltf",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "multi_threaded",
+    "png",
+    "jpeg",
+    "webgl2",
+    "x11",
+    "wayland",
+]}
+bevy_egui = "0.30"
+bevy-inspector-egui = "0.28"
+egui_dock = "0.15"
+egui_extras = "0.30"
+egui-notify = "0.19"
+
+# Advanced generation dependencies
+dashmap = "5.5"
+petgraph = "0.6"
+lru = "0.12"
+zstd = "0.13"
+crossbeam = "0.8"
+crossbeam-channel = "0.5"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+indexmap = "2.2"
+rfd = "0.12"
+webbrowser = "0.8"
+
+# Style transfer and image processing
+imageproc = "0.23"
+nalgebra = "0.32"
+ndarray = "0.15"
+blake3 = "1.5"
+notify = "6.1"
+ron = "0.8"
+colored = "2.0"
 
 [dev-dependencies]
 pretty_assertions = "1.4"
