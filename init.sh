@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-
+set -euo pipefail
 # Echoes of Beastlight - Project Initializer
 # This script helps set up the metaprompt game generator
 
