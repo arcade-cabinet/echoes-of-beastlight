@@ -2,7 +2,6 @@
 /target
 **/*.rs.bk
 Cargo.lock
-Cargo.toml
 
 # WASM/Web builds
 /out
@@ -72,15 +71,10 @@ lerna-debug.log*
 .tmp/
 .temp/
 
-# Generated assets (during development)
-/assets/generated/
-/assets/data/
+# Temporary generated directories (for testing)
 /generated/
-/generated-*/
-/src/main.rs
-/src/components.rs
-/src/tilemaps/
-/src/systems/
+/generated-test/
+/generated-*
 
 # Docker volumes
 .docker/

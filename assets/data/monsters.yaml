@@ -1,0 +1,130 @@
+- Name: Emberclaw Beast
+  Description: A Wild creature with a burning ferocity, the Emberclaw Beast is known for its flaming talons and fiery temperament.
+  Type: Beast
+  Base Stats:
+    HP: 150
+    Attack: 40
+    Defense: 30
+    Speed: 35
+    Special: 10
+  Abilities:
+    - Name: Ember Swipe
+      Type: Physical
+      Power: 50
+      Description: A burning claw attack that may leave the enemy with a burn.
+    - Name: Wild Howl
+      Type: Status
+      Power: 0
+      Description: The beast howls fiercely, increasing its Attack.
+  Taming Info:
+    Difficulty: 3
+    Preferred Bait: Spicy Meat
+    Special Requirement: Taming success rate increases if the beast is afflicted with a status ailment.
+  Loot:
+    Common Drop: Beast Claw
+    Rare Drop: Ember Gem
+  Spawn Zones: Ember Heights, Lava Caves
+- Name: Glyphroot Guardian
+  Description: An ancient construct born from the arcane scripts engraved on its bark-like armor. Its movements are slow but unyielding.
+  Type: Construct
+  Base Stats:
+    HP: 200
+    Attack: 30
+    Defense: 50
+    Speed: 10
+    Special: 20
+  Abilities:
+    - Name: Root Guard
+      Type: Status
+      Power: 0
+      Description: The guardian strengthens its defenses using its roots.
+    - Name: Glyph Barrage
+      Type: Special
+      Power: 35
+      Description: The guardian releases a barrage of magical glyphs at the enemy.
+  Taming Info:
+    Difficulty: 5
+    Preferred Bait: Arcane Sap
+    Special Requirement: Can only be tamed at night.
+  Loot:
+    Common Drop: Magic Bark
+    Rare Drop: Glyphstone
+  Spawn Zones: Ancient Forest, Glyphstone Quarry
+- Name: Mistshadow Phantom
+  Description: A spectral entity shrouded in a chilling mist, the Mistshadow Phantom is as elusive as it is haunting.
+  Type: Spirit
+  Base Stats:
+    HP: 130
+    Attack: 35
+    Defense: 25
+    Speed: 60
+    Special: 20
+  Abilities:
+    - Name: Shadow Slash
+      Type: Physical
+      Power: 40
+      Description: The phantom rends its enemy with a shadowy claw.
+    - Name: Mist Cloak
+      Type: Status
+      Power: 0
+      Description: The phantom cloaks itself in mist, increasing its evasiveness.
+  Taming Info:
+    Difficulty: 4
+    Preferred Bait: Ghostly Ectoplasm
+    Special Requirement: Can only be tamed in the fog.
+  Loot:
+    Common Drop: Phantom Cloth
+    Rare Drop: Miststone
+  Spawn Zones: Fog Woods, Phantasm Marshes
+- Name: Thornbeast Strider
+  Description: The Thornbeast Strider is a feral creature, its body armed with sharp thorns. It moves quickly, leaving painful marks on its foes.
+  Type: Beast
+  Base Stats:
+    HP: 100
+    Attack: 45
+    Defense: 20
+    Speed: 50
+    Special: 10
+  Abilities:
+    - Name: Thorn Volley
+      Type: Physical
+      Power: 35
+      Description: The beast shoots thorns from its body in a rapid volley.
+    - Name: Feral Dash
+      Type: Physical
+      Power: 40
+      Description: The beast charges at the enemy with reckless speed.
+  Taming Info:
+    Difficulty: 2
+    Preferred Bait: Thorny Fruit
+    Special Requirement: None
+  Loot:
+    Common Drop: Thorn
+    Rare Drop: Beast Hide
+  Spawn Zones: Thorny Plains, Wild Woods
+- Name: Crystalglyph Golem
+  Description: An ancient construct of crystal, inscribed with arcane glyphs. It moves with a slow, deliberate grace, shimmering in the light.
+  Type: Construct
+  Base Stats:
+    HP: 250
+    Attack: 35
+    Defense: 45
+    Speed: 5
+    Special: 30
+  Abilities:
+    - Name: Crystal Smash
+      Type: Physical
+      Power: 45
+      Description: The golem attacks the enemy with a crystal arm.
+    - Name: Glyph Drain
+      Type: Special
+      Power: 30
+      Description: The golem drains the enemy's HP with glyph magic.
+  Taming Info:
+    Difficulty: 5
+    Preferred Bait: Crystal Shard
+    Special Requirement: Taming success rate increases if the player has a high magic level.
+  Loot:
+    Common Drop: Crystal Fragment
+    Rare Drop: Glyph Crystal
+  Spawn Zones: Crystal Caves, Arcane Ruins
