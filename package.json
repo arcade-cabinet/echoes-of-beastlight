@@ -32,7 +32,10 @@
     "prepare": "husky install",
     "generate": "node tools/metaprompt-runner.js",
     "generate:dry": "node tools/metaprompt-runner.js --dry-run",
-    "generate:fresh": "node tools/metaprompt-runner.js --output=generated/"
+    "generate:fresh": "node tools/metaprompt-runner.js --output=generated/",
+    "generate:v2": "node tools/metaprompt-runner-v2.js",
+    "generate:v2:dry": "node tools/metaprompt-runner-v2.js --dry-run",
+    "generate:v2:cache": "node tools/metaprompt-runner-v2.js --use-cache"
   },
   "devDependencies": {
     "@nrwl/cli": "^15.9.0",
@@ -64,7 +67,13 @@
     "@octokit/rest": "^19.0.7",
     "chalk": "^4.1.2",
     "js-yaml": "^4.1.0",
-    "openai": "^3.3.0"
+    "openai": "^4.20.0",
+    "handlebars": "^4.7.8",
+    "tiktoken": "^1.0.10",
+    "p-retry": "^4.6.2",
+    "p-limit": "^3.1.0",
+    "gray-matter": "^4.0.3",
+    "lru-cache": "^10.0.1"
   },
   "nx": {
     "includedScripts": []
