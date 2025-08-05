@@ -9,8 +9,7 @@ use async_openai::{
         ChatCompletionRequestSystemMessageArgs,
         ChatCompletionRequestUserMessageArgs,
         ImageSize,
-        ImageModel,
-        ResponseFormat,
+        Image,
     },
 };
 use serde::{Serialize, Deserialize};
@@ -160,6 +159,7 @@ impl AIGameGenerator {
             if let Some(tracker) = &self.git_tracker {
                 let mut manifest_mut = manifest.clone();
                 tracker.track_prompt(&mut manifest_mut, vec![], prompt_node)?;
+                self.manifest = Some(manifest_mut);
             }
         }
         
@@ -221,13 +221,9 @@ impl AIGameGenerator {
     async fn generate_image(&mut self, prompt: &str, filename: &str) -> Result<()> {
         info!("Generating image: {}", filename);
         
-        use async_openai::types::{CreateImageRequestArgs, ImageSize, ImageResponseFormat, Image};
-        
         let request = CreateImageRequestArgs::default()
             .prompt(prompt)
-            .model("dall-e-3")
             .n(1)
-            .response_format(ImageResponseFormat::Url)
             .size(ImageSize::S1024x1024)
             .build()?;
             
@@ -377,7 +373,7 @@ impl AIGameGenerator {
             Each color should have 'hex', 'name', and 'usage' fields.",
             config.game.genre,
             config.game.title,
-            config.game.theme.as_str().unwrap_or(&config.game.genre),
+            if config.game.theme.is_empty() { &config.game.genre } else { &config.game.theme },
             config.graphics.perspective
         );
         
@@ -444,7 +440,7 @@ impl AIGameGenerator {
     }
     
     pub async fn generate_ui_assets(&mut self) -> Result<()> {
-        info!("🖼️ Generating UI assets...");
+        info!("🖼️  Generating UI assets...");
         
         let config = self.config.as_ref().context("Config not loaded")?;
         
@@ -454,7 +450,7 @@ impl AIGameGenerator {
             fs::read_to_string(&palette_path)?
         } else {
             warn!("Color palette not found, using defaults");
-            r#"{"ui_colors": {"background": "#1a1c2c", "text": "#f4f4f4", "highlight": "#41a6f6"}}"#.to_string()
+            r#"{"ui_colors": {"background": "#1a1c2c", "text": "#f4f4f4 ", "highlight": "#41a6f6"}}"#.to_string()
         };
         
         // Generate UI element specifications
@@ -578,13 +574,15 @@ impl AIGameGenerator {
         info!("🗺️  Generating level files...");
         
         let config = self.config.as_ref().context("Config not loaded")?;
+        let tile_size = config.graphics.tile_size;
+        let zones = config.environments.outdoor_zones.clone();
         
         // Create levels directory and Yoleck index
         fs::create_dir_all("assets/levels")?;
         
         let mut level_files = Vec::new();
         
-        for zone in &config.environments.outdoor_zones {
+        for zone in &zones {
             let zone_name_slug = zone.name.to_lowercase().replace(' ', "_");
             
             let level_prompt = format!(
@@ -597,7 +595,7 @@ impl AIGameGenerator {
                 zone.zone_type,
                 zone.biome,
                 zone.description.as_str(),
-                config.graphics.tile_size
+                tile_size
             );
             
             let level_content = self.generate_with_ai(
@@ -670,6 +668,8 @@ impl AIGameGenerator {
         info!("🎵 Generating procedural audio specifications...");
         
         let config = self.config.as_ref().context("Config not loaded")?;
+        let game_title = config.game.title.clone();
+        let game_genre = config.game.genre.clone();
         
         // Generate comprehensive audio specifications
         let audio_prompt = format!(
@@ -680,8 +680,8 @@ impl AIGameGenerator {
             3. Ambient sounds for each biome \
             Use retro JRPG style with chiptune aesthetics. \
             Output as JSON with synthesis parameters for Web Audio API.",
-            config.game.title,
-            config.game.genre
+            game_title,
+            game_genre
         );
         
         let audio_specs = self.generate_with_ai(
@@ -701,7 +701,7 @@ impl AIGameGenerator {
             4. Handle looping for background music \
             5. Include volume and mixing controls \
             Make it modular and easy to integrate with the game.",
-            config.game.title
+            game_title
         );
         
         let audio_script = self.generate_with_ai(
@@ -729,7 +729,7 @@ impl AIGameGenerator {
             ```\n\n\
             ## Customization\n\
             Edit `audio_specs.json` to modify any sound parameters.",
-            config.game.title
+            game_title
         );
         
         self.write_file("assets/audio/README.md", doc_content.as_bytes()).await?;

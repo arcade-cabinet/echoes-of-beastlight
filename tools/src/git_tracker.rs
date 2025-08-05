@@ -7,6 +7,7 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 /// Git-based generation tracker for perfect idempotency and versioning
+#[derive(Debug)]
 pub struct GitGenerationTracker {
     repo: Repository,
     generation_branch: String,
@@ -15,6 +16,7 @@ pub struct GitGenerationTracker {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GenerationManifest {
     pub id: Uuid,
+    #[serde(with = "chrono::serde::ts_seconds")]
     pub timestamp: DateTime<Utc>,
     pub parent_commit: Option<String>,
     pub cascade_tree: CascadeTree,
@@ -47,8 +49,9 @@ pub struct FileMetadata {
     pub hash: String,
     pub size: u64,
     pub prompt_hash: String,
+    #[serde(with = "chrono::serde::ts_seconds")]
     pub generation_time: DateTime<Utc>,
-    pub parent_assets: Vec<String>,
+    pub parent_assets: Vec<PathBuf>,
 }
 
 impl GitGenerationTracker {
@@ -99,25 +102,24 @@ impl GitGenerationTracker {
         parent_path: Vec<String>,
         prompt: PromptNode,
     ) -> Result<()> {
-        // Navigate to the parent node
         let mut current = &mut manifest.cascade_tree.root_prompt;
+        
+        // Navigate to parent
         for segment in parent_path {
-            current = current.children
-                .iter_mut()
+            current = current.children.iter_mut()
                 .find(|child| child.id == segment)
-                .context("Parent node not found in cascade tree")?;
+                .context("Parent path not found in cascade tree")?;
         }
         
-        // Add the new prompt node
+        // Calculate cost
+        let prompt_tokens = prompt.system_prompt.len() + prompt.user_prompt.len();
+        let estimated_tokens = prompt_tokens / 4; // Rough estimate
+        let cost = (estimated_tokens as f32) * 0.00001; // Rough cost estimate
+        
+        manifest.cascade_tree.total_api_calls += 1;
+        manifest.cascade_tree.total_cost_estimate += cost;
+        
         current.children.push(prompt);
-        
-        // Update statistics
-        if !prompt.cache_hit {
-            manifest.cascade_tree.total_api_calls += 1;
-            // Estimate cost based on prompt length
-            let tokens = (prompt.system_prompt.len() + prompt.user_prompt.len()) / 4;
-            manifest.cascade_tree.total_cost_estimate += (tokens as f32) * 0.00001; // Rough estimate
-        }
         
         Ok(())
     }
@@ -138,7 +140,7 @@ impl GitGenerationTracker {
             size: content.len() as u64,
             prompt_hash,
             generation_time: Utc::now(),
-            parent_assets,
+            parent_assets: parent_assets.into_iter().map(PathBuf::from).collect(),
         };
         
         manifest.generated_files.insert(path.clone(), metadata);
@@ -173,7 +175,7 @@ impl GitGenerationTracker {
             if check_parents {
                 for parent in &metadata.parent_assets {
                     if let Some(parent_path) = manifest.cache_keys.iter()
-                        .find(|(_, hash)| *hash == parent)
+                        .find(|(_, hash)| *hash == parent.to_string_lossy().to_string())
                         .map(|(path, _)| PathBuf::from(path))
                     {
                         if self.needs_regeneration(manifest, &parent_path, false)? {
@@ -392,6 +394,16 @@ pub struct GenerationSummary {
     pub commit_id: String,
     pub files_generated: usize,
     pub api_calls: u32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GenerationHistory {
+    pub id: Uuid,
+    #[serde(with = "chrono::serde::ts_seconds")]
+    pub timestamp: DateTime<Utc>,
+    pub commit_hash: String,
+    pub files_generated: usize,
+    pub cascade_depth: usize,
 }
 
 /// Integration with the main generator
