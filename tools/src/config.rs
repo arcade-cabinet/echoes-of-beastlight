@@ -30,16 +30,19 @@ pub struct HeroInfo {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Environments {
     pub outdoor_zones: Vec<Zone>,
+    #[serde(default)]
     pub dungeons: Vec<Zone>,
+    #[serde(default)]
     pub special_areas: Vec<Zone>,
     pub map_generation: MapGeneration,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Zone {
     pub name: String,
-    #[serde(rename = "type")]
+    #[serde(rename = "type", default)]
     pub zone_type: String,
+    #[serde(default)]
     pub description: String,
 }
 
@@ -52,7 +55,9 @@ pub struct MapGeneration {
 pub struct MapgenAlgorithms {
     pub overworld: String,
     pub dungeon: String,
+    #[serde(default)]
     pub cave: String,
+    #[serde(default)]
     pub special: String,
 }
 
@@ -60,7 +65,9 @@ pub struct MapgenAlgorithms {
 pub struct GenerationRules {
     pub adjectives: Vec<String>,
     pub nouns: Vec<String>,
+    #[serde(default)]
     pub verbs: Vec<String>,
+    #[serde(default)]
     pub abilities: Vec<String>,
 }
 

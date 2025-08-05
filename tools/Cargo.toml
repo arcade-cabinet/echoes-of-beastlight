@@ -11,8 +11,8 @@ path = "src/main.rs"
 # Async runtime
 tokio = { version = "1.35", features = ["full"] }
 
-# OpenAI API
-async-openai = "0.23"
+# OpenAI API (using rustls to avoid OpenSSL dependency)
+async-openai = { version = "0.23", default-features = false, features = ["rustls"] }
 
 # Token counting  
 tiktoken-rs = "0.5"
@@ -34,8 +34,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # File system and paths
 walkdir = "2.4"
 
-# HTTP client for DALL-E
-reqwest = { version = "0.11", features = ["json", "stream"] }
+# HTTP client for DALL-E (using rustls to avoid OpenSSL dependency)
+reqwest = { version = "0.11", default-features = false, features = ["json", "stream", "rustls-tls"] }
 
 # Image processing
 image = "0.24"
@@ -53,6 +53,10 @@ handlebars = "5.0"
 # Parallel processing
 rayon = "1.8"
 futures = "0.3"
+
+# Additional dependencies
+md5 = "0.7"
+chrono = "0.4"
 
 [dev-dependencies]
 pretty_assertions = "1.4"
