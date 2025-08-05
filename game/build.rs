@@ -1,46 +1,57 @@
-use ai_game_generator::{CascadeExecutor, PromptCascade};
-use anyhow::Result;
 use std::env;
-use std::path::PathBuf;
+use std::fs;
+use std::path::Path;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    // Only run cascade in release builds or when explicitly requested
+fn main() {
+    // Only generate in release builds or when explicitly requested
     let should_generate = env::var("ECHOES_GENERATE").is_ok() || 
                          env::var("PROFILE").map(|p| p == "release").unwrap_or(false);
     
     if !should_generate {
-        println!("cargo:warning=Skipping AI generation. Set ECHOES_GENERATE=1 to enable.");
-        return Ok(());
+        return;
     }
 
-    println!("cargo:warning=Running AI game generation cascade...");
+    println!("cargo:warning=Generating game assets...");
     
-    // Get paths
-    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
-    let metaprompt_path = manifest_dir.join("metaprompts/root.toml");
-    let output_dir = manifest_dir.clone();
-    let cache_dir = manifest_dir.join(".cascade-cache");
+    // Create asset directories if they don't exist
+    let asset_dirs = vec![
+        "assets/sprites/characters",
+        "assets/sprites/monsters", 
+        "assets/sprites/tiles",
+        "assets/sprites/ui",
+        "assets/audio/music",
+        "assets/audio/sfx",
+        "assets/levels",
+        "assets/data",
+    ];
     
-    // Check if we're in dry-run mode
-    let dry_run = env::var("ECHOES_DRY_RUN").is_ok();
+    for dir in &asset_dirs {
+        fs::create_dir_all(dir).unwrap_or_else(|e| {
+            println!("cargo:warning=Failed to create {}: {}", dir, e);
+        });
+    }
     
-    // Load the cascade
-    let cascade_content = std::fs::read_to_string(&metaprompt_path)?;
-    let cascade: PromptCascade = toml::from_str(&cascade_content)?;
+    // Create marker files for the generator to know what needs generation
+    // The actual generation will be done by targeted TOML prompts in each directory
+    let markers = vec![
+        ("assets/sprites/characters/.generate", "hero_sprites"),
+        ("assets/sprites/monsters/.generate", "monster_sprites"),
+        ("assets/sprites/tiles/.generate", "tilemap_sprites"),
+        ("assets/sprites/ui/.generate", "ui_elements"),
+        ("assets/audio/music/.generate", "music_tracks"),
+        ("assets/audio/sfx/.generate", "sound_effects"),
+        ("assets/levels/.generate", "level_layouts"),
+        ("assets/data/.generate", "game_data"),
+    ];
     
-    // Create executor
-    let mut executor = CascadeExecutor::new(cache_dir, dry_run)?;
+    for (path, content) in &markers {
+        if !Path::new(path).exists() {
+            fs::write(path, content).unwrap_or_else(|e| {
+                println!("cargo:warning=Failed to create marker {}: {}", path, e);
+            });
+        }
+    }
     
-    // Execute the cascade
-    executor.execute_cascade(&cascade, &output_dir).await?;
-    
-    println!("cargo:warning=AI generation cascade completed successfully!");
-    
-    // Tell Cargo to re-run this build script if the cascade file changes
-    println!("cargo:rerun-if-changed=metaprompts/root.toml");
+    // Tell Cargo to re-run if generation is requested
     println!("cargo:rerun-if-env-changed=ECHOES_GENERATE");
-    println!("cargo:rerun-if-env-changed=ECHOES_DRY_RUN");
-    
-    Ok(())
 }

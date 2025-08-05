@@ -12,25 +12,23 @@ bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy_ecs_tilemap = "0.14"
 bevy-yoleck = "0.24"
 bevy_rapier2d = "0.27"
+bevy_save = "1.0"
+bevy_cobweb = "0.17"
+bevy_cobweb_ui = "0.21"
+beet_flow = "0.4"
 leafwing-input-manager = "0.17"
 serde = { version = "1.0", features = ["derive"] }
 ron = "0.8"
 rand = "0.9"
 rand_chacha = "0.9"
 
-[build-dependencies]
-ai-game-generator = { path = "../build-tools" }
-anyhow = "1.0"
-tokio = { version = "1.47", features = ["rt", "macros"] }
-toml = "0.8"
-
 [[bin]]
 name = "echoes-of-beastlight"
 path = "src/main.rs"
 
 [features]
-default = ["bevy/dynamic_linking"]
-dev = ["bevy/file_watcher", "bevy/embedded_watcher"]
+default = []
+dev = ["bevy/dynamic_linking"]
 
 [profile.dev]
 opt-level = 1
