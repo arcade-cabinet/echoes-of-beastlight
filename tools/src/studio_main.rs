@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
 mod studio;
+mod config;
+mod generator;
+mod templates;
 mod git_tracker;
 
 use studio::GameGeneratorStudioPlugin;
