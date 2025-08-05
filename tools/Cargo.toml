@@ -7,10 +7,6 @@ edition = "2021"
 name = "ai-gen"
 path = "src/main.rs"
 
-[[bin]]
-name = "studio"
-path = "src/studio_main.rs"
-
 [dependencies]
 tokio = { version = "1.35", features = ["full"] }
 async-openai = { version = "0.23", default-features = false, features = ["rustls"] }
@@ -28,40 +24,9 @@ reqwest = { version = "0.11", default-features = false, features = ["json", "str
 image = "0.24"
 base64 = "0.21"
 indicatif = "0.17"
-cacache = "12.0"
 handlebars = "5.0"
 rayon = "1.8"
 futures = "0.3"
 md5 = "0.7"
 chrono = "0.4"
-git2 = "0.18"
-bevy = { version = "0.14", default-features = false, features = [
-    "bevy_asset", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_gltf",
-    "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi_threaded",
-    "png", "jpeg", "webgl2", "x11", "wayland",
-]}
-bevy_egui = { version = "0.28", default-features = false, features = ["default_fonts"] }
-bevy-inspector-egui = { version = "0.25", default-features = false }
-egui_dock = "0.13"
-egui_extras = { version = "0.28", default-features = false }
-egui-notify = "0.15"
-dashmap = "5.5"
-petgraph = "0.6"
-lru = "0.12"
-zstd = "0.13"
-crossbeam = "0.8"
-crossbeam-channel = "0.5"
-uuid = { version = "1.10", features = ["v4", "serde"] }
-indexmap = "2.2"
-rfd = "0.12"
-webbrowser = "0.8"
-imageproc = "0.23"
-nalgebra = "0.32"
-ndarray = "0.15"
-blake3 = "1.5"
-notify = "6.1"
-ron = "0.8"
 colored = "2.0"
-
-[dev-dependencies]
-pretty_assertions = "1.4"

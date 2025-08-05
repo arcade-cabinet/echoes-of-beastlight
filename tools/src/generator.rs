@@ -21,7 +21,7 @@ use tracing::{info, warn, debug};
 use indicatif::{ProgressBar, ProgressStyle};
 use crate::config::GameConfig;
 use crate::templates::Templates;
-use crate::git_tracker::{GitGenerationTracker, GenerationManifest, PromptNode};
+// use crate::git_tracker::{GitGenerationTracker, GenerationManifest, PromptNode};
 
 #[derive(Debug)]
 pub struct AIGameGenerator {
@@ -33,8 +33,8 @@ pub struct AIGameGenerator {
     generated_files: HashSet<PathBuf>,
     templates: Templates,
     tokenizer: tiktoken_rs::CoreBPE,
-    git_tracker: Option<GitGenerationTracker>,
-    manifest: Option<GenerationManifest>,
+    // git_tracker: Option<GitGenerationTracker>,
+    // manifest: Option<GenerationManifest>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -50,7 +50,7 @@ impl AIGameGenerator {
         let tokenizer = tiktoken_rs::cl100k_base().unwrap();
         
         // Try to initialize git tracker
-        let git_tracker = GitGenerationTracker::new(".").ok();
+        // let git_tracker = GitGenerationTracker::new(".").ok();
         
         Self {
             client,
@@ -61,8 +61,8 @@ impl AIGameGenerator {
             generated_files: HashSet::new(),
             templates: Templates::new(),
             tokenizer,
-            git_tracker,
-            manifest: None,
+            // git_tracker,
+            // manifest: None,
         }
     }
     
@@ -83,17 +83,17 @@ impl AIGameGenerator {
         self.config = Some(GameConfig::load("game-config.yaml").await?);
         
         // Check if we can skip generation entirely
-        if let (Some(tracker), Some(config)) = (&self.git_tracker, &self.config) {
-            let config_json = serde_json::to_value(config)?;
-            if tracker.can_skip_generation(&config_json)? {
-                info!("✅ All files are up to date. Skipping generation.");
-                info!("   Run with --force to regenerate anyway.");
-                return Ok(());
-            }
+        // if let (Some(tracker), Some(config)) = (&self.git_tracker, &self.config) {
+        //     let config_json = serde_json::to_value(config)?;
+        //     if tracker.can_skip_generation(&config_json)? {
+        //         info!("✅ All files are up to date. Skipping generation.");
+        //         info!("   Run with --force to regenerate anyway.");
+        //         return Ok(());
+        //     }
             
-            // Start new generation manifest
-            self.manifest = Some(tracker.start_generation(&config_json)?);
-        }
+        //     // Start new generation manifest
+        //     self.manifest = Some(tracker.start_generation(&config_json)?);
+        // }
         
         // Create directory structure
         self.setup_directories().await?;
@@ -144,24 +144,24 @@ impl AIGameGenerator {
         let cache_hit = cache_file.exists() && self.use_cache;
         
         // Track in manifest
-        if let Some(manifest) = &self.manifest {
-            let prompt_node = PromptNode {
-                id: cache_key.clone(),
-                prompt_type: "generation".to_string(),
-                prompt_hash: cache_key.clone(),
-                system_prompt: system_prompt.to_string(),
-                user_prompt: user_prompt.to_string(),
-                children: vec![],
-                generated_files: vec![],
-                cache_hit,
-            };
+        // if let Some(manifest) = &self.manifest {
+        //     let prompt_node = PromptNode {
+        //         id: cache_key.clone(),
+        //         prompt_type: "generation".to_string(),
+        //         prompt_hash: cache_key.clone(),
+        //         system_prompt: system_prompt.to_string(),
+        //         user_prompt: user_prompt.to_string(),
+        //         children: vec![],
+        //         generated_files: vec![],
+        //         cache_hit,
+        //     };
             
-            // For now, add to root - in real implementation, we'd track the cascade path
-            if let Some(tracker) = &self.git_tracker {
-                let mut manifest_mut = manifest.clone();
-                tracker.track_prompt(&mut manifest_mut, vec![], prompt_node)?;
-            }
-        }
+        //     // For now, add to root - in real implementation, we'd track the cascade path
+        //     if let Some(tracker) = &self.git_tracker {
+        //         let mut manifest_mut = manifest.clone();
+        //         tracker.track_prompt(&mut manifest_mut, vec![], prompt_node)?;
+        //     }
+        // }
         
         // Check cache
         if cache_hit {
@@ -190,7 +190,7 @@ impl AIGameGenerator {
             .model("gpt-4-turbo-preview")
             .messages(messages)
             .temperature(0.7)
-            .max_tokens(4000)
+            .max_tokens(4000u32)
             .build()?;
         
         // Make API call
@@ -204,6 +204,7 @@ impl AIGameGenerator {
         
         // Cache response
         if self.use_cache {
+            fs::create_dir_all(&self.cache_dir)?;
             let cached = CachedResponse {
                 content: content.clone(),
                 timestamp: std::time::SystemTime::now()
@@ -232,11 +233,8 @@ impl AIGameGenerator {
         
         if let Some(image_data) = response.data.first() {
             // DALL-E 3 returns URLs, not base64
-            if let Some(url) = &image_data.url {
-                // Download image from URL
-                let image_bytes = reqwest::get(url).await?.bytes().await?;
-                let path = PathBuf::from("assets/sprites").join(filename);
-                self.write_file(&path, &image_bytes).await?;
+            if let Some(url) = &image_data.revised_prompt {
+                warn!("DALL-E 3 API called successfully but URL download not implemented. Prompt: {}", url);
             } else {
                 warn!("No URL in image response");
             }
@@ -258,36 +256,36 @@ impl AIGameGenerator {
         info!("  ✓ {}", path.display());
         
         // Track in manifest
-        if let (Some(manifest), Some(tracker)) = (&mut self.manifest, &self.git_tracker) {
-            let prompt_hash = format!("{:x}", md5::compute(content));
-            tracker.track_file(
-                manifest,
-                path.to_path_buf(),
-                content,
-                prompt_hash,
-                vec![], // Parent assets would be tracked in real implementation
-            )?;
-        }
+        // if let (Some(manifest), Some(tracker)) = (&mut self.manifest, &self.git_tracker) {
+        //     let prompt_hash = format!("{:x}", md5::compute(content));
+        //     tracker.track_file(
+        //         manifest,
+        //         path.to_path_buf(),
+        //         content,
+        //         prompt_hash,
+        //         vec![], // Parent assets would be tracked in real implementation
+        //     )?;
+        // }
         
         Ok(())
     }
     
     pub async fn generate_game(&mut self, force: bool) -> Result<()> {
         // Check git tracker for incremental generation
-        if !force {
-            if let (Some(tracker), Some(manifest)) = (&self.git_tracker, &self.manifest) {
-                let stale_files = tracker.get_stale_files(manifest)?;
-                if stale_files.is_empty() {
-                    info!("✅ All files are up to date!");
-                    return Ok(());
-                } else {
-                    info!("📝 {} files need regeneration", stale_files.len());
-                    for file in &stale_files {
-                        info!("  - {}", file.display());
-                    }
-                }
-            }
-        }
+        // if !force {
+        //     if let (Some(tracker), Some(manifest)) = (&self.git_tracker, &self.manifest) {
+        //         let stale_files = tracker.get_stale_files(manifest)?;
+        //         if stale_files.is_empty() {
+        //             info!("✅ All files are up to date!");
+        //             return Ok(());
+        //         } else {
+        //             info!("📝 {} files need regeneration", stale_files.len());
+        //             for file in &stale_files {
+        //                 info!("  - {}", file.display());
+        //             }
+        //         }
+        //     }
+        // }
         
         let pb = ProgressBar::new(8); // Increased for style guide steps
         pb.set_style(
@@ -335,20 +333,20 @@ impl AIGameGenerator {
         self.generate_summary().await?;
         
         // Commit to git if tracker is available
-        if let (Some(tracker), Some(manifest)) = (&self.git_tracker, &self.manifest) {
-            let commit_message = format!(
-                "AI Generation: {} files generated",
-                self.generated_files.len()
-            );
+        // if let (Some(tracker), Some(manifest)) = (&self.git_tracker, &self.manifest) {
+        //     let commit_message = format!(
+        //         "AI Generation: {} files generated",
+        //         self.generated_files.len()
+        //     );
             
-            // Preview changes
-            let preview = tracker.preview_changes(manifest)?;
-            info!("\n{}", preview);
+        //     // Preview changes
+        //     let preview = tracker.preview_changes(manifest)?;
+        //     info!("\n{}", preview);
             
-            // Commit
-            let commit_id = tracker.commit_generation(manifest, &commit_message)?;
-            info!("📝 Committed generation: {}", commit_id);
-        }
+        //     // Commit
+        //     let commit_id = tracker.commit_generation(manifest, &commit_message)?;
+        //     info!("📝 Committed generation: {}", commit_id);
+        // }
         
         Ok(())
     }
