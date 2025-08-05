@@ -55,7 +55,7 @@ impl CascadeExecutor {
             let prompt = cascade.prompts.get(&prompt_id)
                 .context(format!("Prompt {} not found", prompt_id))?;
             
-            self.execute_prompt(prompt, &cascade, &mut context, output_dir).await?;
+            self.execute_prompt(prompt, cascade, output_dir, &mut context).await?;
         }
         
         Ok(())
@@ -66,17 +66,26 @@ impl CascadeExecutor {
         &mut self,
         prompt: &MetaPrompt,
         cascade: &PromptCascade,
-        context: &mut HashMap<String, serde_json::Value>,
         output_dir: &Path,
+        context: &mut HashMap<String, serde_json::Value>,
     ) -> Result<()> {
         info!("Executing prompt: {}", prompt.id);
         
-        // Check cache if idempotent
+        // Check cache first if idempotent
         if prompt.idempotent {
             let cache_key = self.render_cache_key(prompt, context)?;
             if self.check_cache(&cache_key).await? {
-                info!("Cache hit for {}, skipping", prompt.id);
+                info!("Using cached result for {}", prompt.id);
                 return Ok(());
+            }
+        }
+        
+        // Add prompt variables to context
+        for var in &prompt.variables {
+            if !context.contains_key(&var.name) {
+                if let Some(default) = &var.default {
+                    context.insert(var.name.clone(), default.clone());
+                }
             }
         }
         
@@ -86,7 +95,7 @@ impl CascadeExecutor {
             prompt.inherits.as_ref(),
             cascade,
             context,
-            true
+            true,
         )?;
         
         let user_prompt = self.render_template_with_inheritance(
@@ -94,7 +103,7 @@ impl CascadeExecutor {
             prompt.inherits.as_ref(),
             cascade,
             context,
-            false
+            false,
         )?;
         
         debug!("System prompt: {}", system_prompt);
@@ -105,8 +114,48 @@ impl CascadeExecutor {
             return Ok(());
         }
         
+        // Build the full prompt with response format if specified
+        let mut full_user_prompt = user_prompt;
+        if let Some(response_format) = &prompt.response_format {
+            full_user_prompt.push_str("\n\n");
+            match &response_format.format_type {
+                crate::metaprompt::ResponseFormatType::Structured { schema } => {
+                    full_user_prompt.push_str(&format!("Please respond with valid JSON matching this schema:\n{}", schema));
+                }
+                crate::metaprompt::ResponseFormatType::Json => {
+                    full_user_prompt.push_str("Please respond with valid JSON format.");
+                }
+                crate::metaprompt::ResponseFormatType::Markdown => {
+                    full_user_prompt.push_str("Please format your response as valid Markdown.");
+                }
+                crate::metaprompt::ResponseFormatType::Code { language } => {
+                    full_user_prompt.push_str(&format!("Please respond with only valid {} code, no explanations.", language));
+                }
+                crate::metaprompt::ResponseFormatType::Yaml => {
+                    full_user_prompt.push_str("Please respond with valid YAML format.");
+                }
+                crate::metaprompt::ResponseFormatType::Toml => {
+                    full_user_prompt.push_str("Please respond with valid TOML format.");
+                }
+                crate::metaprompt::ResponseFormatType::PlainText => {
+                    // No special formatting needed for plain text
+                }
+            }
+            
+            if response_format.validate {
+                full_user_prompt.push_str("\nEnsure the response is syntactically valid and can be parsed.");
+            }
+        }
+        
         // Execute with OpenAI
-        let response = self.call_openai(&system_prompt, &user_prompt).await?;
+        let response = self.call_openai(&system_prompt, &full_user_prompt).await?;
+        
+        // Validate response format if requested
+        if let Some(response_format) = &prompt.response_format {
+            if response_format.validate {
+                self.validate_response_format(&response, &response_format.format_type)?;
+            }
+        }
         
         // Process response based on output type
         self.process_response(prompt, &response, output_dir, context).await?;
@@ -147,8 +196,8 @@ impl CascadeExecutor {
         
         // Render with minijinja
         let tmpl = self.env.template_from_str(&full_template)?;
-        let ctx = Value::from_serialize(context)?;
-        Ok(tmpl.render(ctx)?)
+        let ctx = Value::from_serialize(context);
+        Ok(tmpl.render(&ctx)?)
     }
     
     /// Call OpenAI API
@@ -187,12 +236,14 @@ impl CascadeExecutor {
             OutputType::MetaPrompt => {
                 // Parse and save as TOML
                 let path = output_dir.join(format!("{}.toml", prompt.id));
+                fs::create_dir_all(path.parent().unwrap()).await?;
                 fs::write(&path, response).await?;
                 info!("Saved meta-prompt to {:?}", path);
             }
             OutputType::Prompt => {
                 // Save as TOML prompt file
                 let path = output_dir.join(format!("{}.toml", prompt.id));
+                fs::create_dir_all(path.parent().unwrap()).await?;
                 fs::write(&path, response).await?;
                 info!("Saved prompt to {:?}", path);
             }
@@ -204,6 +255,7 @@ impl CascadeExecutor {
                     _ => language.as_str(),
                 };
                 let path = output_dir.join(format!("{}.{}", prompt.id, ext));
+                fs::create_dir_all(path.parent().unwrap()).await?;
                 fs::write(&path, response).await?;
                 info!("Saved code to {:?}", path);
             }
@@ -216,6 +268,7 @@ impl CascadeExecutor {
                     crate::metaprompt::DataFormat::Ron => "ron",
                 };
                 let path = output_dir.join(format!("{}.{}", prompt.id, ext));
+                fs::create_dir_all(path.parent().unwrap()).await?;
                 fs::write(&path, response).await?;
                 info!("Saved data to {:?}", path);
             }
@@ -240,20 +293,28 @@ impl CascadeExecutor {
             }
         }
         
-        // Add result to context for child prompts
-        context.insert(format!("{}_result", prompt.id), serde_json::Value::String(response.to_string()));
+        // Store response in context for child prompts
+        context.insert(
+            format!("{}_response", prompt.id),
+            serde_json::Value::String(response.to_string()),
+        );
         
         Ok(())
     }
     
     /// Render cache key
-    fn render_cache_key(&mut self, prompt: &MetaPrompt, context: &HashMap<String, serde_json::Value>) -> Result<String> {
+    fn render_cache_key(
+        &mut self,
+        prompt: &MetaPrompt,
+        context: &HashMap<String, serde_json::Value>,
+    ) -> Result<String> {
         if let Some(template) = &prompt.cache_key_template {
             let tmpl = self.env.template_from_str(template)?;
-            let ctx = Value::from_serialize(context)?;
-            Ok(tmpl.render(ctx)?)
+            let ctx = Value::from_serialize(context);
+            Ok(tmpl.render(&ctx)?)
         } else {
-            Ok(prompt.id.clone())
+            // Default cache key
+            Ok(format!("{}_v{}", prompt.id, context.get("version").and_then(|v| v.as_str()).unwrap_or("1")))
         }
     }
     
@@ -268,6 +329,27 @@ impl CascadeExecutor {
         let path = self.cache_dir.join(format!("{}.cache", cache_key));
         fs::create_dir_all(path.parent().unwrap()).await?;
         fs::write(&path, content).await?;
+        Ok(())
+    }
+
+    /// Validate response format
+    fn validate_response_format(&self, response: &str, format_type: &crate::metaprompt::ResponseFormatType) -> Result<()> {
+        match format_type {
+            crate::metaprompt::ResponseFormatType::Structured { .. } |
+            crate::metaprompt::ResponseFormatType::Json => {
+                serde_json::from_str::<serde_json::Value>(response)
+                    .context("Response is not valid JSON")?;
+            }
+            crate::metaprompt::ResponseFormatType::Yaml => {
+                serde_yaml::from_str::<serde_yaml::Value>(response)
+                    .context("Response is not valid YAML")?;
+            }
+            crate::metaprompt::ResponseFormatType::Toml => {
+                toml::from_str::<toml::Value>(response)
+                    .context("Response is not valid TOML")?;
+            }
+            _ => {} // Other formats don't need validation
+        }
         Ok(())
     }
 }

@@ -1,0 +1,198 @@
+name = "echoes-of-beastlight-code"
+description = "Code generation cascade for Echoes of Beastlight"
+version = "1.0.0"
+root_prompt = "code_root"
+
+[global_variables]
+bevy_version = "0.16.1"
+ecs_pattern = "entity-component-system"
+style_guide_path = "../metaprompts/templates/style_guide_template.toml"
+
+[prompts.code_root]
+id = "code_root"
+output_type = { meta_prompt = {} }
+variables = []
+children = ["components", "systems", "world_gen", "monster_taming"]
+system_template = """
+You are generating Rust code for a Bevy-based JRPG with monster taming.
+Follow ECS patterns and ensure all code is idiomatic Rust.
+Reference the style guide for naming conventions.
+"""
+user_template = """
+Generate child meta-prompts for:
+1. components.toml - all ECS components
+2. systems.toml - all game systems
+3. world_gen.toml - procedural world generation
+4. monster_taming.toml - taming mechanics
+"""
+idempotent = true
+cache_key_template = "code_root_v1"
+
+[prompts.components]
+id = "components"
+output_type = { meta_prompt = {} }
+depends_on = ["code_root"]
+variables = []
+children = ["player_components", "monster_components", "world_components", "ui_components"]
+system_template = """
+Generate ECS component definitions following Bevy patterns.
+Components should be small, focused, and composable.
+"""
+user_template = """
+Create a cascade for generating all game components organized by domain.
+"""
+idempotent = true
+
+[prompts.player_components]
+id = "player_components"
+output_type = { code = { language = "rust" } }
+depends_on = ["components"]
+variables = []
+children = []
+system_template = """
+Generate player-related components for the hero character.
+"""
+user_template = """
+Create components/player.rs with:
+
+```rust
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Component, Debug, Clone, Serialize, Deserialize)]
+pub struct Player {
+    pub name: String,
+    pub level: u32,
+    pub experience: u32,
+}
+
+#[derive(Component, Debug, Clone)]
+pub struct PlayerStats {
+    pub health: i32,
+    pub max_health: i32,
+    pub mana: i32,
+    pub max_mana: i32,
+    pub attack: i32,
+    pub defense: i32,
+    pub speed: i32,
+}
+
+#[derive(Component, Debug)]
+pub struct Inventory {
+    pub items: Vec<Entity>,
+    pub max_size: usize,
+}
+
+#[derive(Component, Debug)]
+pub struct MonsterTeam {
+    pub monsters: Vec<Entity>,
+    pub active_index: usize,
+    pub max_size: usize,
+}
+```
+
+Add any additional components needed for a complete player implementation.
+"""
+idempotent = true
+
+[prompts.systems]
+id = "systems"
+output_type = { meta_prompt = {} }
+depends_on = ["code_root"]
+variables = []
+children = ["movement_system", "combat_system", "taming_system", "inventory_system"]
+system_template = """
+Generate game systems that operate on the defined components.
+Systems should be modular and follow the single responsibility principle.
+"""
+user_template = """
+Create a cascade for all core game systems.
+"""
+idempotent = true
+
+[prompts.movement_system]
+id = "movement_system"
+output_type = { code = { language = "rust" } }
+depends_on = ["systems", "player_components"]
+variables = []
+children = []
+system_template = """
+Generate a movement system for player and entity movement.
+"""
+user_template = """
+Create systems/movement.rs with:
+
+```rust
+use bevy::prelude::*;
+use leafwing_input_manager::prelude::*;
+
+pub fn movement_system(
+    time: Res<Time>,
+    mut query: Query<(&ActionState<PlayerAction>, &mut Transform), With<Player>>,
+) {
+    // Implement 8-directional movement
+    // Handle collision detection
+    // Update animation states
+}
+```
+
+Include proper input handling and smooth movement.
+"""
+idempotent = true
+
+[prompts.world_gen]
+id = "world_gen"
+output_type = { meta_prompt = {} }
+depends_on = ["code_root"]
+variables = []
+children = ["seed_system", "biome_generator", "dungeon_generator"]
+system_template = """
+Generate procedural world generation systems using the mad libs approach.
+Ensure reproducibility with seeds.
+"""
+user_template = """
+Create a cascade for world generation components.
+"""
+idempotent = true
+
+[prompts.seed_system]
+id = "seed_system"
+output_type = { code = { language = "rust" } }
+depends_on = ["world_gen"]
+variables = []
+children = []
+system_template = """
+Generate a seed-based world generation system using word combinations.
+"""
+user_template = """
+Create world_gen/seed.rs with:
+
+```rust
+use rand::{Rng, SeedableRng};
+use rand_chacha::ChaCha8Rng;
+
+pub struct WorldSeed {
+    pub adjective: String,
+    pub noun: String,
+    pub verb: String,
+    pub numeric_seed: u64,
+}
+
+impl WorldSeed {
+    pub fn from_words(adjective: &str, noun: &str, verb: &str) -> Self {
+        // Convert words to numeric seed
+        // Store both for display and generation
+    }
+    
+    pub fn generate_world(&self) -> World {
+        let mut rng = ChaCha8Rng::seed_from_u64(self.numeric_seed);
+        // Generate world parameters
+        // Create biomes, dungeons, towns
+        // Place monsters and items
+    }
+}
+```
+
+Include word banks and generation logic.
+"""
+idempotent = true

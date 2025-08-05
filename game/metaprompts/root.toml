@@ -87,6 +87,8 @@ cache_key_template = "root_{{ version }}"
 id = "style_guide"
 output_type = { prompt = {} }
 depends_on = ["root"]
+variables = []
+children = []
 system_template = """
 You are creating a comprehensive style guide for {{ game_name }}.
 This style guide will ensure consistency across all generated content.
@@ -136,6 +138,8 @@ id = "assets_metaprompt"
 output_type = { meta_prompt = {} }
 depends_on = ["style_guide"]
 inherits = "root"
+variables = []
+children = []
 system_template = """
 {{ super() }}
 
@@ -187,11 +191,13 @@ id = "code_metaprompt"
 output_type = { meta_prompt = {} }
 depends_on = ["style_guide"]
 inherits = "root"
+variables = []
+children = []
 system_template = """
 {{ super() }}
 
 You are now specifically focused on code generation for the game.
-All code must follow Rust {{ rust_edition }} best practices and leverage Bevy {{ bevy_version }} effectively.
+All code must follow Rust best practices and leverage Bevy's ECS architecture.
 """
 
 user_template = """

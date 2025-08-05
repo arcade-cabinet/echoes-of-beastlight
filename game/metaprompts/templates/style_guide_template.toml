@@ -1,0 +1,85 @@
+# Echoes of Beastlight Style Guide
+# This file defines the visual, audio, and narrative style for the entire game
+
+[metadata]
+version = "1.0.0"
+game_name = "Echoes of Beastlight"
+genre = "JRPG with Monster Taming"
+
+[visual]
+[visual.general]
+art_style = "Modern Pixel Art"
+perspective = "Top-down with 3/4 view"
+tile_size = 32
+sprite_scale = 2
+
+[visual.color_palette]
+# Primary colors for the game world
+primary = ["#2C1810", "#8B4513", "#D2691E", "#F4A460"]  # Earth tones
+secondary = ["#1E3A5F", "#4682B4", "#87CEEB", "#B0E0E6"]  # Sky/water tones
+accent = ["#FFD700", "#FFA500", "#FF6347", "#DC143C"]  # Magic/energy colors
+
+# Semantic colors
+[visual.color_palette.semantic]
+health = "#FF6B6B"
+mana = "#4ECDC4"
+experience = "#FFE66D"
+poison = "#95E1D3"
+fire = "#FF6B6B"
+ice = "#A8E6CF"
+electric = "#FFE66D"
+
+[visual.sprites]
+[visual.sprites.characters]
+size = "32x32"
+outline = "1px black"
+animation_fps = 8
+idle_frames = 2
+walk_frames = 4
+attack_frames = 3
+
+[visual.sprites.monsters]
+small_size = "32x32"
+medium_size = "48x48"
+large_size = "64x64"
+outline = "1px black with colored glow for rarity"
+animation_style = "smooth with anticipation"
+
+[visual.ui]
+font_family = "Pixel"
+primary_font_size = 16
+secondary_font_size = 12
+button_style = "rounded corners with gradient"
+window_style = "ornate frame with transparency"
+
+[audio]
+[audio.music]
+main_theme = "Orchestral with chiptune elements"
+battle_theme = "Fast-paced, energetic with rock influences"
+town_theme = "Peaceful, melodic with folk instruments"
+dungeon_theme = "Mysterious, atmospheric with tension"
+
+[audio.sound_effects]
+style = "16-bit inspired with modern processing"
+categories = ["ui", "combat", "movement", "ambient", "monster", "magic"]
+
+[narrative]
+tone = "Hopeful adventure with moments of mystery"
+writing_style = "Clear, concise with occasional humor"
+dialogue_style = "Character-driven with distinct voices"
+
+[narrative.themes]
+primary = ["Friendship", "Growth", "Discovery"]
+secondary = ["Balance with nature", "Understanding differences", "Courage"]
+
+[code_style]
+[code_style.naming]
+components = "PascalCase ending with 'Component'"
+systems = "snake_case ending with '_system'"
+resources = "PascalCase ending with 'Resource'"
+events = "PascalCase ending with 'Event'"
+
+[code_style.organization]
+component_per_file = true
+systems_grouped_by_feature = true
+shared_types_in_common = true

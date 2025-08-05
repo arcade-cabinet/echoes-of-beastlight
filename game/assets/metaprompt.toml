@@ -1,0 +1,127 @@
+name = "echoes-of-beastlight-assets"
+description = "Asset generation cascade for Echoes of Beastlight"
+version = "1.0.0"
+root_prompt = "assets_root"
+
+[global_variables]
+style_guide_path = "../metaprompts/templates/style_guide_template.toml"
+tile_size = 32
+sprite_sizes = { small = 32, medium = 48, large = 64 }
+
+[prompts.assets_root]
+id = "assets_root"
+output_type = { meta_prompt = {} }
+variables = []
+children = ["sprite_generator", "audio_generator", "level_generator"]
+system_template = """
+You are generating asset specifications for Echoes of Beastlight.
+All assets must conform to the style guide and maintain consistency.
+"""
+user_template = """
+Generate child meta-prompts for:
+1. sprite_generator.toml - for all visual assets
+2. audio_generator.toml - for all audio specifications
+3. level_generator.toml - for all level/map data
+"""
+idempotent = true
+cache_key_template = "assets_root_v1"
+
+[prompts.sprite_generator]
+id = "sprite_generator"
+output_type = { meta_prompt = {} }
+depends_on = ["assets_root"]
+variables = []
+children = ["hero_sprites", "monster_sprites", "tile_sprites", "ui_sprites"]
+system_template = """
+You are generating sprite specifications that will be used to create actual image assets.
+Follow the visual style guide strictly, especially color palettes and sprite dimensions.
+"""
+user_template = """
+Create a meta-prompt cascade for generating all sprite specifications.
+Each sprite should be defined with:
+- Dimensions and scale
+- Color palette references
+- Animation frames and timing
+- Special effects or shaders
+"""
+idempotent = true
+
+[prompts.hero_sprites]
+id = "hero_sprites"
+output_type = { asset = { asset_type = "sprite" } }
+depends_on = ["sprite_generator"]
+variables = [
+    { name = "hero_name", type = "string", default = "Luna" },
+    { name = "hero_class", type = "string", default = "Tamer" }
+]
+system_template = """
+Generate detailed sprite specifications for the main hero character.
+The hero should be memorable and align with JRPG protagonist aesthetics.
+"""
+user_template = """
+Create sprites/hero_{{ hero_name | lower }}.yaml with specifications for:
+- Idle animation (2 frames)
+- Walk cycle (4 frames, 4 directions)
+- Attack animation (3 frames)
+- Special ability animation
+- Emotion sprites (happy, sad, surprised, determined)
+
+Include exact color values from the style guide palette.
+"""
+idempotent = true
+cache_key_template = "hero_{{ hero_name }}_{{ hero_class }}"
+
+[prompts.monster_sprites]
+id = "monster_sprites"
+output_type = { asset = { asset_type = "sprite" } }
+depends_on = ["sprite_generator"]
+variables = []
+children = []
+system_template = """
+Generate sprite specifications for tameable monsters.
+Each monster should be unique but fit within the established visual style.
+"""
+user_template = """
+Create sprites/monsters.yaml with specifications for at least 10 starter monsters:
+- Each with idle, attack, and special animations
+- Size variations (small, medium, large)
+- Elemental visual indicators
+- Evolution visual connections
+"""
+idempotent = true
+
+[prompts.audio_generator]
+id = "audio_generator"
+output_type = { meta_prompt = {} }
+depends_on = ["assets_root"]
+variables = []
+children = ["music_tracks", "sound_effects"]
+system_template = """
+Generate audio specifications following the audio style guide.
+Mix retro charm with modern production quality.
+"""
+user_template = """
+Create cascading prompts for music and sound effect generation.
+"""
+idempotent = true
+
+[prompts.music_tracks]
+id = "music_tracks"
+output_type = { asset = { asset_type = "audio" } }
+depends_on = ["audio_generator"]
+variables = []
+children = []
+system_template = """
+Generate detailed music track specifications.
+"""
+user_template = """
+Create audio/music_specs.yaml with:
+- Main theme (2-3 minutes, loopable)
+- Battle theme (energetic, 1-2 minutes)
+- Town theme (peaceful, 2 minutes)
+- Victory fanfare (10-15 seconds)
+- Game over theme (melancholic, 30 seconds)
+
+Include tempo, key, instrumentation, and mood descriptors.
+"""
+idempotent = true

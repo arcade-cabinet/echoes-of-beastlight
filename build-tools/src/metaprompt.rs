@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::path::PathBuf;
 
 /// A meta-prompt that can generate other prompts or content
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -99,7 +98,8 @@ pub enum VariableType {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResponseFormat {
     pub format_type: ResponseFormatType,
-    pub schema: Option<serde_json::Value>,
+    #[serde(default)]
+    pub validate: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -107,8 +107,10 @@ pub struct ResponseFormat {
 pub enum ResponseFormatType {
     Json,
     Yaml,
+    Toml,
     Markdown,
-    Code,
+    Code { language: String },
+    Structured { schema: serde_json::Value },
     PlainText,
 }
 
