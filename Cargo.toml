@@ -1,45 +1,29 @@
-Here is the Cargo.toml file for your Echoes of Beastlight game:
-
 ```toml
 [package]
-name = "beastlight"
+name = "echoes_of_beastlight"
 version = "0.1.0"
 edition = "2018"
 
-# Workspace configuration
 [workspace]
-members = ["beastlight"]
 
-# Specify the build target
-[build]
-target = "wasm32-unknown-unknown"
+[lib]
+crate-type = ["cdylib", "rlib"]
 
-# Specify the dependencies
-[dependencies]
-bevy = "0.5.0" # Bevy is a simple, data-driven game engine built in Rust
-
-# Specify the dependencies for the web build
-[dependencies.web]
-wasm-bindgen = "0.2.69" # Facilitate high-level interactions between Wasm modules and JavaScript
-wasm-pack = "0.9.1" # Your one-stop shop for building and working with Rust-generated WebAssembly
-
-# Specify the dependencies for the native build
-[dependencies.native]
-bevy-native = "0.5.0" # Bevy native is a simple, data-driven game engine built in Rust for native platforms
-
-# Specify the features for the web build
-[features]
-default = ["web"]
-web = ["bevy/web", "wasm-bindgen", "wasm-pack"]
-native = ["bevy/native", "bevy-native"]
-
-# Specify the release profiles
 [profile.release]
-# Optimize for size on the web
-opt-level = "s"
-# Optimize for performance on native platforms
 lto = true
+opt-level = "z"
 codegen-units = 1
-```
 
-This Cargo.toml file specifies the package information, workspace configuration, build target, dependencies, features, and release profiles for your game. The dependencies are split into web and native dependencies, and the features are specified for each build. The release profiles are optimized for size on the web and performance on native platforms.
+[dependencies]
+bevy = { version = "0.12", features = ["dynamic", "wayland", "webgl2"] }
+bevy_ecs_tilemap = { version = "0.12", features = ["atlas"] }
+bevy-yoleck = { version = "0.17", features = ["vpeol_2d"] }
+mapgen = { version = "0.5" }
+bevy_egui = { version = "0.23" }
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = { version = "0.9" }
+rand = { version = "0.8" }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+```

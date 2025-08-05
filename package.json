@@ -27,7 +27,10 @@
     "generate": "nx run tools:generate",
     "generate:dry": "nx run tools:generate:dry",
     "generate:v2": "nx run tools:generate:v2",
-    "generate:v2:dry": "nx run tools:generate:v2:dry"
+    "generate:v2:dry": "nx run tools:generate:v2:dry",
+    "ai": "node tools/ai-game-generator.js",
+    "ai:test": "node tools/ai-game-generator.js test",
+    "ai:regenerate": "node tools/ai-game-generator.js regenerate"
   },
   "devDependencies": {
     "@nrwl/cli": "^15.9.0",

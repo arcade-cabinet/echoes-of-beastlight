@@ -1,68 +1,54 @@
+```rust
 use bevy::prelude::*;
-use bevy_ecs_tilemap::TilemapPlugin;
-use bevy_egui::EguiPlugin;
-#[cfg(debug_assertions)]
-use bevy_yoleck::YoleckPluginForEditor;
+use bevy_tilemap::prelude::*;
+use yoleck::YoleckPlugin;
 
-// Define game states
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum GameState {
     Menu,
-    Overworld,
-    Battle,
-    Shop,
-    Dungeon,
-    Inventory,
+    Playing,
+    Paused,
 }
 
 fn main() {
     App::build()
-        // Set window configuration
         .insert_resource(WindowDescriptor {
-            title: "".to_string(),
-            width: 800.,
-            height: 600.,
+            title: "Echoes of Beastlight".to_string(),
+            width: 16.0 * 40.0,
+            height: 16.0 * 30.0,
             ..Default::default()
         })
-        // Add plugins
+        .add_state(GameState::Menu)
         .add_plugins(DefaultPlugins)
         .add_plugin(TilemapPlugin)
-        .add_plugin(EguiPlugin)
-        #[cfg(debug_assertions)]
-        .add_plugin(YoleckPluginForEditor)
-        // Add game state
-        .add_state(GameState::Menu)
-        // Add systems
-        .add_system_set(SystemSet::on_update(GameState::Menu).with_system(menu_system.system()))
-        .add_system_set(SystemSet::on_update(GameState::Overworld).with_system(overworld_system.system()))
-        .add_system_set(SystemSet::on_update(GameState::Battle).with_system(battle_system.system()))
-        .add_system_set(SystemSet::on_update(GameState::Shop).with_system(shop_system.system()))
-        .add_system_set(SystemSet::on_update(GameState::Dungeon).with_system(dungeon_system.system()))
-        .add_system_set(SystemSet::on_update(GameState::Inventory).with_system(inventory_system.system()))
+        .add_plugin(YoleckPlugin)
+        .add_startup_system(setup.system())
         .run();
 }
 
-// Define your systems here
-fn menu_system() {
-    // TODO: Implement menu system
-}
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut state: ResMut<State<GameState>>,
+) {
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
-fn overworld_system() {
-    // TODO: Implement overworld system
-}
+    let map = Tilemap::builder()
+        .topology(GridTopology::Square)
+        .dimensions(40, 30)
+        .chunk_dimensions(16, 16, 1)
+        .texture_dimensions(16, 16)
+        .finish()
+        .unwrap();
 
-fn battle_system() {
-    // TODO: Implement battle system
+    commands.spawn_bundle(TilemapBundle {
+        tilemap: map,
+        visible: Visible {
+            is_visible: true,
+            is_transparent: true,
+        },
+        transform: Transform::from_xyz(0.0, 0.0, 0.0),
+        global_transform: GlobalTransform::default(),
+    });
 }
-
-fn shop_system() {
-    // TODO: Implement shop system
-}
-
-fn dungeon_system() {
-    // TODO: Implement dungeon system
-}
-
-fn inventory_system() {
-    // TODO: Implement inventory system
-}
+```

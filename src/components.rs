@@ -1,33 +1,41 @@
 use bevy::prelude::*;
 
-// Player component
+
+#[derive(Component, Debug, Clone)]
 pub struct Player {
-    pub name: String,
+    pub health: i32,
+    pub mana: i32,
     pub level: u32,
 }
 
-// Monster component
+impl Player {
+    pub fn new(health: i32, mana: i32, level: u32) -> Self {
+        Self { health, mana, level }
+    }
+}
+
+#[derive(Component, Debug, Clone)]
 pub struct Monster {
-    pub name: String,
-    pub level: u32,
+    pub species: String,
+    pub health: i32,
+    pub damage: i32,
+    pub tameable: bool,
 }
 
-// Tile component
-pub struct Tile {
-    pub x: u32,
-    pub y: u32,
-    pub walkable: bool,
+impl Monster {
+    pub fn new(species: String, health: i32, damage: i32, tameable: bool) -> Self {
+        Self { species, health, damage, tameable }
+    }
 }
 
-// Stats component
-pub struct Stats {
-    pub health: u32,
-    pub strength: u32,
-    pub defense: u32,
-}
-
-// Position component
+#[derive(Component, Debug, Clone)]
 pub struct Position {
     pub x: f32,
     pub y: f32,
+}
+
+impl Position {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self { x, y }
+    }
 }
