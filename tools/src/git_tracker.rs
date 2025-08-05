@@ -1,5 +1,5 @@
 use anyhow::{Result, Context};
-use git2::{Repository, Signature, Oid, Tree, Commit, DiffOptions, IndexAddOption};
+use git2::{Repository, Signature, Oid, Commit};
 use serde::{Serialize, Deserialize};
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
@@ -7,13 +7,12 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 /// Git-based generation tracker for perfect idempotency and versioning
-#[derive(Debug)]
 pub struct GitGenerationTracker {
     repo: Repository,
     generation_branch: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GenerationManifest {
     pub id: Uuid,
     #[serde(with = "chrono::serde::ts_seconds")]
@@ -25,14 +24,14 @@ pub struct GenerationManifest {
     pub config_snapshot: serde_json::Value,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CascadeTree {
     pub root_prompt: PromptNode,
     pub total_api_calls: u32,
     pub total_cost_estimate: f32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PromptNode {
     pub id: String,
     pub prompt_type: String,
@@ -44,7 +43,7 @@ pub struct PromptNode {
     pub cache_hit: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FileMetadata {
     pub hash: String,
     pub size: u64,
@@ -55,6 +54,24 @@ pub struct FileMetadata {
 }
 
 impl GitGenerationTracker {
+    /// Calculate hash of file content
+    fn calculate_file_hash(content: &[u8]) -> String {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+        
+        let mut hasher = DefaultHasher::new();
+        content.hash(&mut hasher);
+        format!("{:x}", hasher.finish())
+    }
+    
+    /// Estimate API cost based on token counts
+    fn estimate_cost(prompt_tokens: usize, completion_tokens: usize) -> f32 {
+        // GPT-4 Turbo pricing (approximate)
+        let prompt_cost = prompt_tokens as f32 * 0.01 / 1000.0;
+        let completion_cost = completion_tokens as f32 * 0.03 / 1000.0;
+        prompt_cost + completion_cost
+    }
+    
     /// Initialize tracker with the current repository
     pub fn new(repo_path: impl AsRef<Path>) -> Result<Self> {
         let repo = Repository::open(repo_path)?;
@@ -114,7 +131,8 @@ impl GitGenerationTracker {
         // Calculate cost
         let prompt_tokens = prompt.system_prompt.len() + prompt.user_prompt.len();
         let estimated_tokens = prompt_tokens / 4; // Rough estimate
-        let cost = (estimated_tokens as f32) * 0.00001; // Rough cost estimate
+        let completion_tokens = 500; // Rough estimate
+        let cost = Self::estimate_cost(estimated_tokens, completion_tokens);
         
         manifest.cascade_tree.total_api_calls += 1;
         manifest.cascade_tree.total_cost_estimate += cost;
@@ -133,7 +151,7 @@ impl GitGenerationTracker {
         prompt_hash: String,
         parent_assets: Vec<String>,
     ) -> Result<()> {
-        let hash = format!("{:x}", md5::compute(content));
+        let hash = Self::calculate_file_hash(content);
         
         let metadata = FileMetadata {
             hash: hash.clone(),
@@ -165,7 +183,7 @@ impl GitGenerationTracker {
             
             // Check if content matches
             let current_content = std::fs::read(path)?;
-            let current_hash = format!("{:x}", md5::compute(&current_content));
+                            let current_hash = Self::calculate_file_hash(&current_content);
             
             if current_hash != metadata.hash {
                 return Ok(true);
@@ -175,7 +193,7 @@ impl GitGenerationTracker {
             if check_parents {
                 for parent in &metadata.parent_assets {
                     if let Some(parent_path) = manifest.cache_keys.iter()
-                        .find(|(_, hash)| *hash == parent.to_string_lossy().to_string())
+                        .find(|(_, hash)| **hash == parent.to_string_lossy().to_string())
                         .map(|(path, _)| PathBuf::from(path))
                     {
                         if self.needs_regeneration(manifest, &parent_path, false)? {
@@ -421,7 +439,7 @@ impl GitGenerationTracker {
             for (path, metadata) in &manifest.generated_files {
                 if path.exists() {
                     let content = std::fs::read(path)?;
-                    let hash = format!("{:x}", md5::compute(&content));
+                    let hash = Self::calculate_file_hash(&content);
                     if hash != metadata.hash {
                         return Ok(false);
                     }
@@ -457,7 +475,7 @@ mod tests {
     use tempfile::TempDir;
     use std::fs;
     
-    fn setup_test_repo() -> Result<(TempDir, Repository)> {
+    fn setup_test_repo() -> Result<TempDir> {
         let temp_dir = TempDir::new()?;
         let repo = Repository::init(&temp_dir)?;
         
@@ -477,19 +495,19 @@ mod tests {
             &[],
         )?;
         
-        Ok((temp_dir, repo))
+        Ok(temp_dir)
     }
     
     #[test]
     fn test_new_tracker() {
-        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let temp_dir = setup_test_repo().unwrap();
         let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
         assert_eq!(tracker.generation_branch, "ai-generation-tracking");
     }
     
     #[test]
     fn test_start_generation() {
-        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let temp_dir = setup_test_repo().unwrap();
         let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
         
         let config = serde_json::json!({
@@ -509,7 +527,7 @@ mod tests {
     
     #[test]
     fn test_track_prompt() {
-        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let temp_dir = setup_test_repo().unwrap();
         let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
         
         let config = serde_json::json!({});
@@ -526,7 +544,7 @@ mod tests {
             cache_hit: false,
         };
         
-        tracker.track_prompt(&mut manifest, prompt_node.clone(), None).unwrap();
+        tracker.track_prompt(&mut manifest, vec![], prompt_node).unwrap();
         
         assert_eq!(manifest.cascade_tree.root_prompt.children.len(), 1);
         assert_eq!(manifest.cascade_tree.root_prompt.children[0].id, "test-prompt");
@@ -536,7 +554,7 @@ mod tests {
     
     #[test]
     fn test_track_file() {
-        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let temp_dir = setup_test_repo().unwrap();
         let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
         
         let mut manifest = GenerationManifest {
@@ -565,7 +583,7 @@ mod tests {
         let file_path = PathBuf::from("test.txt");
         let content = b"test content";
         
-        tracker.track_file(&mut manifest, &file_path, content, "prompt123", vec![]).unwrap();
+        tracker.track_file(&mut manifest, file_path.clone(), content, "prompt123".to_string(), vec![]).unwrap();
         
         assert!(manifest.generated_files.contains_key(&file_path));
         let metadata = &manifest.generated_files[&file_path];
@@ -576,7 +594,7 @@ mod tests {
     
     #[test]
     fn test_can_skip_generation() {
-        let (temp_dir, _repo) = setup_test_repo().unwrap();
+        let temp_dir = setup_test_repo().unwrap();
         let tracker = GitGenerationTracker::new(&temp_dir).unwrap();
         
         // First generation
@@ -588,7 +606,7 @@ mod tests {
         // Track a file
         let file_path = temp_dir.path().join("test.txt");
         fs::write(&file_path, "content").unwrap();
-        tracker.track_file(&mut manifest, &PathBuf::from("test.txt"), b"content", "hash1", vec![]).unwrap();
+        tracker.track_file(&mut manifest, PathBuf::from("test.txt"), b"content", "hash1".to_string(), vec![]).unwrap();
         
         // Save manifest
         let manifest_path = temp_dir.path().join(".ai-generation/manifest.json");

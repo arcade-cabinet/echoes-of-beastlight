@@ -22,7 +22,6 @@ use crate::config::GameConfig;
 use crate::templates::Templates;
 use crate::git_tracker::{GitGenerationTracker, GenerationManifest, PromptNode};
 
-#[derive(Debug)]
 pub struct AIGameGenerator {
     client: Client<OpenAIConfig>,
     config: Option<GameConfig>,
@@ -128,7 +127,7 @@ impl AIGameGenerator {
         Ok(())
     }
     
-    async fn generate_with_ai(&self, system_prompt: &str, user_prompt: &str) -> Result<String> {
+    async fn generate_with_ai(&mut self, system_prompt: &str, user_prompt: &str) -> Result<String> {
         // Count tokens
         let system_tokens = self.tokenizer.encode_with_special_tokens(system_prompt).len();
         let user_tokens = self.tokenizer.encode_with_special_tokens(user_prompt).len();
@@ -356,10 +355,15 @@ impl AIGameGenerator {
         Ok(())
     }
     
-    pub async fn generate_style_guide(&mut self) -> Result<()> {
+    pub     async fn generate_style_guide(&mut self) -> Result<()> {
         info!("🎨 Generating visual style guide...");
         
         let config = self.config.as_ref().context("Config not loaded")?;
+        let game_genre = config.game.genre.clone();
+        let game_title = config.game.title.clone();
+        let game_theme = config.game.theme.clone();
+        let graphics_perspective = config.graphics.perspective.clone();
+        let sprite_size = config.graphics.sprite_size;
         
         // Generate color palette
         let palette_prompt = format!(
@@ -371,10 +375,10 @@ impl AIGameGenerator {
             - ui_colors: background, text, highlight colors \
             - semantic_colors: health (red), mana (blue), poison (green), etc. \
             Each color should have 'hex', 'name', and 'usage' fields.",
-            config.game.genre,
-            config.game.title,
-            if config.game.theme.is_empty() { &config.game.genre } else { &config.game.theme },
-            config.graphics.perspective
+            game_genre,
+            game_title,
+            if game_theme.is_empty() { &game_genre } else { &game_theme },
+            graphics_perspective
         );
         
         let palette_json = self.generate_with_ai(
@@ -395,9 +399,9 @@ impl AIGameGenerator {
             5. UI design patterns \
             6. Environmental art rules \
             Format as a markdown document.",
-            config.game.title,
-            config.graphics.sprite_size,
-            config.graphics.sprite_size
+            game_title,
+            sprite_size,
+            sprite_size
         );
         
         let style_rules = self.generate_with_ai(
@@ -418,11 +422,11 @@ impl AIGameGenerator {
             6. Effect samples (fire, magic sparkle) \
             All sprites should be {}x{} pixels. \
             Describe each element in detail for DALL-E 3 generation.",
-            config.game.title,
-            config.graphics.sprite_size,
-            config.graphics.sprite_size,
-            config.graphics.sprite_size,
-            config.graphics.sprite_size
+            game_title,
+            sprite_size,
+            sprite_size,
+            sprite_size,
+            sprite_size
         );
         
         let reference_description = self.generate_with_ai(
@@ -450,7 +454,13 @@ impl AIGameGenerator {
             fs::read_to_string(&palette_path)?
         } else {
             warn!("Color palette not found, using defaults");
-            r#"{"ui_colors": {"background": "#1a1c2c", "text": "#f4f4f4 ", "highlight": "#41a6f6"}}"#.to_string()
+            serde_json::json!({
+                "ui_colors": {
+                    "background": "#1a1c2c",
+                    "text": "#f4f4f4",
+                    "highlight": "#41a6f6"
+                }
+            }).to_string()
         };
         
         // Generate UI element specifications
@@ -664,7 +674,7 @@ impl AIGameGenerator {
         Ok(())
     }
     
-    async fn generate_audio(&mut self) -> Result<()> {
+    pub async fn generate_audio(&mut self) -> Result<()> {
         info!("🎵 Generating procedural audio specifications...");
         
         let config = self.config.as_ref().context("Config not loaded")?;
@@ -762,7 +772,7 @@ impl AIGameGenerator {
         Ok(())
     }
     
-    pub async fn test(&self) -> Result<()> {
+    pub async fn test(&mut self) -> Result<()> {
         let response = self.generate_with_ai(
             "You are a helpful assistant.",
             "Say 'Hello from Rust AI generator!'"

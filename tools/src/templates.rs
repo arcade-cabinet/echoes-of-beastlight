@@ -9,8 +9,10 @@ pub struct Templates {
 
 impl Templates {
     pub fn new() -> Self {
+        let mut handlebars = Handlebars::new();
+        handlebars.register_escape_fn(handlebars::no_escape);
         Self {
-            handlebars: Handlebars::new(),
+            handlebars,
         }
     }
     
@@ -182,7 +184,7 @@ pub struct QueryDef {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pretty_assertions::assert_eq;
+
 
     #[tokio::test]
     async fn test_templates_new() {
@@ -248,6 +250,8 @@ mod tests {
         
         assert!(result.is_ok());
         let rendered = result.unwrap();
+        
+        println!("Rendered system template:\n{}", rendered);
         
         assert!(rendered.contains("pub fn movement_system"));
         assert!(rendered.contains("mut player_query: Query<&mut Transform, &Player>"));

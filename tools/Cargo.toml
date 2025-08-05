@@ -42,7 +42,7 @@ handlebars = "5.1"
 rayon = "1.10"
 futures = "0.3"
 md5 = "0.7"
-chrono = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
 colored = "2.2"
 
 # Bevy and UI dependencies (optional, for studio only)
