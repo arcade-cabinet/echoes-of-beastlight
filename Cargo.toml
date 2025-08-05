@@ -1,28 +1,79 @@
-[package]
-name = "echoes_of_beastlight"
-version = "0.1.0"
-edition = "2018"
-
 [workspace]
-members = ["tools"]
+members = [".", "tools"]
+resolver = "2"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Echoes of Beastlight Team"]
+license = "MIT"
+repository = "https://github.com/yourusername/echoes-of-beastlight"
 
-[profile.release]
-lto = true
-opt-level = "z"
-codegen-units = 1
+[workspace.dependencies]
+bevy = { version = "0.14", default-features = false }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+anyhow = "1.0"
+thiserror = "1.0"
+
+[package]
+name = "echoes-of-beastlight"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "echoes-of-beastlight"
+path = "src/main.rs"
 
 [dependencies]
-bevy = { version = "0.12", features = ["wayland", "webgl2"] }
-bevy_ecs_tilemap = { version = "0.12", features = ["atlas"] }
-bevy-yoleck = { version = "0.17", features = ["vpeol_2d"] }
-mapgen = { version = "0.5" }
-bevy_egui = { version = "0.23" }
-serde = { version = "1.0", features = ["derive"] }
-serde_yaml = { version = "0.9" }
-rand = { version = "0.8" }
+bevy = { workspace = true, features = [
+    "bevy_asset",
+    "bevy_winit", 
+    "bevy_core_pipeline",
+    "bevy_pbr",
+    "bevy_gltf",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_text",
+    "bevy_ui",
+    "multi_threaded",
+    "png",
+    "jpeg",
+    "webgl2",
+    "x11",
+    "wayland",
+]}
+bevy_ecs_tilemap = "0.14"
+bevy-yoleck = "0.21"
+bevy_rapier2d = "0.27"
+leafwing-input-manager = "0.15"
+rand = "0.8"
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yaml = { workspace = true }
+ron = "0.8"
 
+# Platform-specific dependencies
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
+web-sys = "0.3"
+console_error_panic_hook = "0.1"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[profile.wasm-release]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+strip = true
