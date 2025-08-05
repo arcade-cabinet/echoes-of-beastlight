@@ -58,6 +58,12 @@ class AIGameGenerator {
     return this;
   }
   
+  // Helper to write files and track them
+  async writeFile(path, content) {
+    await fs.writeFile(path, content);
+    this.state.generated.add(path);
+  }
+  
   async setupDirectories() {
     const dirs = [
       'src',
@@ -266,6 +272,7 @@ Output only Rust code, no explanations.`;
     
     const mainContent = await this.generate(mainPrompt, { temperature: 0.3 });
     await fs.writeFile('src/main.rs', mainContent);
+    this.state.generated.add('src/main.rs');
     console.log(chalk.green('  ✓ main.rs'));
   }
   
@@ -410,136 +417,179 @@ Output as structured JSON.`;
   }
   
   async generateActualSprites() {
-    // Generate a simple 32x32 pixel sprite for the hero
-    const heroSpritePrompt = `Generate a 32x32 pixel art sprite for the hero Cael.
-Create a simple pixel art character with:
-- Green cloak/clothing
-- Brown hair
-- Crystal arm bracer (light blue)
-- Facing right, standing pose
-
-Output as a base64-encoded PNG image data URL.
-Start with: data:image/png;base64,
-Include only the data URL, no other text.`;
+    // Generate images using DALL-E 3
+    const heroSpritePrompt = `Pixel art sprite of a young hero named Cael for a JRPG game. 
+32x32 pixels, green cloak, brown hair, crystal arm bracer (light blue), facing right in standing pose. 
+Clean pixel art style with clear outlines, suitable for a retro RPG.`;
     
-    const heroSprite = await this.generate(heroSpritePrompt, { 
-      temperature: 0.1,
-      maxTokens: 8000 
-    });
-    
-    // Save the base64 as an actual PNG file
-    if (heroSprite.startsWith('data:image/png;base64,')) {
-      const base64Data = heroSprite.replace('data:image/png;base64,', '');
-      const buffer = Buffer.from(base64Data, 'base64');
-      await fs.writeFile('assets/sprites/hero.png', buffer);
-      console.log(chalk.green('  ✓ hero.png'));
+    try {
+      const response = await this.openai.images.generate({
+        model: "dall-e-3",
+        prompt: heroSpritePrompt,
+        n: 1,
+        size: "1024x1024", // DALL-E 3 only supports 1024x1024, 1792x1024, or 1024x1792
+        quality: "standard",
+        response_format: "b64_json"
+      });
+      
+      if (response.data[0].b64_json) {
+        const buffer = Buffer.from(response.data[0].b64_json, 'base64');
+        await fs.writeFile('assets/sprites/hero_dalle.png', buffer);
+        this.state.generated.add('assets/sprites/hero_dalle.png');
+        console.log(chalk.green('  ✓ hero_dalle.png (DALL-E 3)'));
+      }
+    } catch (error) {
+      console.log(chalk.yellow(`  ⚠ DALL-E 3 generation failed: ${error.message}`));
     }
     
-    // Generate a simple tileset
-    const tilesetPrompt = `Generate a 16x16 pixel tileset with 4 basic tiles arranged in a 2x2 grid (32x32 total):
-- Top-left: Grass tile (green)
-- Top-right: Stone tile (gray)
-- Bottom-left: Water tile (blue)
-- Bottom-right: Dirt tile (brown)
-
-Each tile should be 16x16 pixels with simple patterns.
-Output as a base64-encoded PNG image data URL.
-Start with: data:image/png;base64,
-Include only the data URL, no other text.`;
+    // Generate a tileset
+    const tilesetPrompt = `Pixel art tileset for a JRPG game showing a 2x2 grid of 16x16 pixel tiles:
+Top-left: grass tile with small details
+Top-right: stone/rock tile with cracks
+Bottom-left: water tile with subtle animation suggestion
+Bottom-right: dirt/earth tile with texture
+Clean pixel art style, vibrant colors, suitable for retro RPG.`;
     
-    const tileset = await this.generate(tilesetPrompt, { 
-      temperature: 0.1,
-      maxTokens: 8000 
-    });
-    
-    if (tileset.startsWith('data:image/png;base64,')) {
-      const base64Data = tileset.replace('data:image/png;base64,', '');
-      const buffer = Buffer.from(base64Data, 'base64');
-      await fs.writeFile('assets/sprites/basic_tileset.png', buffer);
-      console.log(chalk.green('  ✓ basic_tileset.png'));
+    try {
+      const tilesetResponse = await this.openai.images.generate({
+        model: "dall-e-3",
+        prompt: tilesetPrompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+        response_format: "b64_json"
+      });
+      
+      if (tilesetResponse.data[0].b64_json) {
+        const buffer = Buffer.from(tilesetResponse.data[0].b64_json, 'base64');
+        await fs.writeFile('assets/sprites/tileset_dalle.png', buffer);
+        this.state.generated.add('assets/sprites/tileset_dalle.png');
+        console.log(chalk.green('  ✓ tileset_dalle.png (DALL-E 3)'));
+      }
+    } catch (error) {
+      console.log(chalk.yellow(`  ⚠ Tileset generation failed: ${error.message}`));
     }
     
-    // Generate monster sprites
-    const monsterPrompt = `Generate a 32x32 pixel art sprite for a Crystal Beast monster.
-Create a simple creature made of blue crystals with:
-- Angular crystal body
-- Glowing blue core
-- Four legs
-- Facing left
-
-Output as a base64-encoded PNG image data URL.
-Start with: data:image/png;base64,
-Include only the data URL, no other text.`;
+    // Generate monster sprite
+    const monsterPrompt = `Pixel art sprite of a Crystal Beast monster for a JRPG game.
+32x32 pixels, creature made of angular blue crystals with glowing core, four legs, facing left.
+Clean pixel art style with magical glow effect, suitable for retro RPG enemy.`;
     
-    const monsterSprite = await this.generate(monsterPrompt, {
-      temperature: 0.1,
-      maxTokens: 8000
-    });
-    
-    if (monsterSprite.startsWith('data:image/png;base64,')) {
-      const base64Data = monsterSprite.replace('data:image/png;base64,', '');
-      const buffer = Buffer.from(base64Data, 'base64');
-      await fs.writeFile('assets/sprites/crystal_beast.png', buffer);
-      console.log(chalk.green('  ✓ crystal_beast.png'));
+    try {
+      const monsterResponse = await this.openai.images.generate({
+        model: "dall-e-3",
+        prompt: monsterPrompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+        response_format: "b64_json"
+      });
+      
+      if (monsterResponse.data[0].b64_json) {
+        const buffer = Buffer.from(monsterResponse.data[0].b64_json, 'base64');
+        await fs.writeFile('assets/sprites/crystal_beast_dalle.png', buffer);
+        this.state.generated.add('assets/sprites/crystal_beast_dalle.png');
+        console.log(chalk.green('  ✓ crystal_beast_dalle.png (DALL-E 3)'));
+      }
+    } catch (error) {
+      console.log(chalk.yellow(`  ⚠ Monster generation failed: ${error.message}`));
     }
   }
   
   async generateActualAudio() {
-    // Generate a simple 8-bit style audio file
-    const audioPrompt = `Generate a simple 8-bit chiptune melody for a game menu.
-Create a 2-second loop at 120 BPM in C major.
-Use basic square wave synthesis.
-
-Output as a base64-encoded WAV audio data URL.
-Start with: data:audio/wav;base64,
-Include only the data URL, no other text.`;
+    // OpenAI currently offers TTS (text-to-speech) but not music generation
+    // For actual game audio, we'd need to use specialized services like:
+    // - Mubert API for music
+    // - ElevenLabs for voice
+    // - Or generate with code (Web Audio API)
     
-    const menuAudio = await this.generate(audioPrompt, {
-      temperature: 0.1,
-      maxTokens: 10000
+    console.log(chalk.yellow('  ℹ️  Audio generation requires specialized APIs'));
+    
+    // Generate procedural audio descriptions that could be used with Web Audio API
+    const audioSpecs = {
+      menu_theme: {
+        type: 'melody',
+        tempo: 120,
+        key: 'C_major',
+        pattern: [
+          { note: 'C4', duration: 0.25, time: 0 },
+          { note: 'E4', duration: 0.25, time: 0.25 },
+          { note: 'G4', duration: 0.25, time: 0.5 },
+          { note: 'C5', duration: 0.25, time: 0.75 },
+        ],
+        synth: 'square',
+        loop: true
+      },
+      coin_pickup: {
+        type: 'sfx',
+        envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.2 },
+        frequencies: [523.25, 659.25, 783.99], // C5, E5, G5
+        duration: 0.3
+      },
+      menu_select: {
+        type: 'sfx',
+        waveform: 'square',
+        frequency: 440,
+        duration: 0.1,
+        volume: 0.5
+      }
+    };
+    
+    await fs.writeFile('assets/audio/procedural_audio_specs.json', JSON.stringify(audioSpecs, null, 2));
+    this.state.generated.add('assets/audio/procedural_audio_specs.json');
+    console.log(chalk.green('  ✓ procedural_audio_specs.json'));
+    
+    // If we had access to OpenAI's Whisper or future audio generation:
+    // const audioResponse = await this.openai.audio.create({...})
+    
+    // For now, generate a simple Web Audio API script
+    const webAudioScript = `// Web Audio API script for generating game sounds
+class GameAudio {
+  constructor() {
+    this.context = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  
+  playMenuSelect() {
+    const oscillator = this.context.createOscillator();
+    const gainNode = this.context.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(this.context.destination);
+    
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(440, this.context.currentTime);
+    gainNode.gain.setValueAtTime(0.3, this.context.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.1);
+    
+    oscillator.start(this.context.currentTime);
+    oscillator.stop(this.context.currentTime + 0.1);
+  }
+  
+  playCoinPickup() {
+    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+    notes.forEach((freq, i) => {
+      const oscillator = this.context.createOscillator();
+      const gainNode = this.context.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(this.context.destination);
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(freq, this.context.currentTime + i * 0.1);
+      gainNode.gain.setValueAtTime(0.3, this.context.currentTime + i * 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + i * 0.1 + 0.2);
+      
+      oscillator.start(this.context.currentTime + i * 0.1);
+      oscillator.stop(this.context.currentTime + i * 0.1 + 0.2);
     });
+  }
+}
+
+export default GameAudio;`;
     
-    if (menuAudio.startsWith('data:audio/wav;base64,')) {
-      const base64Data = menuAudio.replace('data:audio/wav;base64,', '');
-      const buffer = Buffer.from(base64Data, 'base64');
-      await fs.writeFile('assets/audio/menu_theme.wav', buffer);
-      console.log(chalk.green('  ✓ menu_theme.wav'));
-    }
-    
-    // Generate sound effects
-    const sfxPrompts = [
-      { 
-        name: 'coin_pickup.wav',
-        prompt: 'Generate a short coin pickup sound effect (0.5 seconds). Classic 8-bit style ascending tone.'
-      },
-      {
-        name: 'menu_select.wav', 
-        prompt: 'Generate a menu selection sound effect (0.2 seconds). Quick blip sound.'
-      },
-      {
-        name: 'attack_hit.wav',
-        prompt: 'Generate an attack hit sound effect (0.3 seconds). Sharp impact noise.'
-      }
-    ];
-    
-    for (const sfx of sfxPrompts) {
-      const fullPrompt = `${sfx.prompt}
-Output as a base64-encoded WAV audio data URL.
-Start with: data:audio/wav;base64,
-Include only the data URL, no other text.`;
-      
-      const audio = await this.generate(fullPrompt, {
-        temperature: 0.1,
-        maxTokens: 10000
-      });
-      
-      if (audio.startsWith('data:audio/wav;base64,')) {
-        const base64Data = audio.replace('data:audio/wav;base64,', '');
-        const buffer = Buffer.from(base64Data, 'base64');
-        await fs.writeFile(`assets/audio/${sfx.name}`, buffer);
-        console.log(chalk.green(`  ✓ ${sfx.name}`));
-      }
-    }
+    await fs.writeFile('assets/audio/game-audio.js', webAudioScript);
+    this.state.generated.add('assets/audio/game-audio.js');
+    console.log(chalk.green('  ✓ game-audio.js (Web Audio API)'));
   }
   
   async generateCombatSystem() {
