@@ -30,6 +30,7 @@ tilemaps_module = "tilemaps"
 [prompts.root]
 id = "root"
 output_type = { meta_prompt = {} }
+variables = []
 system_template = """
 You are an AI game architect designing a comprehensive JRPG game called {{ game_name }}.
 You are working with Rust {{ rust_edition }} and Bevy {{ bevy_version }}.

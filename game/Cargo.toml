@@ -1,16 +1,14 @@
-[workspace]
-members = ["game", "build-tools"]
-resolver = "2"
-
-[workspace.package]
+[package]
+name = "echoes-of-beastlight"
 version = "0.1.0"
 edition = "2024"
 authors = ["AI Game Generator"]
 license = "MIT"
+description = "A JRPG adventure featuring monster taming and procedural world generation"
 repository = "https://github.com/yourusername/echoes-of-beastlight"
 
-[workspace.dependencies]
-bevy = "0.16.1"
+[dependencies]
+bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy_ecs_tilemap = "0.14"
 bevy-yoleck = "0.24"
 bevy_rapier2d = "0.27"
@@ -18,51 +16,20 @@ leafwing-input-manager = "0.17"
 serde = { version = "1.0", features = ["derive"] }
 ron = "0.8"
 rand = "0.9"
+rand_chacha = "0.9"
 
-[package]
-name = "echoes-of-beastlight"
-version.workspace = true
-edition.workspace = true
-authors.workspace = true
-license.workspace = true
+[build-dependencies]
+ai-game-generator = { path = "../build-tools" }
+anyhow = "1.0"
+tokio = { version = "1.47", features = ["rt", "macros"] }
 
 [[bin]]
 name = "echoes-of-beastlight"
 path = "src/main.rs"
 
-[dependencies]
-bevy = { workspace = true, features = [
-    "bevy_asset",
-    "bevy_winit",
-    "bevy_core_pipeline",
-    "bevy_pbr",
-    "bevy_gltf",
-    "bevy_render",
-    "bevy_sprite",
-    "bevy_text",
-    "bevy_ui",
-    "multi_threaded",
-    "png",
-    "jpeg",
-    "webgl2",
-    "x11",
-    "wayland",
-]}
-bevy_ecs_tilemap = "0.14"
-bevy-yoleck = "0.21"
-bevy_rapier2d = "0.27"
-leafwing-input-manager = "0.15"
-rand = "0.8"
-serde = { workspace = true }
-serde_json = { workspace = true }
-serde_yaml = { workspace = true }
-ron = "0.8"
-
-# Platform-specific dependencies
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen = "0.2"
-web-sys = "0.3"
-console_error_panic_hook = "0.1"
+[features]
+default = ["bevy/dynamic_linking"]
+dev = ["bevy/file_watcher", "bevy/embedded_watcher"]
 
 [profile.dev]
 opt-level = 1
