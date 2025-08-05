@@ -20,6 +20,36 @@ We're creating a unique fusion of classic JRPG nostalgia with modern AI-driven c
 - Familiar gameplay patterns with infinite variation
 - "Mad libs" world generation creates memorable, shareable seeds
 
+## How It Works
+
+The AI Game Generator is now fully integrated into the game's build process:
+
+1. **Meta-Prompt Cascade**: The game generation is driven by a cascade of meta-prompts defined in `game/metaprompts/root.toml`
+2. **Build Integration**: Generation happens automatically during the build process when enabled
+3. **Studio Review**: The separate studio application allows you to inspect and review generated assets
+
+### Generation Process
+
+```bash
+# Generate game assets
+ECHOES_GENERATE=1 cargo build
+
+# Generate and immediately review
+just generate-and-review
+
+# Dry run to preview changes
+just dry-run
+```
+
+### Studio Features
+
+The studio (`just director`) provides:
+- Asset gallery with visual preview
+- Live game preview
+- Code editor with syntax highlighting
+- Console for monitoring generation
+- Integration with bevy-inspector-egui for runtime inspection
+
 ## Current Development Status
 
 ### ✅ Completed
@@ -169,3 +199,20 @@ Your primary tool for reviewing and directing the game's development:
 5. Define launch timeline preferences
 
 Remember: You have full creative control through the Studio. The AI handles implementation details while you focus on the vision and player experience.
+
+## Quick Start
+
+1. **Generate the game**:
+   ```bash
+   just generate
+   ```
+
+2. **Review in studio**:
+   ```bash
+   just director
+   ```
+
+3. **Play the game**:
+   ```bash
+   just play
+   ```

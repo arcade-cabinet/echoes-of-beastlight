@@ -17,7 +17,7 @@ path = "src/lib.rs"
 # path = "tests/integration/full_generation_test.rs"
 
 [[bin]]
-name = "ai-gen"
+name = "generator-debug"
 path = "src/main.rs"
 required-features = []
 
@@ -25,11 +25,6 @@ required-features = []
 name = "studio"
 path = "src/studio_main.rs"
 required-features = ["studio"]
-
-[[bin]]
-name = "cascade"
-path = "src/cascade_main.rs"
-required-features = []
 
 [features]
 default = []

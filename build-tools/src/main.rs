@@ -22,8 +22,8 @@ mod git_tracker;
 use generator::AIGameGenerator;
 
 #[derive(Parser)]
-#[command(name = "ai-gen")]
-#[command(about = "AI-powered game generator for Echoes of Beastlight", long_about = None)]
+#[command(name = "generator-debug")]
+#[command(about = "Debug tool for AI game generator - for testing individual components", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -39,19 +39,13 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Generate the complete game
-    Generate {
-        /// Force regeneration even if files exist
-        #[arg(long)]
-        force: bool,
-    },
-    /// Generate only specific components
+    /// Test individual generator components
     Component {
         /// Component type to generate
         #[arg(value_enum)]
         component: ComponentType,
     },
-    /// Test the generator
+    /// Run a simple test
     Test,
     /// Clean generated files
     Clean,
@@ -86,12 +80,8 @@ async fn main() -> Result<()> {
     generator.initialize().await?;
 
     match cli.command {
-        Commands::Generate { force } => {
-            info!("🎮 Starting AI Game Generation");
-            generator.generate_game(force).await?;
-        }
         Commands::Component { component } => {
-            info!("🧩 Generating {:?} component", component);
+            info!("🧩 Testing {:?} component generation", component);
             match component {
                 ComponentType::Core => generator.generate_core().await?,
                 ComponentType::Components => generator.generate_components().await?,

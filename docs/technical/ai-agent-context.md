@@ -262,3 +262,64 @@ cargo run --bin ai-gen -- clean
 - Graceful fallbacks for missing assets
 - Partial generation recovery from manifest
 - Automatic retry with exponential backoff
+
+## Architecture Overview
+
+The project now consists of two main crates:
+
+1. **`game/`**: The actual game crate containing:
+   - Game source code (`src/`)
+   - Assets (`assets/`)
+   - Meta-prompts (`metaprompts/`)
+   - Build script (`build.rs`) that triggers AI generation
+
+2. **`build-tools/`**: The AI generation library and studio containing:
+   - Core generator logic (`src/generator.rs`)
+   - Meta-prompt cascade executor (`src/cascade_executor.rs`)
+   - Git-based idempotency tracking (`src/git_tracker.rs`)
+   - Director studio with Bevy/Egui (`src/studio/`)
+   - Debug CLI for testing individual components
+
+### Build Integration
+
+The AI generation is now integrated directly into the game's build process:
+
+```rust
+// game/build.rs
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Generation runs when ECHOES_GENERATE=1 or in release builds
+    let should_generate = env::var("ECHOES_GENERATE").is_ok() || 
+                         env::var("PROFILE").map(|p| p == "release").unwrap_or(false);
+    
+    // Execute the cascade from game/metaprompts/root.toml
+    executor.execute_cascade(&cascade, &output_dir).await?;
+}
+```
+
+## Key Components
+
+### Meta-Prompt Cascade System
+
+The entire game generation is driven by a cascade of meta-prompts:
+
+- **Root cascade**: `game/metaprompts/root.toml` - orchestrates all generation
+- **Meta-prompts generate prompts**: Cascading system where prompts can generate other prompts
+- **Jinja2 templates**: Support for template inheritance and variables
+- **DAG execution**: Topological sorting ensures correct generation order
+
+### Studio (Director Interface)
+
+The studio provides a GUI for directors to:
+- Review generated assets
+- Inspect game state with bevy-inspector-egui
+- Modify generation parameters
+- Preview the game in real-time
+
+### Generator Debug Tool
+
+For testing individual components:
+```bash
+just debug-component sprites  # Test sprite generation
+just debug-test              # Run generator tests
+```

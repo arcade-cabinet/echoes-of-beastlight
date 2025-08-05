@@ -56,38 +56,35 @@ This installs:
 
 ## Daily Workflows
 
-### For AI Generators (Headless)
+### For AI Generators (You)
 
-```bash
-# Generate a complete game
-just generate
+1. **Generate game assets via build script**:
+   ```bash
+   just generate         # Run cascade via game build script
+   just dry-run         # Test without API calls
+   just generate-fresh  # Ignore cache
+   ```
 
-# Generate with custom config
-just generate-with my-config.yaml
+2. **Run tests and checks**:
+   ```bash
+   just test    # Run all tests
+   just check   # Run all checks
+   ```
 
-# Dry run to preview
-just dry-run
+### For Directors (Human Users)
 
-# Fresh generation (no cache)
-just generate-fresh
-```
+1. **Review and iterate on generated assets**:
+   ```bash
+   just director              # Launch studio for asset inspection
+   just generate-and-review   # Generate then review
+   just play                  # Test the game
+   ```
 
-### For Directors (GUI Studio)
-
-```bash
-# Launch the director studio
-just director
-
-# Generate and immediately review
-just generate-and-review
-
-# Review specific aspects
-just review-code
-just review-style
-
-# Play the generated game
-just play
-```
+2. **Development workflow**:
+   ```bash
+   just watch   # Auto-run checks on file changes
+   just fix     # Auto-fix issues
+   ```
 
 ### For Developers
 
@@ -251,3 +248,14 @@ This makes it simple for AI agents to:
 2. Execute appropriate workflows
 3. Parse structured output
 4. Chain operations together
+
+## Build Integration
+
+The AI generation cascade is now integrated directly into the game's build process:
+
+- Generation runs automatically during release builds
+- Can be triggered manually with `ECHOES_GENERATE=1`
+- Dry run mode available with `ECHOES_DRY_RUN=1`
+- Cache is stored in `game/.cascade-cache`
+
+The studio remains a separate binary for director-level asset review and inspection with bevy-inspector-egui integration.

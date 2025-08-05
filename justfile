@@ -4,68 +4,49 @@ default:
 
 # ============= DIRECTOR WORKFLOWS =============
 
-# Launch the full director studio for game review and iteration
+# Launch the studio for asset review and inspection
 director:
-    @echo "🎬 Launching Director Studio..."
-    cd build-tools && cargo run --release --bin studio --features studio
+    @echo "🎮 Launching AI Game Generator Studio..."
+    cd build-tools && cargo run --release --features studio --bin studio
 
-# Review generated game assets in the studio
+# Review generated assets in the studio
 review:
-    @echo "🔍 Opening generated game for review..."
-    just director
+    @echo "🔍 Launching studio in review mode..."
+    cd build-tools && cargo run --release --features studio --bin studio -- --review-mode
 
-# Generate a new game and immediately open in studio for review
-generate-and-review: generate director
-    @echo "✨ Game generated and studio opened!"
+# Generate game and launch studio for review
+generate-and-review:
+    @echo "🎯 Generating game and launching review..."
+    ECHOES_GENERATE=1 cargo build --release
+    just review
 
-# Run the game to test it
+# Play the generated game
 play:
-    @echo "🎮 Launching game..."
+    @echo "🎮 Launching Echoes of Beastlight..."
     cargo run --release
 
 # ============= GENERATOR WORKFLOWS =============
 
-# Generate a complete game (headless AI generator)
+# Generate game assets (via build script)
 generate:
-    @echo "🤖 Running AI game generator..."
-    cd build-tools && cargo run --release --bin ai-gen
+    @echo "🤖 Generating game assets..."
+    ECHOES_GENERATE=1 cargo build
 
-# Generate with specific configuration
+# Generate with specific config
 generate-with CONFIG:
-    @echo "🤖 Running AI generator with config: {{CONFIG}}"
-    cd build-tools && cargo run --release --bin ai-gen -- --config {{CONFIG}}
+    @echo "🤖 Generating with config: {{CONFIG}}"
+    ECHOES_GENERATE=1 ECHOES_CONFIG={{CONFIG}} cargo build
 
-# Dry run to see what would be generated
+# Dry run generation (no API calls)
 dry-run:
-    cd build-tools && cargo run --release --bin ai-gen -- --dry-run
+    @echo "🌊 Dry run generation..."
+    ECHOES_GENERATE=1 ECHOES_DRY_RUN=1 cargo build
 
-# Generate with caching disabled (fresh generation)
+# Force fresh generation (ignore cache)
 generate-fresh:
-    cd build-tools && cargo run --release --bin ai-gen -- --no-cache
-
-# ============= CASCADE WORKFLOWS =============
-
-# Execute the root meta-prompt cascade
-cascade:
-    @echo "🌊 Running meta-prompt cascade..."
-    cd build-tools && cargo run --release --bin cascade -- execute ../game/metaprompts/root.toml -o ../game
-
-# Validate cascade structure
-cascade-validate:
-    @echo "✅ Validating cascade..."
-    cd build-tools && cargo run --release --bin cascade -- validate ../game/metaprompts/root.toml
-
-# Visualize cascade as graph
-cascade-viz:
-    @echo "📊 Visualizing cascade..."
-    cd build-tools && cargo run --release --bin cascade -- visualize ../game/metaprompts/root.toml -o cascade.dot
-    dot -Tpng cascade.dot -o cascade.png
-    @echo "Graph saved to cascade.png"
-
-# Dry run cascade (no API calls)
-cascade-dry:
-    @echo "🌊 Dry run cascade..."
-    cd build-tools && cargo run --release --bin cascade -- execute ../game/metaprompts/root.toml -o ../game --dry-run
+    @echo "🔄 Fresh generation (ignoring cache)..."
+    rm -rf game/.cascade-cache
+    ECHOES_GENERATE=1 cargo build
 
 # ============= DEVELOPMENT SETUP =============
 
@@ -157,7 +138,7 @@ release:
 dist: release
     mkdir -p dist
     tar -czf dist/echoes-of-beastlight-linux-x64.tar.gz -C target/release echoes-of-beastlight || true
-    cd build-tools/target/release && tar -czf ../../../dist/ai-game-generator-linux-x64.tar.gz ai-gen studio
+    cd build-tools/target/release && tar -czf ../../../dist/ai-game-studio-linux-x64.tar.gz studio
     @echo "Distribution packages created in dist/"
 
 # ============= DOCUMENTATION =============
@@ -252,14 +233,14 @@ stats:
     @echo "\n=== Binary Sizes ==="
     ls -lh target/release/ | grep -E "(ai-gen|studio|echoes)" || echo "No release builds found"
 
-# Run the AI generator with custom prompts directory
+# Run the AI generator with custom prompts directory (legacy)
 generate-custom PROMPTS_DIR:
-    cd build-tools && cargo run --release --bin ai-gen -- --prompts-dir {{PROMPTS_DIR}}
+    @echo "⚠️  Custom prompts directory is deprecated. Use metaprompts in game/metaprompts/ instead."
 
 # Profile the generator performance
 profile-generator:
-    cd build-tools && cargo build --release --bin ai-gen
-    perf record --call-graph=dwarf tools/target/release/ai-gen
+    cd build-tools && cargo build --release --bin generator-debug
+    perf record --call-graph=dwarf build-tools/target/release/generator-debug test
     perf report
 
 # Check the entire workspace
@@ -300,4 +281,21 @@ test-taming:
 # Generate world with specific seed
 generate-world SEED:
     @echo "🌍 Generating world with seed: {{SEED}}"
-    cd build-tools && cargo run --release --bin ai-gen -- --world-seed {{SEED}}
+    @echo "⚠️  World generation now happens via metaprompts. Set seed in game/metaprompts/root.toml"
+
+# ============= DEBUG WORKFLOWS =============
+
+# Debug individual generator components
+debug-component COMPONENT:
+    @echo "🔧 Testing {{COMPONENT}} generation..."
+    cd build-tools && cargo run --release --bin generator-debug -- component {{COMPONENT}}
+
+# Run generator test
+debug-test:
+    @echo "🧪 Running generator test..."
+    cd build-tools && cargo run --release --bin generator-debug -- test
+
+# List available debug components
+debug-help:
+    @echo "Available components: core, components, systems, levels, sprites, audio"
+    cd build-tools && cargo run --bin generator-debug -- component --help

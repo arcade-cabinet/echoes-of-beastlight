@@ -26,6 +26,9 @@ GENERATION_STATUS.md
 # Cache
 .cache/
 .ai-generation/
+game/.cascade-cache/
+GENERATION_*.json
+GENERATION_*.md
 
 # OS
 .DS_Store
