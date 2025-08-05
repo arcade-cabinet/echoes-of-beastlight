@@ -23,6 +23,7 @@ This project demonstrates a closed-loop metaprompt system where:
 ```
 .
 ├── game-config.yaml              # Master configuration file
+├── init.sh                       # Project initialization script
 ├── .github/workflows/
 │   ├── generate-file.yml         # Base workflow for OpenAI generation
 │   ├── bootstrap-beastlight.yml  # Main bootstrapping workflow
@@ -45,19 +46,26 @@ This project demonstrates a closed-loop metaprompt system where:
 
 1. **Fork this repository**
 
-2. **Add OpenAI API Key**:
+2. **Initialize the project (optional but recommended)**:
+   Run the initialization script to create the necessary directory structure.
+   ```bash
+   ./init.sh
+   ```
+   Note: You may need to make it executable first: `chmod +x ./init.sh`
+
+3. **Add OpenAI API Key**:
    - Go to Settings → Secrets → Actions
    - Add a new secret named `OPENAI_API_KEY`
    - Paste your OpenAI API key
 
-3. **Install Rust** (for local development):
+4. **Install Rust** (for local development):
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    rustup target add wasm32-unknown-unknown
    cargo install wasm-bindgen-cli
    ```
 
-4. **Trigger Generation**:
+5. **Trigger Generation**:
    - Option 1: Push a change to `game-config.yaml`
    - Option 2: Go to Actions → Select a workflow → Run workflow
 
