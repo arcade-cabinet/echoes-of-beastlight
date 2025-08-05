@@ -343,6 +343,7 @@ mod tests {
             let result = templates.render_tilemap(zone_name);
             assert!(result.is_ok());
             let rendered = result.unwrap();
+            println!("Zone: '{}' -> Expected: '{}'\nRendered:\n{}", zone_name, expected_fn, rendered);
             assert!(rendered.contains(&format!("pub fn {}", expected_fn)));
         }
     }
