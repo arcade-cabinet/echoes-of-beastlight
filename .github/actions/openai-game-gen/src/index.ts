@@ -80,7 +80,7 @@ async function loadTemplate(templatePath: string | undefined): Promise<any> {
   return yaml.load(content);
 }
 
-function interpolatePrompt(template: string, config: GameConfig, params: any): string {
+export function interpolatePrompt(template: string, config: GameConfig, params: any): string {
   let result = template;
   
   // Replace config references
@@ -124,7 +124,7 @@ async function generateWithRetry(
   throw new Error('Failed after all retries');
 }
 
-function parseGeneratedContent(content: string, format: string | undefined): any {
+export function parseGeneratedContent(content: string, format: string | undefined): any {
   if (!format) return content;
   
   try {

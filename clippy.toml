@@ -1,0 +1,25 @@
+# Clippy configuration
+msrv = "1.70.0"
+warn-by-default = true
+
+# Deny certain lints
+disallowed-methods = [
+    { path = "std::env::set_var", reason = "Use a proper configuration system instead" },
+    { path = "std::process::exit", reason = "Use proper error handling with Result" }
+]
+
+# Allow certain patterns common in game development
+allow-dbg-in-tests = true
+allow-print-in-tests = true
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 30
+
+# Maximum number of lines in a function
+too-many-lines-threshold = 100
+
+# Maximum number of arguments
+too-many-arguments-threshold = 7
+
+# Type complexity threshold
+type-complexity-threshold = 250
