@@ -289,13 +289,18 @@ impl AIGameGenerator {
             }
         }
         
-        let pb = ProgressBar::new(6);
+        let pb = ProgressBar::new(8); // Increased for style guide steps
         pb.set_style(
             ProgressStyle::default_bar()
                 .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} {msg}")
                 .unwrap()
                 .progress_chars("#>-")
         );
+        
+        // Generate style guide FIRST
+        pb.set_message("Generating style guide...");
+        self.generate_style_guide().await?;
+        pb.inc(1);
         
         pb.set_message("Generating core files...");
         self.generate_core().await?;
@@ -321,6 +326,10 @@ impl AIGameGenerator {
         self.generate_audio().await?;
         pb.inc(1);
         
+        pb.set_message("Generating UI assets...");
+        self.generate_ui_assets().await?;
+        pb.inc(1);
+        
         pb.finish_with_message("✅ Game generation complete!");
         
         self.generate_summary().await?;
@@ -339,6 +348,133 @@ impl AIGameGenerator {
             // Commit
             let commit_id = tracker.commit_generation(manifest, &commit_message)?;
             info!("📝 Committed generation: {}", commit_id);
+        }
+        
+        Ok(())
+    }
+    
+    pub async fn generate_style_guide(&mut self) -> Result<()> {
+        info!("🎨 Generating visual style guide...");
+        
+        let config = self.config.as_ref().context("Config not loaded")?;
+        
+        // Generate color palette
+        let palette_prompt = format!(
+            "Generate a cohesive color palette for a {} game called '{}'. \
+            The game has a {} mood and {} visual style. \
+            Output a JSON object with: \
+            - primary_colors: 3-4 main colors with hex values and names \
+            - secondary_colors: 2-3 accent colors \
+            - ui_colors: background, text, highlight colors \
+            - semantic_colors: health (red), mana (blue), poison (green), etc. \
+            Each color should have 'hex', 'name', and 'usage' fields.",
+            config.game.genre,
+            config.game.title,
+            config.game.genre, // Using genre as mood for now
+            config.graphics.perspective
+        );
+        
+        let palette_json = self.generate_with_ai(
+            "You are a game art director specializing in color theory and pixel art palettes.",
+            &palette_prompt
+        ).await?;
+        
+        self.write_file("assets/style/color-palette.json", palette_json.as_bytes()).await?;
+        
+        // Generate style rules document
+        let style_rules_prompt = format!(
+            "Create comprehensive visual style guidelines for '{}'. \
+            Include: \
+            1. Pixel art specifications ({}x{} sprites) \
+            2. Outline style (black, colored, or none) \
+            3. Shading technique (flat, simple gradient, dithered) \
+            4. Animation principles (frame counts, timing) \
+            5. UI design patterns \
+            6. Environmental art rules \
+            Format as a markdown document.",
+            config.game.title,
+            config.graphics.sprite_size,
+            config.graphics.sprite_size
+        );
+        
+        let style_rules = self.generate_with_ai(
+            "You are a pixel art expert and game art director.",
+            &style_rules_prompt
+        ).await?;
+        
+        self.write_file("assets/style/style-rules.md", style_rules.as_bytes()).await?;
+        
+        // Generate reference sprite sheet prompt
+        let reference_prompt = format!(
+            "Design a style guide reference sprite sheet for '{}' that includes: \
+            1. Color swatches from the palette \
+            2. Example character in idle pose ({}x{} pixels) \
+            3. Sample terrain tiles (grass, stone, water) \
+            4. UI element examples (button, health bar, dialog box) \
+            5. Lighting/shadow examples \
+            6. Effect samples (fire, magic sparkle) \
+            All sprites should be {}x{} pixels. \
+            Describe each element in detail for DALL-E 3 generation.",
+            config.game.title,
+            config.graphics.sprite_size,
+            config.graphics.sprite_size,
+            config.graphics.sprite_size,
+            config.graphics.sprite_size
+        );
+        
+        let reference_description = self.generate_with_ai(
+            "You are a pixel art designer creating visual references.",
+            &reference_prompt
+        ).await?;
+        
+        // Generate the actual reference image
+        match self.generate_image(&reference_description, "style-reference.png").await {
+            Ok(_) => info!("  ✓ Generated style reference image"),
+            Err(e) => warn!("  ⚠ Failed to generate style reference: {}", e),
+        }
+        
+        Ok(())
+    }
+    
+    pub async fn generate_ui_assets(&mut self) -> Result<()> {
+        info!("🖼️ Generating UI assets...");
+        
+        let config = self.config.as_ref().context("Config not loaded")?;
+        
+        // Load color palette
+        let palette_path = PathBuf::from("assets/style/color-palette.json");
+        let palette_json = if palette_path.exists() {
+            fs::read_to_string(&palette_path)?
+        } else {
+            warn!("Color palette not found, using defaults");
+            r#"{"ui_colors": {"background": "#1a1c2c", "text": "#f4f4f4", "highlight": "#41a6f6"}}"#.to_string()
+        };
+        
+        // Generate UI element specifications
+        let ui_prompt = format!(
+            "Design UI elements for '{}' using this color palette: {}. \
+            Create specifications for: \
+            1. Dialog boxes with 9-slice borders \
+            2. Button states (normal, hover, pressed) \
+            3. Health and mana bars \
+            4. Inventory slots \
+            5. Menu backgrounds \
+            Use pixel art style matching {} perspective. \
+            Output detailed descriptions for image generation.",
+            config.game.title,
+            palette_json,
+            config.graphics.perspective
+        );
+        
+        let ui_specs = self.generate_with_ai(
+            "You are a UI/UX designer specializing in pixel art game interfaces.",
+            &ui_prompt
+        ).await?;
+        
+        // Generate UI sprite sheet
+        match self.generate_image(&ui_specs, "ui-elements.png").await {
+            Ok(_) => info!("  ✓ Generated UI elements"),
+            Err(e) => warn!("  ⚠ Failed to generate UI elements: {}", e),
         }
         
         Ok(())
@@ -432,40 +568,54 @@ impl AIGameGenerator {
     }
     
     pub async fn generate_levels(&mut self) -> Result<()> {
-        info!("🗺️  Generating levels...");
+        info!("🗺️  Generating level files...");
         
         let config = self.config.as_ref().context("Config not loaded")?;
-        let zones = config.environments.outdoor_zones[..3.min(config.environments.outdoor_zones.len())].to_vec();
-        let dungeon_algorithm = config.environments.map_generation.mapgen_algorithms.dungeon.clone();
-        let overworld_algorithm = config.environments.map_generation.mapgen_algorithms.overworld.clone();
         
-        for zone in zones {
-            let algorithm = if zone.zone_type == "dungeon" {
-                &dungeon_algorithm
-            } else {
-                &overworld_algorithm
-            };
+        // Create levels directory and Yoleck index
+        fs::create_dir_all("assets/levels")?;
+        
+        let mut level_files = Vec::new();
+        
+        for zone in &config.environments.outdoor_zones {
+            let zone_name_slug = zone.name.to_lowercase().replace(' ', "_");
             
             let level_prompt = format!(
-                "Generate a level layout for '{}' using {} algorithm. \
-                Size: 50x50 tiles. \
-                Output a Bevy-Yoleck format with player spawn, monsters, treasures, and exit. \
-                Format as YAML.",
-                zone.name, algorithm
+                "Generate a Yoleck (.yol) format level file for '{}' zone. \
+                Zone type: outdoor, biome: {}, description: {}. \
+                Map size: 50x50 tiles, tile size: {}. \
+                Include proper tilemap layout, player spawn, enemies, treasures, and zone transitions. \
+                Output the complete JSON array following Yoleck format: [metadata, {{}}, entities]",
+                zone.name,
+                zone.biome,
+                zone.description.as_deref().unwrap_or("A mysterious area"),
+                config.graphics.tile_size
             );
             
-            let level_data = self.generate_with_ai(
-                "You are a game level designer.",
+            let level_content = self.generate_with_ai(
+                "You are a level designer creating Bevy Yoleck format levels.",
                 &level_prompt
             ).await?;
             
-            let filename = format!(
-                "assets/levels/{}.yol",
-                zone.name.to_lowercase().replace(' ', "_")
-            );
+            let level_filename = format!("{}.yol", zone_name_slug);
+            let level_path = format!("assets/levels/{}", level_filename);
+            self.write_file(&level_path, level_content.as_bytes()).await?;
             
-            self.write_file(&filename, level_data.as_bytes()).await?;
+            level_files.push(serde_json::json!({
+                "filename": level_filename
+            }));
         }
+        
+        // Generate Yoleck index file
+        let index_content = serde_json::json!([
+            {
+                "format_version": 1
+            },
+            level_files
+        ]);
+        
+        let index_json = serde_json::to_string_pretty(&index_content)?;
+        self.write_file("assets/levels/index.yoli", index_json.as_bytes()).await?;
         
         Ok(())
     }
@@ -508,38 +658,73 @@ impl AIGameGenerator {
         Ok(())
     }
     
-    pub async fn generate_audio(&mut self) -> Result<()> {
-        info!("🎵 Generating audio specifications...");
+    async fn generate_audio(&mut self) -> Result<()> {
+        info!("🎵 Generating procedural audio specifications...");
         
-        // Since OpenAI doesn't have music generation yet, create specs for procedural audio
-        let audio_specs = serde_json::json!({
-            "menu_theme": {
-                "type": "melody",
-                "tempo": 120,
-                "key": "C_major",
-                "pattern": [
-                    {"note": "C4", "duration": 0.25, "time": 0},
-                    {"note": "E4", "duration": 0.25, "time": 0.25},
-                    {"note": "G4", "duration": 0.25, "time": 0.5},
-                    {"note": "C5", "duration": 0.25, "time": 0.75}
-                ]
-            },
-            "sfx": {
-                "coin_pickup": {
-                    "frequencies": [523.25, 659.25, 783.99],
-                    "duration": 0.3
-                },
-                "menu_select": {
-                    "frequency": 440,
-                    "duration": 0.1
-                }
-            }
-        });
+        let config = self.config.as_ref().context("Config not loaded")?;
         
-        self.write_file(
-            "assets/audio/audio_specs.json",
-            serde_json::to_string_pretty(&audio_specs)?.as_bytes()
+        // Generate comprehensive audio specifications
+        let audio_prompt = format!(
+            "Generate complete procedural audio specifications for '{}', a {} game. \
+            Include specifications for: \
+            1. Background music tracks (main theme, zone themes, battle, boss, victory, game over) \
+            2. Sound effects (UI, player actions, combat, environmental) \
+            3. Ambient sounds for each biome \
+            Use retro JRPG style with chiptune aesthetics. \
+            Output as JSON with synthesis parameters for Web Audio API.",
+            config.game.title,
+            config.game.genre
+        );
+        
+        let audio_specs = self.generate_with_ai(
+            "You are an audio designer specializing in procedural game audio and Web Audio API.",
+            &audio_prompt
         ).await?;
+        
+        self.write_file("assets/audio/audio_specs.json", audio_specs.as_bytes()).await?;
+        
+        // Generate Web Audio implementation script
+        let implementation_prompt = format!(
+            "Generate a JavaScript module that implements the audio specifications for '{}' using Web Audio API. \
+            The script should: \
+            1. Load the audio_specs.json \
+            2. Create synthesis functions for each sound \
+            3. Provide play() methods for music and SFX \
+            4. Handle looping for background music \
+            5. Include volume and mixing controls \
+            Make it modular and easy to integrate with the game.",
+            config.game.title
+        );
+        
+        let audio_script = self.generate_with_ai(
+            "You are a JavaScript developer expert in Web Audio API and game audio programming.",
+            &implementation_prompt
+        ).await?;
+        
+        self.write_file("assets/audio/game-audio.js", audio_script.as_bytes()).await?;
+        
+        // Generate audio documentation
+        let doc_content = format!(
+            "# Audio System Documentation for {}\n\n\
+            ## Overview\n\
+            This game uses procedural audio generation via Web Audio API.\n\n\
+            ## Audio Files\n\
+            - `audio_specs.json`: Complete audio specifications\n\
+            - `game-audio.js`: Web Audio API implementation\n\n\
+            ## Integration\n\
+            ```javascript\n\
+            import {{ GameAudio }} from './assets/audio/game-audio.js';\n\
+            const audio = new GameAudio();\n\
+            await audio.init();\n\
+            audio.playMusic('main_theme');\n\
+            audio.playSFX('menu_select');\n\
+            ```\n\n\
+            ## Customization\n\
+            Edit `audio_specs.json` to modify any sound parameters.",
+            config.game.title
+        );
+        
+        self.write_file("assets/audio/README.md", doc_content.as_bytes()).await?;
         
         Ok(())
     }

@@ -40,11 +40,11 @@ bevy = { version = "0.14", default-features = false, features = [
     "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi_threaded",
     "png", "jpeg", "webgl2", "x11", "wayland",
 ]}
-bevy_egui = "0.30"
-bevy-inspector-egui = "0.28"
-egui_dock = "0.15"
-egui_extras = "0.30"
-egui-notify = "0.19"
+bevy_egui = { version = "0.28", default-features = false, features = ["default_fonts"] }
+bevy-inspector-egui = { version = "0.25", default-features = false }
+egui_dock = "0.13"
+egui_extras = { version = "0.28", default-features = false }
+egui-notify = "0.15"
 dashmap = "5.5"
 petgraph = "0.6"
 lru = "0.12"
