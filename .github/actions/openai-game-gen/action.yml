@@ -1,0 +1,57 @@
+name: 'OpenAI Game Generator'
+description: 'Optimized OpenAI integration for game asset and code generation'
+author: 'Beastlight Team'
+
+inputs:
+  api_key:
+    description: 'OpenAI API key'
+    required: true
+  output_path:
+    description: 'Path where generated content will be saved'
+    required: true
+  generation_type:
+    description: 'Type of generation: code, tilemap, level, monster, dialog, asset'
+    required: true
+    default: 'code'
+  model:
+    description: 'OpenAI model to use'
+    required: false
+    default: 'gpt-4'
+  temperature:
+    description: 'Temperature for generation'
+    required: false
+    default: '0.7'
+  system_prompt:
+    description: 'System prompt for the AI'
+    required: false
+  user_prompt:
+    description: 'User prompt for the AI'
+    required: true
+  config_path:
+    description: 'Path to game config file'
+    required: false
+    default: 'game-config.yaml'
+  template_path:
+    description: 'Path to template file for structured generation'
+    required: false
+  max_tokens:
+    description: 'Maximum tokens for response'
+    required: false
+    default: '4000'
+  parse_format:
+    description: 'Format to parse response: json, yaml, rust, toml'
+    required: false
+  
+outputs:
+  content:
+    description: 'Generated content'
+  parsed_data:
+    description: 'Parsed data (if parse_format specified)'
+  
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+  
+branding:
+  icon: 'zap'
+  color: 'purple'

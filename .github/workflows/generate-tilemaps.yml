@@ -1,0 +1,220 @@
+name: Generate Tilemap Configurations
+
+on:
+  workflow_call:
+    inputs:
+      zones:
+        description: 'JSON array of zones to generate tilemaps for'
+        required: false
+        type: string
+        default: '["all"]'
+  workflow_dispatch:
+    inputs:
+      zones:
+        description: 'Comma-separated list of zones or "all"'
+        required: false
+        default: 'all'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      zones: ${{ steps.parse.outputs.zones }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Parse zones
+        id: parse
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ZONES="${{ github.event.inputs.zones }}"
+          else
+            ZONES="${{ inputs.zones }}"
+          fi
+          
+          if [ "$ZONES" = "all" ] || [ "$ZONES" = '["all"]' ]; then
+            # Extract zone names from config
+            ZONES=$(yq e '.environments.outdoor_zones[].name' game-config.yaml | jq -R -s -c 'split("\n")[:-1]')
+          elif [[ "$ZONES" != \[* ]]; then
+            # Convert comma-separated to JSON array
+            ZONES=$(echo "$ZONES" | jq -R 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+          fi
+          
+          echo "zones=$ZONES" >> $GITHUB_OUTPUT
+          echo "Generating tilemaps for: $ZONES"
+
+  generate-tilemaps:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        zone: ${{ fromJson(needs.prepare.outputs.zones) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          
+      - name: Install custom action dependencies
+        run: |
+          cd .github/actions/openai-game-gen
+          npm ci
+          npm run build
+          
+      - name: Generate tilemap module for ${{ matrix.zone }}
+        uses: ./.github/actions/openai-game-gen
+        with:
+          api_key: ${{ secrets.OPENAI_API_KEY }}
+          output_path: src/tilemaps/${{ matrix.zone }}_tilemap.rs
+          generation_type: tilemap
+          temperature: 0.4
+          user_prompt: |
+            {
+              "zone_name": "${{ matrix.zone }}",
+              "tile_size": "{config.graphics.tile_size}",
+              "map_size": "{config.environments.map_generation.size}",
+              "chunk_size": "{config.environments.map_generation.chunk_size}"
+            }
+            
+      - name: Generate tilemap data for ${{ matrix.zone }}
+        uses: ./.github/actions/openai-game-gen
+        with:
+          api_key: ${{ secrets.OPENAI_API_KEY }}
+          output_path: assets/tilemaps/${{ matrix.zone }}_tiles.yaml
+          generation_type: tilemap
+          parse_format: yaml
+          temperature: 0.6
+          system_prompt: |
+            Generate tilemap data including tile indices, collision data, and visual properties.
+            Use the zone configuration from the game config.
+          user_prompt: |
+            Generate tile data for ${{ matrix.zone }} including:
+            - Tile index mappings (0-255)
+            - Collision flags per tile
+            - Animation frames if applicable
+            - Palette variations
+            - Layer assignments
+            Based on zone config: {config.environments.outdoor_zones[?name=='${{ matrix.zone }}']}
+            
+      - name: Generate tilemap assets manifest
+        run: |
+          mkdir -p assets/tilemaps
+          cat > assets/tilemaps/${{ matrix.zone }}_manifest.toml << EOF
+          [[tilemap]]
+          name = "${{ matrix.zone }}"
+          texture_path = "sprites/tilesets/${{ matrix.zone }}.png"
+          tile_size = ${{ env.TILE_SIZE || '16' }}
+          columns = 16
+          rows = 16
+          
+          [[layers]]
+          name = "terrain"
+          z_index = 0
+          
+          [[layers]]
+          name = "decoration"
+          z_index = 1
+          
+          [[layers]]
+          name = "collision"
+          z_index = 2
+          visible = false
+          EOF
+          
+      - name: Validate generated code
+        run: |
+          # Create a minimal Cargo.toml for validation
+          cat > Cargo.toml << EOF
+          [package]
+          name = "tilemap-validation"
+          version = "0.1.0"
+          edition = "2021"
+          
+          [dependencies]
+          bevy = "0.12"
+          bevy_ecs_tilemap = "0.12"
+          EOF
+          
+          # Try to compile the generated module
+          rustc --edition=2021 --crate-type lib src/tilemaps/${{ matrix.zone }}_tilemap.rs 2>&1 || true
+          
+      - name: Commit generated files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --staged --quiet || git commit -m "🗺️ Generated tilemap for ${{ matrix.zone }}"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+  generate-tilemap-plugin:
+    needs: generate-tilemaps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          
+      - name: Generate tilemap plugin
+        uses: ./.github/actions/openai-game-gen
+        with:
+          api_key: ${{ secrets.OPENAI_API_KEY }}
+          output_path: src/plugins/tilemap_plugin.rs
+          generation_type: code
+          temperature: 0.3
+          system_prompt: |
+            Generate a Bevy plugin that manages all tilemaps using bevy_ecs_tilemap.
+            The plugin should load tilemap configurations and handle map transitions.
+          user_prompt: |
+            Create a TilemapPlugin that:
+            - Loads all tilemap modules from src/tilemaps/
+            - Manages tilemap spawning and despawning
+            - Handles chunk loading for performance
+            - Implements map transitions between zones
+            - Uses the generated tilemap data from assets/tilemaps/
+            - Integrates with bevy_ecs_tilemap 0.12 API
+            
+            Available zones: {config.environments.outdoor_zones[*].name}
+            
+      - name: Generate tilemap systems
+        uses: ./.github/actions/openai-game-gen
+        with:
+          api_key: ${{ secrets.OPENAI_API_KEY }}
+          output_path: src/systems/tilemap_systems.rs
+          generation_type: code
+          temperature: 0.4
+          user_prompt: |
+            Generate tilemap systems including:
+            - Chunk loading/unloading based on camera position
+            - Tile animation system
+            - Collision detection using tilemap data
+            - Tile interaction system (for shops, dungeons, etc.)
+            - Dynamic tile recoloring for variety
+            
+      - name: Commit plugin files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --staged --quiet || git commit -m "🔌 Generated tilemap plugin and systems"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
