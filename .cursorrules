@@ -1,0 +1,121 @@
+# Echoes of Beastlight - Cursor Rules
+
+## Project Overview
+This is a self-bootstrapping game generator that creates a complete JRPG using AI-powered metaprompts. The project uses Rust + Bevy for the game engine and GitHub Actions for orchestration.
+
+## Key Technologies
+- **Language**: Rust (edition 2021)
+- **Game Engine**: Bevy 0.12
+- **Key Crates**: bevy_ecs_tilemap, bevy-yoleck, mapgen
+- **Build Target**: Native (Windows/Linux/macOS) + WebAssembly
+- **CI/CD**: GitHub Actions with custom OpenAI integration
+- **Configuration**: YAML-driven (game-config.yaml)
+
+## Code Style Guidelines
+
+### Rust Code
+- Use idiomatic Rust patterns
+- Prefer composition over inheritance (ECS pattern)
+- Use `bevy::prelude::*` for common imports
+- Keep systems small and focused on a single responsibility
+- Use descriptive component names (e.g., `TileMapPosition` not `Pos`)
+- Comment like a 90s programmer: terse but effective
+- Always handle WASM compatibility with conditional compilation
+
+### GitHub Actions
+- Use the custom OpenAI action (`.github/actions/openai-game-gen`) for all AI generation
+- Prefer matrix strategies for parallel generation
+- Always validate generated content before committing
+- Use descriptive commit messages with emojis (🎮, 🗺️, 👾, etc.)
+
+### File Organization
+```
+src/
+  main.rs           # App setup and plugin registration
+  components.rs     # All component definitions
+  resources.rs      # Game resources and config
+  systems/          # Game systems (one file per major system)
+  plugins/          # Bevy plugins
+  generation/       # Procedural generation code
+assets/
+  data/            # YAML game data (monsters, items, etc.)
+  levels/          # Yoleck level files (.yol)
+  tilemaps/        # Tilemap configurations
+  prompts/         # DALL-E and audio prompts
+```
+
+## Generation Patterns
+
+### When generating tilemaps:
+- Use bevy_ecs_tilemap 0.12 API
+- Always include multiple layers (terrain, decoration, collision)
+- Use chunk size of 32x32 for optimization
+- Include proper TextureAtlasLayout setup
+
+### When generating levels:
+- Use mapgen.rs algorithms specified in config
+- Output bevy-yoleck compatible .yol files
+- Include entity spawn points
+- Ensure traversability constraints
+
+### When generating monsters:
+- Combine words from generation_rules in config
+- Balance stats based on level range
+- Include at least 2 abilities per monster
+- Use YAML format for data files
+
+## Common Tasks
+
+### Adding a new zone:
+1. Update `game-config.yaml` with zone definition
+2. Run `gh workflow run generate-tilemaps.yml`
+3. The system will generate tilemap modules and data
+
+### Creating new monsters:
+1. Use the monster generation type in custom action
+2. Specify count and level range
+3. System uses word combination rules automatically
+
+### Building for web:
+```bash
+./build-web.sh
+python3 -m http.server 8000
+```
+
+## Error Handling
+- Always validate YAML files after generation
+- Check Rust compilation with minimal Cargo.toml
+- Use proper error types (avoid unwrap in production)
+- Log errors appropriately for debugging
+
+## Performance Considerations
+- Use chunk-based loading for large tilemaps
+- Implement proper culling for off-screen entities
+- Optimize WASM builds with size-focused settings
+- Use resource pooling for frequently spawned entities
+
+## Testing
+- Validate all generated code compiles
+- Test both native and WASM builds
+- Ensure level files are valid YAML
+- Check that all map algorithms produce traversable results
+
+## Documentation
+- Use /// for public API documentation
+- Include examples in doc comments
+- Keep README.md updated with new features
+- Document any new workflows added
+
+## Metaprompt Best Practices
+- Keep prompts focused and specific
+- Use temperature 0.3-0.4 for code, 0.7-0.8 for creative content
+- Always include output format expectations
+- Reference game config values with {config.path.to.value}
+
+## Background Agent Tasks
+When running as a background agent:
+- Automatically fix linting issues
+- Generate missing assets when new zones are added
+- Optimize generated code for performance
+- Create variants of existing content
+- Monitor and fix build failures

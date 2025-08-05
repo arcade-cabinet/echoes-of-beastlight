@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  dev:
+    build: .
+    container_name: beastlight-dev
+    volumes:
+      # Mount the entire workspace
+      - .:/workspace
+      # Preserve cargo cache between runs
+      - cargo-cache:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - target-cache:/workspace/target
+    environment:
+      # Development environment
+      - RUST_LOG=debug
+      - RUST_BACKTRACE=1
+      - CARGO_TERM_COLOR=always
+      # Game configuration
+      - BEVY_ASSET_PATH=/workspace/assets
+      - GAME_CONFIG_PATH=/workspace/game-config.yaml
+      # API keys (set in .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    ports:
+      # Web server for WASM build
+      - "8000:8000"
+      # Bevy inspector (if enabled)
+      - "5000:5000"
+    stdin_open: true
+    tty: true
+    command: cargo watch -x check -x test -x run
+
+  # Asset validation service
+  validator:
+    build: .
+    container_name: beastlight-validator
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: node tools/validate-assets.js
+    depends_on:
+      - dev
+
+  # Web server for testing WASM builds
+  web:
+    image: node:18-alpine
+    container_name: beastlight-web
+    volumes:
+      - ./dist/web:/app
+      - ./out:/app/out
+      - ./assets:/app/assets
+    working_dir: /app
+    ports:
+      - "8080:8080"
+    command: npx http-server -p 8080 -c-1
+    profiles:
+      - web
+
+volumes:
+  cargo-cache:
+  cargo-git:
+  target-cache:

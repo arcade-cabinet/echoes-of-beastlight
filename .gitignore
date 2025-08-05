@@ -1,41 +1,49 @@
-# Prerequisites
-*.d
+# Rust
+/target
+**/*.rs.bk
+Cargo.lock
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# WASM/Web builds
+/out
+/dist
+/pkg
 
-# Precompiled Headers
-*.gch
-*.pch
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Linker files
-*.ilk
+# Environment variables
+.env
+.env.local
+.env.*.local
 
-# Debugger Files
-*.pdb
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# OS
+.DS_Store
+Thumbs.db
 
-# Fortran module files
-*.mod
-*.smod
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# Logs
+*.log
 
-# Executables
-*.exe
-*.out
-*.app
+# Build artifacts
+/build
+/tmp
 
-# debug information files
-*.dwo
+# Generated assets (during development)
+/assets/generated/
+
+# Docker volumes
+.docker/
