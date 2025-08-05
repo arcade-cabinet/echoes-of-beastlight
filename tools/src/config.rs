@@ -19,12 +19,26 @@ pub struct GameInfo {
     pub title: String,
     pub codename: String,
     pub version: String,
+    #[serde(default = "default_genre")]
+    pub genre: String,
+    #[serde(default)]
+    pub theme: String,
+    #[serde(default)]
+    pub setting: String,
+}
+
+fn default_genre() -> String {
+    "JRPG".to_string()
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HeroInfo {
     pub name: String,
     pub description: String,
+    #[serde(default)]
+    pub class: String,
+    #[serde(default)]
+    pub abilities: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -44,6 +58,14 @@ pub struct Zone {
     pub zone_type: String,
     #[serde(default)]
     pub description: String,
+    #[serde(default)]
+    pub biome: String,
+    #[serde(default)]
+    pub difficulty: u32,
+    #[serde(default)]
+    pub monsters: Vec<String>,
+    #[serde(default)]
+    pub features: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

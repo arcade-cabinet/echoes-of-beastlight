@@ -375,9 +375,9 @@ impl AIGameGenerator {
             - ui_colors: background, text, highlight colors \
             - semantic_colors: health (red), mana (blue), poison (green), etc. \
             Each color should have 'hex', 'name', and 'usage' fields.",
-            "JRPG", // Default genre since it's not in config
+            config.game.genre,
             config.game.title,
-            "adventure", // Default mood
+            config.game.theme.as_str().unwrap_or(&config.game.genre),
             config.graphics.perspective
         );
         
@@ -589,13 +589,14 @@ impl AIGameGenerator {
             
             let level_prompt = format!(
                 "Generate a Yoleck (.yol) format level file for '{}' zone. \
-                Zone type: outdoor, biome: {}, description: {}. \
+                Zone type: {}, biome: {}, description: {}. \
                 Map size: 50x50 tiles, tile size: {}. \
                 Include proper tilemap layout, player spawn, enemies, treasures, and zone transitions. \
                 Output the complete JSON array following Yoleck format: [metadata, {{}}, entities]",
                 zone.name,
                 zone.zone_type,
-                zone.description.as_deref().unwrap_or("A mysterious area"),
+                zone.biome,
+                zone.description.as_str(),
                 config.graphics.tile_size
             );
             
