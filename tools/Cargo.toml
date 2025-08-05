@@ -1,0 +1,58 @@
+[package]
+name = "ai-game-generator"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ai-gen"
+path = "src/main.rs"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# OpenAI API
+async-openai = "0.18"
+
+# Token counting
+tiktoken-rs = "0.5"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# CLI and logging
+clap = { version = "4.4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# File system and paths
+walkdir = "2.4"
+
+# HTTP client for DALL-E
+reqwest = { version = "0.11", features = ["json", "stream"] }
+
+# Image processing
+image = "0.24"
+base64 = "0.21"
+
+# Progress bars
+indicatif = "0.17"
+
+# Caching
+cacache = "12.0"
+
+# Templating
+handlebars = "5.0"
+
+# Parallel processing
+rayon = "1.8"
+futures = "0.3"
+
+[dev-dependencies]
+pretty_assertions = "1.4"
