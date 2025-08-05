@@ -218,26 +218,35 @@ impl AIGameGenerator {
         Ok(content)
     }
     
-    async fn generate_image(&self, prompt: &str, filename: &str) -> Result<()> {
-        info!("🎨 Generating image: {}", filename);
+    async fn generate_image(&mut self, prompt: &str, filename: &str) -> Result<()> {
+        info!("Generating image: {}", filename);
+        
+        use async_openai::types::{CreateImageRequestArgs, ImageSize, ImageResponseFormat, Image};
         
         let request = CreateImageRequestArgs::default()
-            .model(ImageModel::DallE3)
             .prompt(prompt)
+            .model("dall-e-3")
             .n(1)
+            .response_format(ImageResponseFormat::Url)
             .size(ImageSize::S1024x1024)
-            .response_format(ResponseFormat::Url)
             .build()?;
-        
+            
         let response = self.client.images().create(request).await?;
         
         if let Some(image_data) = response.data.first() {
-            // DALL-E 3 returns URLs, not base64
-            if let Some(url) = &image_data.revised_prompt {
-                warn!("DALL-E 3 API called successfully but URL download not implemented. Prompt: {}", url);
-            } else {
-                warn!("No URL in image response");
+            match &**image_data {
+                Image::Url { url, revised_prompt: _ } => {
+                    // Download image from URL
+                    let image_bytes = reqwest::get(url).await?.bytes().await?;
+                    let path = PathBuf::from("assets/sprites").join(filename);
+                    self.write_file(&path, &image_bytes).await?;
+                }
+                Image::B64Json { b64_json: _, revised_prompt: _ } => {
+                    warn!("Received base64 response but requested URL format");
+                }
             }
+        } else {
+            warn!("No image in response");
         }
         
         Ok(())
