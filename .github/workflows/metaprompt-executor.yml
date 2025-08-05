@@ -44,7 +44,7 @@ jobs:
               },
               {
                 "role": "user",
-                "content": "Generate a complete vintage-style game based on this configuration:\n\nGame Title: ${{ env.GAME_TITLE }}\nTheme: ${{ env.GAME_THEME }}\nPlatform: Cross-platform desktop (Windows/Linux/macOS)\nArt Style: Final Fantasy VI meets Pokemon GSC\nHero: ${{ env.HERO_NAME }} - ${{ env.HERO_DESC }}\n\nGenerate:\n1. DALL-E prompts for all sprites and tiles\n2. Audio specifications\n3. Quest/dialog/map structures\n4. Complete C++ code structure\n\nFormat the output with clear section headers marked with ### for parsing."
+                "content": "Generate a complete vintage-style game based on this configuration:\n\nGame Title: ${{ env.GAME_TITLE }}\nTheme: ${{ env.GAME_THEME }}\nPlatform: Cross-platform including web (using Rust + Bevy)\nArt Style: Final Fantasy VI meets Pokemon GSC\nHero: ${{ env.HERO_NAME }} - ${{ env.HERO_DESC }}\n\nGenerate:\n1. DALL-E prompts for all sprites and tiles\n2. Audio specifications\n3. Quest/dialog/map structures\n4. Complete Rust + Bevy code structure\n\nFormat the output with clear section headers marked with ### for parsing."
               }
             ]
             
@@ -82,112 +82,159 @@ jobs:
       - name: Generate specific game files
         run: |
           # Create directory structure
-          mkdir -p src data assets/sprites assets/audio assets/maps
+          mkdir -p src src/systems src/components src/resources assets/sprites assets/audio assets/maps
           
-      - name: Generate main.cpp
+      - name: Generate Cargo.toml
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: src/main.cpp
-          temperature: 0.3
-          systemPrompt: |
-            You are a C++ game developer. Write memory-efficient code for cross-platform SDL2 games.
-            Comment like a 90s programmer: terse, hacky, effective.
-          userPrompt: |
-            Generate the main.cpp for Echoes of Beastlight with:
-            - SDL2 init for Windows/Linux/macOS
-            - 60Hz game loop
-            - State machine (overworld, battle, menu, shop)
-            - Input handling (arrows + A/B buttons)
-            - 16x16 tile renderer
-            - Basic audio stub
-            
-            Make it compile and run immediately.
-            
-      - name: Generate map_generator.cpp
-        uses: ./.github/workflows/generate-file.yml
-        with:
-          outPath: src/map_generator.cpp
-          temperature: 0.4
-          systemPrompt: |
-            You are an expert in procedural generation. Create efficient map generation algorithms.
-          userPrompt: |
-            Generate a map generator for Echoes of Beastlight:
-            - 12x12 grids with symbols: W (wall), . (walkable), D (dungeon), S (shop), E (enemy)
-            - DAG algorithm ensuring traversal between any two edges
-            - Ocean/mountain blockers that preserve paths
-            - Dungeon every 5 maps (guaranteed)
-            - Shop 20-40% chance
-            - Tile recoloring for variety
-            - Maze dungeons with 3+ dead ends
-            
-      - name: Generate monster_system.cpp
-        uses: ./.github/workflows/generate-file.yml
-        with:
-          outPath: src/monster_system.cpp
-          temperature: 0.4
-          systemPrompt: |
-            Create a Pokemon/FF hybrid monster system with taming mechanics.
-          userPrompt: |
-            Generate monster system code:
-            - Struct for monsters (HP, ATK, DEF, SPD, abilities)
-            - Tame vs slay choice mechanics
-            - Turn-based battle system
-            - Logarithmic XP scaling
-            - Party size: 0 start, +1 per dungeon
-            - Procedural abilities from: [bite, slash, guard, dash, volley, drain]
-            - Boss scaling based on area progression
-            
-      - name: Generate monsters.yaml
-        uses: ./.github/workflows/generate-file.yml
-        with:
-          outPath: data/monsters.yaml
-          temperature: 0.8
-          systemPrompt: |
-            Create unique monsters by combining word elements creatively.
-          userPrompt: |
-            Generate 25 monsters combining:
-            Nouns: crystal, beast, shadow, thorn, mist, ember, root, glyph
-            Verbs: slash, bite, guard, dash, volley, drain, shimmer, howl  
-            Adjectives: arcane, wild, ancient, corrupted, mystical, feral, glowing
-            
-            Format:
-            - id: unique_name
-              name: "Display Name"
-              stats: {hp: X, atk: X, def: X, spd: X}
-              abilities: [ability1, ability2]
-              xp_reward: X
-              tame_difficulty: X
-              
-      - name: Generate CMakeLists.txt
-        uses: ./.github/workflows/generate-file.yml
-        with:
-          outPath: CMakeLists.txt
+          outPath: Cargo.toml
           temperature: 0.2
           systemPrompt: |
-            Create a cross-platform CMake build system.
+            You are a Rust expert creating a Bevy game project.
+            Focus on cross-platform compatibility including WASM.
           userPrompt: |
-            Generate CMakeLists.txt for Echoes of Beastlight:
-            - Support Windows, Linux, macOS
-            - Find and link SDL2, SDL2_image, SDL2_mixer
-            - C++17 standard
-            - Copy assets to build directory
-            - Set up install targets
+            Generate Cargo.toml for Echoes of Beastlight with:
+            - Bevy 0.12 with minimal features for smaller WASM builds
+            - bevy_egui for UI
+            - serde for data serialization
+            - rand for procedural generation
+            - Target both native and wasm32-unknown-unknown
+            - Optimize for size in release mode
             
-      - name: Generate README with ASCII art
+      - name: Generate main.rs
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/main.rs
+          temperature: 0.3
+          systemPrompt: |
+            You are a Rust game developer using Bevy ECS. Write idiomatic Rust code.
+            Comment like a 90s programmer but with Rust safety in mind.
+          userPrompt: |
+            Generate main.rs for Echoes of Beastlight with:
+            - Bevy app setup with DefaultPlugins
+            - Custom GamePlugin that adds all game systems
+            - State machine for GameState (Menu, Overworld, Battle, Shop)
+            - Window configuration for pixel-perfect rendering
+            - WASM compatibility checks
+            - Resource loading system
+            
+      - name: Generate map_system.rs
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/systems/map_system.rs
+          temperature: 0.4
+          systemPrompt: |
+            You are an expert in procedural generation with Bevy ECS.
+            Create efficient, deterministic map generation using Bevy's entity-component system.
+          userPrompt: |
+            Generate a map system for Echoes of Beastlight:
+            - 12x12 tile maps as entities with TileMap component
+            - DAG algorithm for guaranteed traversal
+            - Spawn tile entities with Sprite components
+            - Handle tile recoloring via sprite tint
+            - Dungeon/shop placement logic
+            - Map transition system between screens
+            - Use Bevy's Transform for positioning
+            
+      - name: Generate monster_system.rs
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/systems/monster_system.rs
+          temperature: 0.4
+          systemPrompt: |
+            Create a Pokemon/FF hybrid monster system using Bevy ECS patterns.
+          userPrompt: |
+            Generate monster system with:
+            - Monster component with stats (HP, ATK, DEF, SPD)
+            - TameableMonster and PlayerMonster marker components
+            - Battle system using Bevy events
+            - Taming mechanics (check HP threshold)
+            - Party resource (Vec<Entity>)
+            - XP/leveling with logarithmic scaling
+            - Ability system using enums
+            
+      - name: Generate components.rs
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/components.rs
+          temperature: 0.3
+          systemPrompt: |
+            Define all Bevy components for the game following ECS best practices.
+          userPrompt: |
+            Generate all component definitions:
+            - Player, Monster, NPC components
+            - Tile, TileMap components
+            - Stats, Abilities components
+            - Item, Shop components
+            - Position component for grid-based movement
+            - Use derive macros appropriately
+            - Keep components small and focused
+            
+      - name: Generate resources.rs
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/resources.rs
+          temperature: 0.3
+          systemPrompt: |
+            Define Bevy resources for game state and configuration.
+          userPrompt: |
+            Generate resource definitions:
+            - GameConfig resource (loaded from YAML)
+            - MapGenerationRules resource
+            - MonsterDatabase resource
+            - PlayerProgress resource (level, gold, dungeons cleared)
+            - RNG resource for deterministic generation
+            
+      - name: Generate build scripts
+        run: |
+          # Create web build script
+          cat > build-web.sh << 'EOF'
+          #!/bin/bash
+          # Build for WASM
+          cargo build --release --target wasm32-unknown-unknown
+          wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/beastlight.wasm
+          EOF
+          chmod +x build-web.sh
+          
+          # Create index.html for web version
+          cat > index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <meta charset="UTF-8">
+              <title>Echoes of Beastlight</title>
+              <style>
+                  body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000; }
+                  canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+              </style>
+          </head>
+          <body>
+              <script type="module">
+                  import init from './out/beastlight.js';
+                  init();
+              </script>
+          </body>
+          </html>
+          EOF
+          
+      - name: Generate README with build instructions
         uses: ./.github/workflows/generate-file.yml
         with:
           outPath: README.md
           temperature: 0.5
           systemPrompt: |
             Create retro-style game documentation with ASCII art.
+            Include specific Rust/Bevy build instructions.
           userPrompt: |
             Generate README.md for Echoes of Beastlight with:
             - ASCII art logo
             - Game description
-            - Features list
-            - Build instructions for all platforms
+            - Build instructions for:
+              - Native: cargo run --release
+              - Web: ./build-web.sh then serve index.html
+            - Required tools: rust, wasm-pack, wasm-bindgen
             - Controls guide
-            - Gameplay tips
+            - Link to play online version
             - 90s-style formatting
             
       - name: Commit all generated files
@@ -195,7 +242,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -A
-          git commit -m "🎮 Generated Echoes of Beastlight game files" || echo "No changes"
+          git commit -m "🎮 Generated Echoes of Beastlight (Rust + Bevy version)" || echo "No changes"
           
       - name: Push changes
         uses: ad-m/github-push-action@master

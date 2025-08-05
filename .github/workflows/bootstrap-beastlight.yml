@@ -35,7 +35,7 @@ jobs:
             prompt: "Create a workflow that generates game assets (sprites, maps, audio) based on config"
           - name: "generate-code"
             path: ".github/workflows/generate-code.yml"
-            prompt: "Create a workflow that generates C++ game code based on config"
+            prompt: "Create a workflow that generates Rust + Bevy game code based on config"
           - name: "generate-data"
             path: ".github/workflows/generate-data.yml"
             prompt: "Create a workflow that generates game data files (quests, monsters, items) based on config"
@@ -61,7 +61,7 @@ jobs:
             - Accept a 'config' input containing the game configuration
             - Parse the config to extract relevant sections
             - Use the generate-file.yml workflow to create appropriate files
-            - Handle cross-platform requirements (Windows, Linux, macOS)
+            - Handle cross-platform requirements including WebAssembly
             - Include proper error handling and logging
 
   # Phase 2: Generate game assets
@@ -115,7 +115,7 @@ jobs:
             
             Include tempo, key, instruments, and loop points.
 
-  # Phase 3: Generate game code
+  # Phase 3: Generate game code (Rust + Bevy)
   generate-game-code:
     needs: [read-config, generate-workflows]
     runs-on: ubuntu-latest
@@ -123,68 +123,121 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         
-      - name: Generate main game engine
+      - name: Generate Cargo.toml
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: src/main.cpp
+          outPath: Cargo.toml
+          temperature: 0.2
+          systemPrompt: |
+            You are a Rust expert configuring a Bevy game project.
+            Focus on minimal dependencies for WASM compatibility.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate Cargo.toml for Echoes of Beastlight:
+            - Bevy 0.12 with minimal features
+            - Dependencies: bevy_egui, serde, serde_yaml, rand
+            - Profile optimizations for WASM size
+            - Both dev and release profiles configured
+        
+      - name: Generate main game module
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/main.rs
           temperature: 0.3
           systemPrompt: |
-            You are a C++ game developer creating cross-platform SDL2 games.
-            Write clean, modular, memory-efficient code.
+            You are a Rust game developer creating cross-platform Bevy games.
+            Write idiomatic Rust with ECS patterns.
             Comment like a 90s programmer: terse but effective.
           userPrompt: |
             Based on this config: ${{ needs.read-config.outputs.config }}
             
-            Generate the main game loop for Echoes of Beastlight:
-            - SDL2 initialization for Windows/Linux/macOS
-            - 60Hz game loop with frame limiting
-            - State management (overworld, battle, menu, shop)
-            - Input handling (arrows + action buttons)
-            - Basic renderer setup for 16x16 tiles
+            Generate the main.rs for Echoes of Beastlight:
+            - Bevy app initialization
+            - Plugin architecture (GamePlugin, RenderPlugin, AudioPlugin)
+            - State management (Menu, Overworld, Battle, Shop, Dungeon)
+            - Window setup for pixel-perfect rendering
+            - WASM compatibility with conditional compilation
+            - Asset loading system
             
-            Include proper cross-platform setup and error handling.
+            Make it compile and run immediately.
 
-      - name: Generate map generator
+      - name: Generate map system
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: src/map_generator.cpp
+          outPath: src/systems/map.rs
           temperature: 0.4
           systemPrompt: |
-            You are an expert in procedural generation algorithms.
+            You are an expert in procedural generation using Bevy ECS.
             Focus on creating efficient, deterministic map generation.
           userPrompt: |
             Based on this config: ${{ needs.read-config.outputs.config }}
             
-            Generate a procedural map generator with:
-            - 12x12 outdoor maps using DAG algorithm
-            - Guaranteed traversal from any edge to another
-            - Ocean/mountain blockers that don't break traversal
+            Generate a procedural map system with:
+            - TileMap component storing 12x12 grid
+            - Tile entities with Sprite components
+            - DAG algorithm ensuring traversal
+            - Ocean/mountain blockers preserving paths
             - Dungeon placement (guaranteed every 5 maps)
             - Shop placement (20-40% chance)
-            - Tile recoloring system for variety
-            - Maze algorithm for dungeons with 3+ false paths
-            
-            Use the tile symbols from config (W, ., D, S, !, N, E).
+            - Tile recoloring via sprite tint
+            - Map transition events
+            - Maze algorithm for dungeons
 
       - name: Generate monster system
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: src/monster_system.cpp
+          outPath: src/systems/monster.rs
           temperature: 0.4
           systemPrompt: |
-            You are creating a Pokemon-inspired monster system.
-            Focus on the tame vs slay mechanics.
+            You are creating a Pokemon-inspired monster system in Bevy.
+            Focus on the tame vs slay mechanics using ECS.
           userPrompt: |
             Based on this config: ${{ needs.read-config.outputs.config }}
             
             Generate a monster system with:
-            - Monster data structures (stats, abilities, level)
-            - Taming mechanics (weaken then capture)
-            - Battle system (turn-based like Pokemon/FF)
-            - XP/leveling system (logarithmic scaling)
-            - Party management (starts at 0, +1 per dungeon)
-            - Procedural ability assignment from word lists
-            - Boss scaling based on last 5 maps
+            - Monster component (HP, ATK, DEF, SPD, abilities)
+            - Tameable and PlayerMonster marker components
+            - Battle system using events and states
+            - Taming mechanics (HP threshold check)
+            - Party resource managing entities
+            - XP/leveling with logarithmic scaling
+            - Procedural ability assignment
+            - Boss entity spawning and scaling
+
+      - name: Generate component definitions
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: src/components.rs
+          temperature: 0.3
+          systemPrompt: |
+            Define Bevy components following ECS best practices.
+            Keep components small and focused on data.
+          userPrompt: |
+            Based on this config: ${{ needs.read-config.outputs.config }}
+            
+            Generate all component definitions:
+            - Player, Monster, NPC, Boss markers
+            - Position (grid coordinates)
+            - Stats (HP, MaxHP, ATK, DEF, SPD, Level, XP)
+            - Abilities (enum of all abilities)
+            - Tile, TileType, TileMap
+            - Item, Shop, ShopInventory
+            - Sprite rendering components
+            - Use appropriate derive macros
+
+      - name: Generate web build configuration
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: .cargo/config.toml
+          temperature: 0.2
+          systemPrompt: |
+            Configure Cargo for WASM builds.
+          userPrompt: |
+            Generate .cargo/config.toml for:
+            - wasm32-unknown-unknown target
+            - Optimization flags for size
+            - Web-compatible linker settings
 
   # Phase 4: Generate game data
   generate-game-data:
@@ -197,7 +250,7 @@ jobs:
       - name: Generate monster database
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: data/monsters.yaml
+          outPath: assets/data/monsters.yaml
           temperature: 0.8
           systemPrompt: |
             You are creating a monster database for a JRPG.
@@ -221,7 +274,7 @@ jobs:
       - name: Generate quest templates
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: data/quest_templates.yaml
+          outPath: assets/data/quest_templates.yaml
           temperature: 0.6
           systemPrompt: |
             You are designing procedural quest templates.
@@ -241,7 +294,7 @@ jobs:
       - name: Generate item database
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: data/items.yaml
+          outPath: assets/data/items.yaml
           temperature: 0.5
           systemPrompt: |
             You are creating an item system for a retro JRPG.
@@ -256,7 +309,7 @@ jobs:
             
             Include costs, effects, and shop availability.
 
-  # Phase 5: Generate build system
+  # Phase 5: Generate build system and web files
   generate-build-system:
     needs: [read-config, generate-workflows]
     runs-on: ubuntu-latest
@@ -264,20 +317,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         
-      - name: Generate CMakeLists
+      - name: Generate web build script
         uses: ./.github/workflows/generate-file.yml
         with:
-          outPath: CMakeLists.txt
+          outPath: build-web.sh
           temperature: 0.2
           systemPrompt: |
-            You are an expert in cross-platform C++ build systems.
+            You are creating build scripts for Rust WASM games.
           userPrompt: |
-            Generate a CMakeLists.txt for Echoes of Beastlight that:
-            - Supports Windows, Linux, macOS
-            - Links SDL2, SDL2_image, SDL2_mixer
-            - Sets up proper include directories
-            - Handles debug/release builds
-            - Copies assets to build directory
+            Generate a build script that:
+            - Installs wasm-bindgen-cli if needed
+            - Builds for wasm32-unknown-unknown
+            - Runs wasm-bindgen
+            - Copies assets to web output
+            - Generates index.html if missing
+            - Includes local server instructions
+
+      - name: Generate index.html
+        uses: ./.github/workflows/generate-file.yml
+        with:
+          outPath: index.html
+          temperature: 0.3
+          systemPrompt: |
+            Create a web page for hosting a Bevy WASM game.
+          userPrompt: |
+            Generate index.html for Echoes of Beastlight:
+            - Retro-styled page with pixel font
+            - Canvas centered with integer scaling
+            - Loading screen while WASM initializes
+            - Keyboard controls display
+            - Mobile touch controls (optional)
+            - Dark theme matching game aesthetic
 
       - name: Generate README
         uses: ./.github/workflows/generate-file.yml
@@ -292,10 +362,13 @@ jobs:
             Generate a README.md that includes:
             - ASCII art title
             - Game description and features
-            - Build instructions for all platforms
+            - Build instructions:
+              - Native: cargo run --release
+              - Web: ./build-web.sh
+            - Deployment to GitHub Pages
             - How to play guide
             - Credits and acknowledgments
-            - Retro-style formatting
+            - Link to play online
 
   # Phase 6: Generate metaprompt improvement workflow
   generate-self-improvement:
@@ -317,7 +390,8 @@ jobs:
             Create a workflow that:
             - Analyzes the current game-config.yaml
             - Suggests improvements and additions
-            - Tests generated code for issues
+            - Tests generated Rust code compilation
+            - Checks WASM build size
             - Proposes balance changes
             - Creates a new optimized config version
             

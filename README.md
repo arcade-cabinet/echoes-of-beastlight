@@ -1,6 +1,6 @@
 # 🎮 Echoes of Beastlight - Metaprompt Game Generator
 
-A self-bootstrapping GitHub Actions workflow system that generates an entire JRPG game using AI-powered metaprompts.
+A self-bootstrapping GitHub Actions workflow system that generates an entire JRPG game using AI-powered metaprompts, built with Rust and Bevy.
 
 ## 🚀 Overview
 
@@ -13,7 +13,8 @@ This project demonstrates a closed-loop metaprompt system where:
 
 - **Config-Driven**: Everything stems from `game-config.yaml`
 - **Self-Bootstrapping**: Workflows generate other workflows
-- **Cross-Platform**: Targets Windows, Linux, and macOS
+- **Cross-Platform**: Native builds for Windows, Linux, macOS + **Web (WASM)**
+- **Modern Tech Stack**: Rust + Bevy for performance and safety
 - **Procedural Generation**: Maps, monsters, and quests are procedurally generated
 - **Final Fantasy × Pokémon**: Unique blend of JRPG mechanics
 
@@ -26,10 +27,18 @@ This project demonstrates a closed-loop metaprompt system where:
 │   ├── generate-file.yml         # Base workflow for OpenAI generation
 │   ├── bootstrap-beastlight.yml  # Main bootstrapping workflow
 │   └── metaprompt-executor.yml   # Direct metaprompt execution
-├── src/                          # Generated C++ source code
-├── data/                         # Generated game data (monsters, quests)
-├── assets/                       # Generated asset specifications
-└── docs/                         # Generated documentation
+├── src/                          # Generated Rust source code
+│   ├── main.rs                   # Game entry point
+│   ├── components.rs             # ECS components
+│   ├── resources.rs              # Game resources
+│   └── systems/                  # Game systems
+├── assets/                       # Game assets
+│   ├── data/                     # Game data (monsters, quests)
+│   ├── sprites/                  # Sprite specifications
+│   └── audio/                    # Audio specifications
+├── Cargo.toml                    # Rust dependencies
+├── build-web.sh                  # Web build script
+└── index.html                    # Web deployment page
 ```
 
 ## 🔧 Setup
@@ -41,7 +50,14 @@ This project demonstrates a closed-loop metaprompt system where:
    - Add a new secret named `OPENAI_API_KEY`
    - Paste your OpenAI API key
 
-3. **Trigger Generation**:
+3. **Install Rust** (for local development):
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   rustup target add wasm32-unknown-unknown
+   cargo install wasm-bindgen-cli
+   ```
+
+4. **Trigger Generation**:
    - Option 1: Push a change to `game-config.yaml`
    - Option 2: Go to Actions → Select a workflow → Run workflow
 
@@ -69,7 +85,7 @@ Base workflow that calls OpenAI API to generate any file.
 Complex multi-phase workflow that:
 - Generates other workflows
 - Creates game assets
-- Generates C++ code
+- Generates Rust + Bevy code
 - Produces game data
 - Sets up build system
 
@@ -83,6 +99,11 @@ game:
   title: "Echoes of Beastlight"
   codename: "beastlight"
   
+platform:
+  engine: "bevy"
+  language: "rust"
+  supported: ["windows", "linux", "macos", "web"]
+  
 theme:
   setting: "Arcane wilderness survival meets ancient techno-ruins"
   
@@ -90,11 +111,6 @@ gameplay:
   core_mechanics:
     - "Monster slaying OR taming choice"
     - "Procedural map generation"
-    
-monsters:
-  types:
-    - name: "Shadowbiter"
-      abilities: ["bite", "shadow_dash"]
 ```
 
 ## 🛠️ Development
@@ -105,11 +121,11 @@ To modify the game:
 2. Push changes
 3. Watch as workflows regenerate everything
 4. The system will create:
-   - C++ source files
+   - Rust source files with Bevy ECS
    - Monster databases
    - Quest templates
    - Build configurations
-   - Documentation
+   - Web deployment files
 
 ## 🎨 Asset Generation
 
@@ -124,20 +140,33 @@ The system generates prompts for:
 The system includes a meta-optimization workflow that can:
 - Analyze current configuration
 - Suggest improvements
-- Test generated code
+- Test Rust compilation
+- Check WASM build size
 - Propose balance changes
 - Create optimized config versions
 
 ## 🏗️ Building the Game
 
-Once generated, build with:
-
+### Native Build
 ```bash
-mkdir build && cd build
-cmake ..
-make
-./beastlight
+cargo run --release
 ```
+
+### Web Build
+```bash
+./build-web.sh
+# Then serve the index.html file
+python3 -m http.server 8000
+# Visit http://localhost:8000
+```
+
+### Deploy to GitHub Pages
+The generated workflow can automatically deploy to GitHub Pages, making your game playable online!
+
+## 🌐 Play Online
+
+Once deployed, your game will be available at:
+`https://[your-username].github.io/echoes-of-beastlight/`
 
 ## 📜 License
 
@@ -147,7 +176,8 @@ This project is open source. The metaprompt system and workflows are free to use
 
 - Inspired by classic JRPGs (Final Fantasy, Pokémon)
 - Powered by OpenAI GPT-4
-- Built with GitHub Actions
+- Built with Rust + Bevy
+- Deployed via GitHub Actions
 
 ---
 
