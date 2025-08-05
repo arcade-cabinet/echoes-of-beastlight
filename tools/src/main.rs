@@ -6,6 +6,7 @@ use tracing_subscriber::EnvFilter;
 mod config;
 mod generator;
 mod templates;
+mod git_tracker;
 
 use generator::AIGameGenerator;
 

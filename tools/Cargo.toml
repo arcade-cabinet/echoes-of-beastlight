@@ -34,32 +34,17 @@ rayon = "1.8"
 futures = "0.3"
 md5 = "0.7"
 chrono = "0.4"
-
-# Bevy and UI dependencies
+git2 = "0.18"
 bevy = { version = "0.14", default-features = false, features = [
-    "bevy_asset",
-    "bevy_winit",
-    "bevy_core_pipeline",
-    "bevy_pbr",
-    "bevy_gltf",
-    "bevy_render",
-    "bevy_sprite",
-    "bevy_text",
-    "bevy_ui",
-    "multi_threaded",
-    "png",
-    "jpeg",
-    "webgl2",
-    "x11",
-    "wayland",
+    "bevy_asset", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_gltf",
+    "bevy_render", "bevy_sprite", "bevy_text", "bevy_ui", "multi_threaded",
+    "png", "jpeg", "webgl2", "x11", "wayland",
 ]}
 bevy_egui = "0.30"
 bevy-inspector-egui = "0.28"
 egui_dock = "0.15"
 egui_extras = "0.30"
 egui-notify = "0.19"
-
-# Advanced generation dependencies
 dashmap = "5.5"
 petgraph = "0.6"
 lru = "0.12"
@@ -70,8 +55,6 @@ uuid = { version = "1.10", features = ["v4", "serde"] }
 indexmap = "2.2"
 rfd = "0.12"
 webbrowser = "0.8"
-
-# Style transfer and image processing
 imageproc = "0.23"
 nalgebra = "0.32"
 ndarray = "0.15"

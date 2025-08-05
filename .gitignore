@@ -2,13 +2,27 @@
 /target/
 **/*.rs.bk
 *.pdb
-
-# Cargo
 Cargo.lock
+*.profraw
+*.profdata
+/coverage/
+
+# Generated game output
+/generated/
+/cache/
+GENERATION_SUMMARY.json
+
+# AI Generation tracking - DO NOT IGNORE
+# .ai-generation/
+
+# WebAssembly
+/dist/
+/pkg/
+/wasm-pack.log
 
 # IDE
-.idea/
 .vscode/
+.idea/
 *.swp
 *.swo
 *~
@@ -17,67 +31,23 @@ Cargo.lock
 .DS_Store
 Thumbs.db
 
-# Environment
-.env
-.env.local
-
-# Generated files
-/generated/
-/cache/
-GENERATION_SUMMARY.json
-
-# Web build
-/dist/
-/pkg/
-/wasm-pack.log
-
-# Logs
-*.log
+# Documentation builds
+docs/_build/
+docs/_site/
 
 # Temporary files
 *.tmp
 *.temp
+*.log
 
 # Python (for any helper scripts)
 __pycache__/
 *.py[cod]
 *$py.class
+.Python
+venv/
+env/
 
-# Documentation build
-/docs/_build/
-/docs/_site/
-
-# Test coverage
-*.profraw
-*.profdata
-/coverage/
-
-# Backup files
-*.bak
-*.backup
-
-# Editor backup files
-*~
-\#*\#
-.\#*
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Linux
-.directory
-
-# Node.js remnants (to be safe)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-yarn.lock
+# Misc
+.env
+.env.local

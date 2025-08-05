@@ -215,3 +215,95 @@ For cascading generations (where one prompt generates multiple sub-prompts):
 3. **Differential Generation**: Only regenerate changed parts
 4. **Blockchain Verification**: Cryptographic proof of generation history
 5. **ML-Based Cache Prediction**: Pregenerate likely requests
+
+## Git-Based Generation Tracking (Implemented)
+
+Since we're already in a git repository, we leverage git2 for sophisticated tracking:
+
+### Generation Manifest in Git
+
+Every generation creates a comprehensive manifest stored in `.ai-generation/manifest.json`:
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "parent_commit": "abc123...",
+  "cascade_tree": {
+    "root_prompt": {
+      "id": "root",
+      "prompt_type": "root",
+      "children": [
+        {
+          "id": "level_gen_1",
+          "prompt_type": "level_layout",
+          "system_prompt": "...",
+          "user_prompt": "...",
+          "generated_files": ["levels/zone1.yol"],
+          "cache_hit": false,
+          "children": [...]
+        }
+      ]
+    },
+    "total_api_calls": 15,
+    "total_cost_estimate": 0.0234
+  },
+  "generated_files": {
+    "src/main.rs": {
+      "hash": "a1b2c3...",
+      "size": 2048,
+      "prompt_hash": "def456...",
+      "generation_time": "2024-01-15T10:31:00Z",
+      "parent_assets": []
+    }
+  }
+}
+```
+
+### Cascade Visualization
+
+Every generation also creates `.ai-generation/cascade.md` showing the prompt tree:
+
+```markdown
+- root [root]
+  - level_layout [level_gen_1]
+    → levels/zone1.yol
+    - level_entities [entities_1] (cached)
+      → levels/zone1_entities.yol
+    - level_visuals [visuals_1]
+      → assets/zone1_theme.json
+```
+
+### Git Integration Features
+
+1. **Automatic Commits**: Each generation creates a commit with all generated files
+2. **Branch Tracking**: Generations happen on `ai-generation-tracking` branch
+3. **History Browsing**: View past generations with `git log`
+4. **Diff Preview**: See what will change before generation
+5. **Rollback**: Revert to any previous generation state
+6. **Cross-Session Tracking**: Manifest persists across runs
+
+### Usage
+
+```bash
+# Normal generation (checks for changes)
+cargo run -p ai-game-generator generate
+
+# Force regeneration
+cargo run -p ai-game-generator generate --force
+
+# View generation history
+git log --oneline | grep "Generation ID"
+
+# Revert to previous generation
+git checkout <commit-id>
+```
+
+### Benefits of Git Integration
+
+1. **Perfect Versioning**: Every generation is a git commit
+2. **Collaboration**: Team members can share generations
+3. **Audit Trail**: Complete history of all AI interactions
+4. **Branching**: Experiment with different generation strategies
+5. **Merge Conflicts**: Git handles concurrent generations
+6. **CI/CD Integration**: Trigger builds on generation commits

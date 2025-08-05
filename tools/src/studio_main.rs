@@ -2,6 +2,7 @@ mod studio;
 mod config;
 mod generator;
 mod templates;
+mod git_tracker;
 
 use bevy::prelude::*;
 use studio::GameGeneratorStudioPlugin;
