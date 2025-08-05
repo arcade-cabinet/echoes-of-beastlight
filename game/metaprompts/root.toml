@@ -18,6 +18,10 @@ physics = "bevy_rapier2d"
 input = "leafwing-input-manager"
 serialization = "ron"
 random = "rand"
+save_system = "bevy_save"
+reactive_ui = "bevy_cobweb_ui"
+reactive_core = "bevy_cobweb"
+behavior_trees = "beet_flow"
 
 # Project structure
 [global_variables.project_structure]
