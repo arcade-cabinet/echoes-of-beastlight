@@ -13,8 +13,12 @@ pub mod config;
 pub mod generator;
 pub mod templates;
 pub mod git_tracker;
+pub mod metaprompt;
+pub mod cascade_executor;
 
 // Re-export commonly used types
 pub use config::GameConfig;
 pub use generator::AIGameGenerator;
 pub use templates::Templates;
+pub use metaprompt::{MetaPrompt, PromptCascade};
+pub use cascade_executor::CascadeExecutor;

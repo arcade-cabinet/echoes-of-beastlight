@@ -7,7 +7,7 @@ default:
 # Launch the full director studio for game review and iteration
 director:
     @echo "🎬 Launching Director Studio..."
-    cd tools && cargo run --release --bin studio --features studio
+    cd build-tools && cargo run --release --bin studio --features studio
 
 # Review generated game assets in the studio
 review:
@@ -28,20 +28,44 @@ play:
 # Generate a complete game (headless AI generator)
 generate:
     @echo "🤖 Running AI game generator..."
-    cd tools && cargo run --release --bin ai-gen
+    cd build-tools && cargo run --release --bin ai-gen
 
 # Generate with specific configuration
 generate-with CONFIG:
     @echo "🤖 Running AI generator with config: {{CONFIG}}"
-    cd tools && cargo run --release --bin ai-gen -- --config {{CONFIG}}
+    cd build-tools && cargo run --release --bin ai-gen -- --config {{CONFIG}}
 
 # Dry run to see what would be generated
 dry-run:
-    cd tools && cargo run --release --bin ai-gen -- --dry-run
+    cd build-tools && cargo run --release --bin ai-gen -- --dry-run
 
 # Generate with caching disabled (fresh generation)
 generate-fresh:
-    cd tools && cargo run --release --bin ai-gen -- --no-cache
+    cd build-tools && cargo run --release --bin ai-gen -- --no-cache
+
+# ============= CASCADE WORKFLOWS =============
+
+# Execute the root meta-prompt cascade
+cascade:
+    @echo "🌊 Running meta-prompt cascade..."
+    cd build-tools && cargo run --release --bin cascade -- execute ../game/metaprompts/root.toml -o ../game
+
+# Validate cascade structure
+cascade-validate:
+    @echo "✅ Validating cascade..."
+    cd build-tools && cargo run --release --bin cascade -- validate ../game/metaprompts/root.toml
+
+# Visualize cascade as graph
+cascade-viz:
+    @echo "📊 Visualizing cascade..."
+    cd build-tools && cargo run --release --bin cascade -- visualize ../game/metaprompts/root.toml -o cascade.dot
+    dot -Tpng cascade.dot -o cascade.png
+    @echo "Graph saved to cascade.png"
+
+# Dry run cascade (no API calls)
+cascade-dry:
+    @echo "🌊 Dry run cascade..."
+    cd build-tools && cargo run --release --bin cascade -- execute ../game/metaprompts/root.toml -o ../game --dry-run
 
 # ============= DEVELOPMENT SETUP =============
 
@@ -78,9 +102,9 @@ check:
 # Auto-fix code issues
 fix:
     cargo fmt --all
-    cd tools && cargo fmt --all
+    cd build-tools && cargo fmt --all
     cargo fix --allow-dirty --allow-staged
-    cd tools && cargo fix --allow-dirty --allow-staged
+    cd build-tools && cargo fix --allow-dirty --allow-staged
     pre-commit run --all-files markdownlint || true
     pre-commit run --all-files prettier || true
 
@@ -113,7 +137,7 @@ build:
     @echo "Building game..."
     cargo build --release
     @echo "Building tools..."
-    cd tools && cargo build --release --all-features
+    cd build-tools && cargo build --release --all-features
 
 # Build only the game
 build-game:
@@ -121,19 +145,19 @@ build-game:
 
 # Build only the tools
 build-tools:
-    cd tools && cargo build --release --all-features
+    cd build-tools && cargo build --release --all-features
 
 # Create optimized release builds
 release:
     @echo "Creating release builds..."
     cargo build --release
-    cd tools && cargo build --release --all-features
+    cd build-tools && cargo build --release --all-features
 
 # Create distribution packages
 dist: release
     mkdir -p dist
     tar -czf dist/echoes-of-beastlight-linux-x64.tar.gz -C target/release echoes-of-beastlight || true
-    cd tools/target/release && tar -czf ../../../dist/ai-game-generator-linux-x64.tar.gz ai-gen studio
+    cd build-tools/target/release && tar -czf ../../../dist/ai-game-generator-linux-x64.tar.gz ai-gen studio
     @echo "Distribution packages created in dist/"
 
 # ============= DOCUMENTATION =============
@@ -141,7 +165,7 @@ dist: release
 # Build and open documentation
 docs:
     cargo doc --no-deps --open
-    cd tools && cargo doc --no-deps --all-features
+    cd build-tools && cargo doc --no-deps --all-features
 
 # Open director documentation
 docs-director:
@@ -158,7 +182,7 @@ docs-tech:
 # Clean build artifacts
 clean:
     cargo clean
-    cd tools && cargo clean
+    cd build-tools && cargo clean
     rm -f .secrets.baseline
     rm -rf dist/
 
@@ -184,7 +208,7 @@ bench:
 
 # Generate test coverage report
 coverage:
-    cd tools && cargo tarpaulin --out Html --output-dir ../target/coverage
+    cd build-tools && cargo tarpaulin --out Html --output-dir ../target/coverage
     @echo "Coverage report generated at target/coverage/index.html"
 
 # ============= CI/CD HELPERS =============
@@ -230,11 +254,11 @@ stats:
 
 # Run the AI generator with custom prompts directory
 generate-custom PROMPTS_DIR:
-    cd tools && cargo run --release --bin ai-gen -- --prompts-dir {{PROMPTS_DIR}}
+    cd build-tools && cargo run --release --bin ai-gen -- --prompts-dir {{PROMPTS_DIR}}
 
 # Profile the generator performance
 profile-generator:
-    cd tools && cargo build --release --bin ai-gen
+    cd build-tools && cargo build --release --bin ai-gen
     perf record --call-graph=dwarf tools/target/release/ai-gen
     perf report
 
@@ -249,12 +273,12 @@ workspace-test:
 # Format check with verbose output
 fmt-check:
     cargo fmt --all -- --check
-    cd tools && cargo fmt --all -- --check
+    cd build-tools && cargo fmt --all -- --check
 
 # Run clippy with pedantic lints
 clippy-pedantic:
     cargo clippy --all-targets --all-features -- -W clippy::pedantic
-    cd tools && cargo clippy --all-targets --all-features -- -W clippy::pedantic
+    cd build-tools && cargo clippy --all-targets --all-features -- -W clippy::pedantic
 
 # ============= DIRECTOR REVIEW WORKFLOWS =============
 
@@ -276,4 +300,4 @@ test-taming:
 # Generate world with specific seed
 generate-world SEED:
     @echo "🌍 Generating world with seed: {{SEED}}"
-    cd tools && cargo run --release --bin ai-gen -- --world-seed {{SEED}}
+    cd build-tools && cargo run --release --bin ai-gen -- --world-seed {{SEED}}
