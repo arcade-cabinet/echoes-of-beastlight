@@ -1,0 +1,48 @@
+repos:
+  - repo: local
+    hooks:
+      - id: rust-fmt
+        name: Rust Format
+        entry: cargo fmt --
+        language: system
+        types: [rust]
+        pass_filenames: false
+        
+      - id: rust-clippy
+        name: Rust Clippy
+        entry: cargo clippy --all-targets --all-features -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+        
+      - id: rust-test
+        name: Rust Tests
+        entry: cargo test
+        language: system
+        types: [rust]
+        pass_filenames: false
+        
+      - id: rust-doc
+        name: Rust Doc Check
+        entry: cargo doc --no-deps
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.16.26
+    hooks:
+      - id: typos

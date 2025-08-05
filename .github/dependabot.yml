@@ -1,0 +1,74 @@
+version: 2
+updates:
+  # Rust dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      bevy:
+        patterns:
+          - "bevy*"
+      dev-dependencies:
+        dependency-type: "development"
+    allow:
+      - dependency-type: "all"
+    ignore:
+      # Add any dependencies to ignore here
+      # - dependency-name: "example"
+      #   versions: ["1.x", "2.x"]
+
+  # Rust dependencies in tools directory
+  - package-ecosystem: "cargo"
+    directory: "/tools"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
+      - "tools"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      async-openai:
+        patterns:
+          - "async-openai"
+          - "tiktoken-rs"
+      bevy-studio:
+        patterns:
+          - "bevy*"
+          - "egui*"
+      testing:
+        patterns:
+          - "*test*"
+          - "wiremock"
+          - "proptest"
+          - "mockall"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"

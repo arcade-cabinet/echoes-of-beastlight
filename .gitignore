@@ -1,24 +1,8 @@
 # Rust
-/target/
+target/
+Cargo.lock
 **/*.rs.bk
 *.pdb
-Cargo.lock
-*.profraw
-*.profdata
-/coverage/
-
-# Generated game output
-/generated/
-/cache/
-GENERATION_SUMMARY.json
-
-# AI Generation tracking - DO NOT IGNORE
-# .ai-generation/
-
-# WebAssembly
-/dist/
-/pkg/
-/wasm-pack.log
 
 # IDE
 .vscode/
@@ -26,21 +10,48 @@ GENERATION_SUMMARY.json
 *.swp
 *.swo
 *~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Generated files
+generated-test/
+GENERATION_SUMMARY.json
+GENERATION_SUMMARY.md
+GENERATION_STATUS.md
+
+# Cache
+.cache/
+.ai-generation/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Documentation builds
-docs/_build/
-docs/_site/
+# Logs
+*.log
 
 # Temporary files
 *.tmp
 *.temp
-*.log
+/tmp/
 
-# Python (for any helper scripts)
+# Coverage
+tarpaulin-report.html
+cobertura.xml
+coverage/
+
+# Documentation
+/target/doc/
+
+# Backup files
+*.backup
+*.bak
+
+# Python (for any scripts)
 __pycache__/
 *.py[cod]
 *$py.class
@@ -48,6 +59,15 @@ __pycache__/
 venv/
 env/
 
-# Misc
-.env
-.env.local
+# Security
+*.key
+*.pem
+*.cert
+
+# Build artifacts
+dist/
+build/
+*.wasm
+
+# Test artifacts
+test-results/
