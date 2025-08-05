@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
     
     // Create generator
     let mut generator = AIGameGenerator::new()
-        .with_cache(cli.cache)
+        .with_use_cache(cli.cache)
         .with_dry_run(cli.dry_run);
     
     generator.initialize().await?;
