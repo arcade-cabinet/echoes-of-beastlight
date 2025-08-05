@@ -375,9 +375,9 @@ impl AIGameGenerator {
             - ui_colors: background, text, highlight colors \
             - semantic_colors: health (red), mana (blue), poison (green), etc. \
             Each color should have 'hex', 'name', and 'usage' fields.",
-            config.game.genre,
+            "JRPG", // Default genre since it's not in config
             config.game.title,
-            config.game.genre, // Using genre as mood for now
+            "adventure", // Default mood
             config.graphics.perspective
         );
         
@@ -594,7 +594,7 @@ impl AIGameGenerator {
                 Include proper tilemap layout, player spawn, enemies, treasures, and zone transitions. \
                 Output the complete JSON array following Yoleck format: [metadata, {{}}, entities]",
                 zone.name,
-                zone.biome,
+                zone.zone_type,
                 zone.description.as_deref().unwrap_or("A mysterious area"),
                 config.graphics.tile_size
             );
