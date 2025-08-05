@@ -1,48 +1,158 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+# Set default stages for all hooks
+default_stages: [commit]
+
+# Configure environment
+default_language_version:
+  rust: 1.88.0
+
 repos:
+  # Rust tooling
   - repo: local
     hooks:
       - id: rust-fmt
         name: Rust Format
-        entry: cargo fmt --
+        entry: bash -c 'cargo fmt --all -- --check && cd tools && cargo fmt --all -- --check'
         language: system
         types: [rust]
         pass_filenames: false
         
       - id: rust-clippy
         name: Rust Clippy
-        entry: cargo clippy --all-targets --all-features -- -D warnings
+        entry: bash -c 'cargo clippy --all-targets --all-features -- -D warnings && cd tools && cargo clippy --all-targets --all-features -- -D warnings'
         language: system
         types: [rust]
         pass_filenames: false
+        verbose: true
         
       - id: rust-test
         name: Rust Tests
-        entry: cargo test
+        entry: bash -c 'cargo test --lib && cd tools && cargo test --lib'
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [commit, push]
+        
+      - id: rust-doc
+        name: Rust Doc Check
+        entry: bash -c 'RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features && cd tools && RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features'
         language: system
         types: [rust]
         pass_filenames: false
         
-      - id: rust-doc
-        name: Rust Doc Check
-        entry: cargo doc --no-deps
+      - id: rust-audit
+        name: Rust Security Audit
+        entry: bash -c 'cargo audit && cd tools && cargo audit'
         language: system
-        types: [rust]
         pass_filenames: false
+        types: [rust]
+        
+      - id: rust-deny
+        name: Cargo Deny Check
+        entry: cargo deny check
+        language: system
+        pass_filenames: false
+        types: [rust, toml]
+        
+      - id: rust-outdated
+        name: Check Outdated Dependencies
+        entry: bash -c 'cargo outdated --exit-code 1 || true'
+        language: system
+        pass_filenames: false
+        types: [rust, toml]
+        verbose: true
+        
+      - id: rust-unused-deps
+        name: Check Unused Dependencies
+        entry: bash -c 'cargo machete && cd tools && cargo machete'
+        language: system
+        pass_filenames: false
+        types: [rust, toml]
 
+  # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
+        args: ['--markdown-linebreak-ext=md']
       - id: end-of-file-fixer
       - id: check-yaml
+        args: ['--unsafe']
       - id: check-toml
+      - id: check-json
       - id: check-added-large-files
         args: ['--maxkb=1000']
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: detect-private-key
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
 
+  # Markdown
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.39.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        exclude: 'CHANGELOG.md'
+
+  # YAML formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types: [yaml]
+        exclude: '^\.github/workflows/'
+
+  # Shell script checks
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: ['-x']
+
+  # Spell checking
   - repo: https://github.com/crate-ci/typos
     rev: v1.16.26
     hooks:
       - id: typos
+        args: ['--config', '.typos.toml']
+
+  # License headers
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.4
+    hooks:
+      - id: insert-license
+        name: Add license header to Rust files
+        files: '\.rs$'
+        args:
+          - --license-filepath
+          - .license-header
+          - --comment-style
+          - //
+        exclude: '^(target/|tools/target/)'
+
+  # Security scanning
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+
+  # Git commit message
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.13.0
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+
+# Configuration for running specific stages
+# Run with: pre-commit run --hook-stage <stage>
+# Available stages:
+#   - commit: Run on git commit (default)
+#   - push: Run on git push
+#   - manual: Run only when explicitly called
