@@ -1,41 +1,76 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
 *.pdb
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
 
-# Fortran module files
-*.mod
-*.smod
+# Environment
+.env
+.env.local
+.env.*.local
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# Generated files
+generated-test/
+GENERATION_SUMMARY.json
+GENERATION_SUMMARY.md
+GENERATION_STATUS.md
 
-# Executables
-*.exe
-*.out
-*.app
+# Cache
+.cache/
+.ai-generation/
+game/.cascade-cache/
+GENERATION_*.json
+GENERATION_*.md
 
-# debug information files
-*.dwo
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+
+# Coverage
+tarpaulin-report.html
+cobertura.xml
+coverage/
+
+# Documentation
+/target/doc/
+
+# Backup files
+*.backup
+*.bak
+
+# Python (for any scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+
+# Security
+*.key
+*.pem
+*.cert
+
+# Build artifacts
+dist/
+build/
+*.wasm
+
+# Test artifacts
+test-results/

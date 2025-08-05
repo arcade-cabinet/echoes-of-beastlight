@@ -1,0 +1,75 @@
+game:
+  title: "Test Game"
+  codename: "test_game"
+  version: "1.0.0"
+  genre: "JRPG"
+  theme: "Fantasy"
+  setting: "Medieval"
+
+hero:
+  name: "Test Hero"
+  description: "A brave test hero"
+  class: "Warrior"
+  abilities:
+    - "Slash"
+    - "Block"
+
+environments:
+  outdoor_zones:
+    - name: "Test Forest"
+      type: "outdoor"
+      description: "A mysterious test forest"
+      biome: "forest"
+      difficulty: 1
+      monsters:
+        - "Test Slime"
+        - "Test Wolf"
+      features:
+        - "river"
+        - "clearing"
+    - name: "Test Plains"
+      type: "outdoor"
+      biome: "grassland"
+      difficulty: 2
+  dungeons:
+    - name: "Test Cave"
+      type: "dungeon"
+      biome: "cave"
+      difficulty: 3
+  map_generation:
+    mapgen_algorithms:
+      overworld: "cellular_automata"
+      dungeon: "rooms_and_corridors"
+      cave: "drunken_walk"
+      special: "maze"
+
+generation_rules:
+  adjectives:
+    - "brave"
+    - "mighty"
+    - "swift"
+  nouns:
+    - "warrior"
+    - "mage"
+    - "ranger"
+  verbs:
+    - "attack"
+    - "defend"
+    - "explore"
+  abilities:
+    - "slash"
+    - "heal"
+    - "fireball"
+
+build:
+  dependencies:
+    bevy: "0.16"
+    bevy_rapier2d: "0.27"
+
+graphics:
+  tile_size: 16
+  sprite_size: 32
+  perspective: "top_down"
+
+audio:
+  music_style: "chiptune"

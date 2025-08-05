@@ -1,0 +1,39 @@
+```yaml
+Emberclaw Beast:
+  Size: 32x32
+  Color Palette: Red, orange, yellow, light brown, dark brown, black, white, light gray
+  Idle Animation:
+    Frame 1: Standing with a hunched posture, its red and orange fur bristling. Its yellow eyes stare menacingly. Two sharp, light brown claws are visibly protruding from its dark brown paws. The tail is raised, animated with a small flicker.
+    Frame 2: The tail moves slightly to the left, and its body subtly shifts to depict breathing.
+  Attack Animation:
+    Frame 1: The beast rears back on its hind legs, claws gleaming.
+    Frame 2: With a swift motion, it lunges forward, claws extended.
+    Frame 3: It lands back to its original position, the end of the animation cycle.
+  Hurt/Damage Animation:
+    Frame 1: The beast reels back, eyes squinting, as if hit.
+    Frame 2: It quickly returns to its idle stance, shaking its head.
+  Death Animation:
+    Frame 1: The beast stumbles backward, eyes dimming.
+    Frame 2: It collapses to the ground, body lying flat.
+    Frame 3: The sprite fades away, starting from the edge to the center.
+
+Glyphroot Guardian:
+  Size: 32x32
+  Color Palette: Dark brown, light brown, green, dark green, gray, dark gray, white.
+  Idle Animation:
+    Frame 1: The guardian stands tall, its dark brown bark-like body covered in green and dark green glyphs. A pair of gray stone eyes gaze forward.
+    Frame 2: The glyphs on its body glow faintly, providing a hint of the magic within.
+  Attack Animation:
+    Frame 1: The guardian raises a hefty, light brown arm, glyphs glowing brighter.
+    Frame 2: The arm swings down in a powerful arc.
+    Frame 3: The arm returns to its side, glyphs fading to their original glow.
+  Hurt/Damage Animation:
+    Frame 1: The guardian stumbles back slightly, glyphs dimming.
+    Frame 2: The guardian straightens again, glyphs returning to their normal glow.
+  Death Animation:
+    Frame 1: The glyph glow extinguishes, and the guardian's body starts to crumble.
+    Frame 2: The body continues to crumble, starting to fall apart.
+    Frame 3: The guardian collapses into a pile of rubble, then fades away.
+
+(Continue with similar descriptions for Mistshadow Phantom, Thornbeast Strider, and Crystalglyph Golem)
+```

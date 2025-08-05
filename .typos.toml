@@ -1,0 +1,55 @@
+# Configuration for typos spell checker
+
+[files]
+extend-exclude = [
+    "target/",
+    "tools/target/",
+    "Cargo.lock",
+    "*.png",
+    "*.jpg",
+    "*.gif",
+    "*.ico",
+    "*.wasm",
+    "*.svg",
+]
+
+[default.extend-words]
+# Project-specific terms
+bevy = "bevy"
+egui = "egui"
+tilemap = "tilemap"
+codename = "codename"
+gameplay = "gameplay"
+spawner = "spawner"
+rapier = "rapier"
+yoleck = "yoleck"
+leafwing = "leafwing"
+async-openai = "async-openai"
+tiktoken = "tiktoken"
+dashmap = "dashmap"
+serde = "serde"
+clippy = "clippy"
+rustfmt = "rustfmt"
+tarpaulin = "tarpaulin"
+
+# Game-specific terms
+beastlight = "beastlight"
+tameable = "tameable"
+biome = "biome"
+npc = "npc"
+rpg = "rpg"
+jrpg = "jrpg"
+
+# Technical terms
+repr = "repr"
+deref = "deref"
+impl = "impl"
+async = "async"
+tokio = "tokio"
+wasm = "wasm"
+webgl = "webgl"
+
+[default.extend-identifiers]
+# Allow these in code
+GameConfig = "GameConfig"
+HeroInfo = "HeroInfo"
