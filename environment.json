@@ -82,6 +82,15 @@
         "cargo check",
         "cargo check --target wasm32-unknown-unknown"
       ]
+    },
+    {
+      "name": "Metaprompt Generation Check",
+      "description": "Check if regeneration is needed based on config changes",
+      "trigger": "fileChange",
+      "pattern": "game-config.yaml",
+      "action": "prompt",
+      "message": "Game config changed. Would you like to regenerate the game?",
+      "command": "npm run generate"
     }
   ]
 }

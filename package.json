@@ -29,7 +29,10 @@
     "affected:lint": "nx affected:lint",
     "affected:dep-graph": "nx affected:dep-graph",
     "clean": "nx run-many --target=clean --all && rm -rf node_modules dist tmp",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "generate": "node tools/metaprompt-runner.js",
+    "generate:dry": "node tools/metaprompt-runner.js --dry-run",
+    "generate:fresh": "node tools/metaprompt-runner.js --output=generated/"
   },
   "devDependencies": {
     "@nrwl/cli": "^15.9.0",

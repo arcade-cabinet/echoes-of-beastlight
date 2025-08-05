@@ -1,0 +1,108 @@
+name: Execute Metaprompt Cascade v2
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no OpenAI calls)'
+        required: false
+        type: boolean
+        default: false
+      output_dir:
+        description: 'Output directory'
+        required: false
+        type: string
+        default: '.'
+  push:
+    paths:
+      - 'game-config.yaml'
+
+jobs:
+  generate-game:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run metaprompt cascade
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm run generate:dry
+          else
+            node tools/metaprompt-runner.js --output="${{ inputs.output_dir }}"
+          fi
+          
+      - name: Validate generated files
+        if: inputs.dry_run != true
+        run: |
+          # Check if key files were created
+          echo "Checking generated files..."
+          [ -f "${{ inputs.output_dir }}/Cargo.toml" ] && echo "✅ Cargo.toml created" || echo "❌ Missing Cargo.toml"
+          [ -f "${{ inputs.output_dir }}/src/main.rs" ] && echo "✅ main.rs created" || echo "❌ Missing main.rs"
+          [ -d "${{ inputs.output_dir }}/assets" ] && echo "✅ Assets directory created" || echo "❌ Missing assets directory"
+          
+      - name: Run asset validation
+        if: inputs.dry_run != true
+        run: npm run validate
+        continue-on-error: true
+        
+      - name: Upload generated files
+        if: inputs.dry_run != true
+        uses: actions/upload-artifact@v3
+        with:
+          name: generated-game-${{ github.run_number }}
+          path: |
+            ${{ inputs.output_dir }}/src/
+            ${{ inputs.output_dir }}/assets/
+            ${{ inputs.output_dir }}/Cargo.toml
+            ${{ inputs.output_dir }}/build-web.sh
+            ${{ inputs.output_dir }}/index.html
+            ${{ inputs.output_dir }}/GENERATION_SUMMARY.md
+            
+      - name: Commit generated files
+        if: inputs.dry_run != true && inputs.output_dir == '.'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --staged --quiet || git commit -m "🎮 Generated game via metaprompt cascade"
+          
+      - name: Push changes
+        if: inputs.dry_run != true && inputs.output_dir == '.'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+          
+      - name: Create PR comment
+        if: github.event_name == 'pull_request' && inputs.dry_run != true
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const summaryPath = '${{ inputs.output_dir }}/GENERATION_SUMMARY.md';
+            let summary = '## 🎮 Game Generation Complete!\n\n';
+            
+            if (fs.existsSync(summaryPath)) {
+              summary += fs.readFileSync(summaryPath, 'utf8');
+            } else {
+              summary += 'Generation completed but summary not found.';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });

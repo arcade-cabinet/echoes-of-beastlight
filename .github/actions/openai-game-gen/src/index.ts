@@ -180,7 +180,7 @@ async function run(): Promise<void> {
     }
     
     // Parse user prompt as JSON if it contains parameters
-    let promptParams = {};
+    let promptParams: any = {};
     try {
       promptParams = JSON.parse(userPrompt);
       if (genTemplate && promptParams.prompt) {
