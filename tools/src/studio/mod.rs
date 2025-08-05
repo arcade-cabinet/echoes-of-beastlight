@@ -137,15 +137,16 @@ pub fn studio_ui_system(
                     next_phase.set(StudioPhase::Setup);
                     wizard_state.reset();
                 }
-                if ui.button("Open Project").clicked() {
+                if ui.button("📂 Open Project").clicked() {
                     // Open project dialog
-                    if let Ok(result) = native_dialog::FileDialog::new()
-                        .add_filter("YAML", &["yaml", "yml"])
-                        .show_open_single_file() {
-                        if let Some(path) = result {
-                            // Handle opening project
-                            info!("Opening project: {:?}", path);
-                        }
+                    if let Some(path) = rfd::FileDialog::new()
+                        .add_filter("Game Config", &["yaml"])
+                        .pick_file() 
+                    {
+                        // Load project
+                        studio_state.notifications.push(Notification::info(
+                            format!("Loading project: {:?}", path)
+                        ));
                     }
                 }
                 ui.separator();

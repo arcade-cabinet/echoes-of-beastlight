@@ -1,7 +1,7 @@
 [package]
 name = "ai-game-generator"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [[bin]]
 name = "ai-gen"
@@ -70,7 +70,7 @@ crossbeam = "0.8"
 crossbeam-channel = "0.5"
 uuid = { version = "1.10", features = ["v4", "serde"] }
 indexmap = "2.2"
-native-dialog = "0.7"
+rfd = "0.12"
 webbrowser = "0.8"
 imageproc = "0.23"
 nalgebra = "0.32"
