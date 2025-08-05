@@ -1,0 +1,30 @@
+---
+Sprite: crystal_grass
+Size: 16x16
+Base Texture: A bright, emerald green grass with iridescent, light blue crystal shards scattered throughout. The grass is rendered in a slightly wavy pattern to give the illusion of a breeze, while the crystals are in a diamond shape and have a slight shimmer.
+Variants:
+  - Variant 1: The grass is interspersed with patches of darker green grass, adding depth and variety to the texture.
+  - Variant 2: The crystals in this variant are a vibrant purple color, adding a splash of contrasting color to the tile.
+  - Variant 3: The grass in this variant is a lighter, lime green color, and the crystals are a soft, glowing white.
+Edge/Transition Tiles: The edge tiles transition from the crystal grass to a plain, dark soil texture. The soil is a deep brown color, with a few small stones and roots visible.
+Decorative Elements: Small, yellow flowers can be added to the grass for a pop of color. The flowers are a simple, five-petal design and are scattered randomly across the tile.
+
+Sprite: stone
+Size: 16x16
+Base Texture: A grey stone texture with a slightly rough surface. The stone has a few cracks and chips to give it a weathered look.
+Variants:
+  - Variant 1: This variant has more pronounced cracks and a couple of small, mossy patches for added detail.
+  - Variant 2: The stone is a lighter, almost white color with a smoother surface.
+  - Variant 3: The stone in this variant is a dark, slate grey with a few shiny mineral deposits for added detail.
+Edge/Transition Tiles: The edge tiles transition from the stone to the crystal grass, showing a layer of soil and roots between the grass and stone.
+Decorative Elements: Small pebbles and stones can be added to the surface of the stone for extra detail. 
+
+Sprite: glowing_moss
+Size: 16x16
+Base Texture: A rich, forest green moss texture that appears to glow softly. The glow is rendered with a slight pulsing animation to give it a magical feel.
+Variants:
+  - Variant 1: The moss in this variant is a deep blue color, and the glow is a contrasting, bright yellow.
+  - Variant 2: The moss is a bright, lime green color with a soft, white glow.
+  - Variant 3: The moss in this variant is a dark, almost black color, with a vibrant, purple glow.
+Edge/Transition Tiles: The edge tiles transition from the moss to the stone, showing the moss creeping over the edge of the stone and onto the surface.
+Decorative Elements: Small, glowing mushrooms can be added to the moss for extra detail. The mushrooms have a simple, rounded shape and glow a soft, white color.

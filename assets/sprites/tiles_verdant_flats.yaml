@@ -1,0 +1,44 @@
+Sprite: Grass Tile
+Size: 16x16
+Palette: Starter
+Description:
+  Base: The base grass tile should have a vibrant green color (#00FF00). The texture should reflect short, mowed grass, with a pattern of darker and lighter green pixels to represent the grass blades' shadows and highlights. 
+
+  Variants:
+    1. Wild Grass: This variant should have longer, wilder grass. Introduce a few pixels of a darker green (#008000) to represent the taller blades.
+    2. Dry Grass: For this variant, use a more muted green color (#ADFF2F), with hints of yellow (#FFFF00) to represent patches of dried grass.
+    3. Clover Grass: In this variant, scatter a few three-leaf clovers in a lighter green (#ADFF2F) on the base grass tile.
+
+  Edge/Transition Tiles: These tiles should blend gradually into the adjoining tiles, be it dirt_path or flowers. Use a gradient of green to whatever color the adjoining tile is.
+
+  Decorative Elements: Small flowers in different colors (yellow - #FFFF00, white - #FFFFFF, and pink - #FFC0CB) could occasionally be sprinkled across the grass tiles.
+
+Sprite: Flowers Tile
+Size: 16x16
+Palette: Starter
+Description:
+  Base: The base flowers tile should be a field of wildflowers. Use a variety of colors (yellow - #FFFF00, white - #FFFFFF, pink - #FFC0CB, and purple - #800080) against a background of vibrant green (#00FF00).
+
+  Variants:
+    1. Single Color: These variants should have fields of flowers in a single color (yellow, white, pink, or purple).
+    2. Sparse Flowers: For this variant, reduce the number of flowers for a more sparse look.
+    3. Dense Flowers: In this variant, increase the number of flowers for a dense, lush look.
+
+  Edge/Transition Tiles: These tiles should gradually blend into the adjoining tiles. Use a gradient of the predominant flower color to whatever color the adjoining tile is.
+
+  Decorative Elements: Occasionally, introduce a few butterflies (orange - #FFA500, blue - #0000FF, and black - #000000) amongst the flowers.
+
+Sprite: Dirt Path Tile
+Size: 16x16
+Palette: Starter
+Description:
+  Base: The base dirt path tile should have a brown color (#A52A2A) with a few darker (#8B4513) and lighter (#DEB887) pixels to create a texture of uneven, trodden earth.
+
+  Variants:
+    1. Rocky Path: This variant should have a few gray (#808080) and light gray (#D3D3D3) pixels to represent small rocks scattered on the path.
+    2. Sandy Path: For this variant, use a warmer, lighter brown color (#DEB887) with hints of yellow (#FFFF00) to represent a sandy path.
+    3. Muddy Path: In this variant, use a darker brown color (#8B4513) with patches of darker brown to represent muddy areas.
+
+  Edge/Transition Tiles: These tiles should gradually blend into the adjoining tiles. Use a gradient of brown to whatever color the adjoining tile is.
+
+  Decorative Elements: Small footprints (darker brown - #8B4513) could occasionally appear on the path tiles.

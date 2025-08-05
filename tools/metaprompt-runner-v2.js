@@ -125,6 +125,23 @@ class MetapromptRunnerV2 {
   }
   
   async initialize() {
+    // Register Handlebars helpers
+    Handlebars.registerHelper('if', function(conditional, options) {
+      if (conditional) {
+        return options.fn(this);
+      } else {
+        return options.inverse(this);
+      }
+    });
+    
+    Handlebars.registerHelper('each', function(context, options) {
+      let ret = "";
+      for(let i=0, j=context.length; i<j; i++) {
+        ret = ret + options.fn(context[i]);
+      }
+      return ret;
+    });
+    
     // Load configuration
     await this.loadConfig();
     
@@ -674,6 +691,169 @@ pub use components::*;
     this.log('endgroup');
   }
   
+  async executePhase4_Sprites() {
+    this.log('Phase 4: Sprite Specifications', 'group');
+    
+    const tasks = [];
+    
+    // Player sprite
+    tasks.push(
+      this.limit(() => this.generateWithTemplate('game-generation/sprite-generator', {
+        sprite_type: 'player',
+        is_player: true,
+        hero_name: this.config.hero.name,
+        art_style: this.config.graphics.art_style,
+        palette_type: 'hero',
+        sprite_size: 32,
+      }, {
+        outputPath: 'assets/sprites/player_sprites.yaml',
+        parseFormat: 'yaml',
+      }))
+    );
+    
+    // Monster sprites (first 10 monsters)
+    tasks.push(
+      this.limit(async () => {
+        // Load monsters data
+        const monstersPath = path.join(this.outputDir, 'assets/data/monsters.yaml');
+        let monsters = [];
+        try {
+          const monstersContent = await fs.readFile(monstersPath, 'utf-8');
+          monsters = yaml.load(monstersContent).slice(0, 10); // First 10 monsters
+        } catch (error) {
+          this.log('Warning: Could not load monsters data', 'warning');
+          return;
+        }
+        
+        await this.generateWithTemplate('game-generation/sprite-generator', {
+          sprite_type: 'monsters',
+          is_monsters: true,
+          monster_list: monsters.map(m => ({ name: m.Name, type: m.Type })),
+          art_style: this.config.graphics.art_style,
+          palette_type: 'monsters',
+          sprite_size: 32,
+        }, {
+          outputPath: 'assets/sprites/monster_sprites.yaml',
+          parseFormat: 'yaml',
+        });
+      })
+    );
+    
+    // Tile sprites for each zone
+    for (const zone of this.config.environments.outdoor_zones.slice(0, 2)) { // First 2 zones
+      tasks.push(
+        this.limit(() => this.generateWithTemplate('game-generation/sprite-generator', {
+          sprite_type: 'tiles',
+          is_tiles: true,
+          zone_name: zone.name,
+          tiles: zone.tiles,
+          art_style: this.config.graphics.art_style,
+          palette_type: zone.type,
+          sprite_size: this.config.graphics.tile_size,
+        }, {
+          outputPath: `assets/sprites/tiles_${zone.name.toLowerCase().replace(/\s+/g, '_')}.yaml`,
+          parseFormat: 'yaml',
+        }))
+      );
+    }
+    
+    await Promise.all(tasks);
+    this.log('endgroup');
+  }
+  
+  async executePhase5_Audio() {
+    this.log('Phase 5: Audio Specifications', 'group');
+    
+    const tasks = [];
+    
+    // Background music
+    tasks.push(
+      this.limit(() => this.generateWithTemplate('game-generation/audio-generator', {
+        audio_type: 'music',
+        is_music: true,
+        music_style: this.config.audio.music_style,
+        mood: 'adventurous',
+        track_list: [
+          { name: 'Title Theme', usage: 'Main menu and title screen' },
+          { name: 'Overworld Theme', usage: 'General exploration' },
+          { name: 'Battle Theme', usage: 'Combat encounters' },
+          { name: 'Victory Fanfare', usage: 'Battle victory' },
+          { name: 'Shop Theme', usage: 'Merchant interactions' },
+        ],
+      }, {
+        outputPath: 'assets/audio/music_specs.yaml',
+        parseFormat: 'yaml',
+      }))
+    );
+    
+    // Sound effects
+    tasks.push(
+      this.limit(() => this.generateWithTemplate('game-generation/audio-generator', {
+        audio_type: 'sfx',
+        is_sfx: true,
+        music_style: this.config.audio.music_style,
+        mood: 'retro',
+        sfx_list: [
+          { name: 'Menu Select', category: 'UI' },
+          { name: 'Menu Cancel', category: 'UI' },
+          { name: 'Sword Slash', category: 'Combat' },
+          { name: 'Monster Hit', category: 'Combat' },
+          { name: 'Item Pickup', category: 'World' },
+          { name: 'Level Up', category: 'System' },
+          { name: 'Tame Success', category: 'System' },
+          { name: 'Footstep Grass', category: 'Movement' },
+        ],
+      }, {
+        outputPath: 'assets/audio/sfx_specs.yaml',
+        parseFormat: 'yaml',
+      }))
+    );
+    
+    // Ambient sounds
+    tasks.push(
+      this.limit(() => this.generateWithTemplate('game-generation/audio-generator', {
+        audio_type: 'ambient',
+        is_ambient: true,
+        music_style: this.config.audio.music_style,
+        mood: 'atmospheric',
+        ambient_list: this.config.environments.outdoor_zones.slice(0, 3).map(z => ({ zone: z.name })),
+      }, {
+        outputPath: 'assets/audio/ambient_specs.yaml',
+        parseFormat: 'yaml',
+      }))
+    );
+    
+    await Promise.all(tasks);
+    this.log('endgroup');
+  }
+  
+  async executePhase6_Quests() {
+    this.log('Phase 6: Quest Generation', 'group');
+    
+    const tasks = [];
+    
+    // Generate quests for first few zones
+    for (const zone of this.config.environments.outdoor_zones.slice(0, 3)) {
+      const levelRange = zone.type === 'starter' ? '1-5' : '5-10';
+      
+      tasks.push(
+        this.limit(() => this.generateWithTemplate('game-generation/quest-generator', {
+          quest_count: 3,
+          zone_name: zone.name,
+          is_starter_zone: zone.type === 'starter',
+          theme: this.config.game.theme,
+          level_range: levelRange,
+        }, {
+          outputPath: `assets/quests/${zone.name.toLowerCase().replace(/\s+/g, '_')}_quests.yaml`,
+          parseFormat: 'yaml',
+        }))
+      );
+    }
+    
+    await Promise.all(tasks);
+    this.log('endgroup');
+  }
+  
   async executeFullCascade() {
     this.log(chalk.bold.magenta(`
 ╔═══════════════════════════════════════════════╗
@@ -688,12 +868,18 @@ pub use components::*;
     this.progress.total = 
       3 + // Core files (Cargo.toml, main.rs, lib.rs)
       this.config.environments.outdoor_zones.length + 1 + // Tilemaps + mod.rs
-      1; // Monsters
+      1 + // Monsters
+      1 + 1 + 2 + // Sprites (player, monsters, 2 tile zones)
+      3 + // Audio (music, sfx, ambient)
+      3; // Quests (3 zones)
     
     try {
       await this.executePhase1_CoreFiles();
       await this.executePhase2_Tilemaps();
       await this.executePhase3_Monsters();
+      await this.executePhase4_Sprites();
+      await this.executePhase5_Audio();
+      await this.executePhase6_Quests();
       
       // Save cache to disk
       await this.saveCacheToDisk();

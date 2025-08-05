@@ -1,4 +1,4 @@
-Here is the generated `Cargo.toml` file:
+Here is the Cargo.toml file for your Echoes of Beastlight game:
 
 ```toml
 [package]
@@ -6,49 +6,40 @@ name = "beastlight"
 version = "0.1.0"
 edition = "2018"
 
-# The workspace configuration allows for managing multiple related packages in a single file
+# Workspace configuration
 [workspace]
 members = ["beastlight"]
 
-# The build target configuration for WebAssembly
+# Specify the build target
 [build]
 target = "wasm32-unknown-unknown"
 
-# The dependencies for the project with exact versions and specified features
+# Specify the dependencies
 [dependencies]
-bevy = { version = "0.12", features = ["dynamic", "wayland", "webgl2"] }
-bevy_ecs_tilemap = { version = "0.12", features = ["atlas"] }
-bevy_yoleck = { version = "0.17", features = ["vpeol_2d"] }
-mapgen = { version = "0.5" }
-bevy_egui = { version = "0.23" }
-serde = { version = "1.0", features = ["derive"] }
-serde_yaml = { version = "0.9" }
-rand = { version = "0.8" }
+bevy = "0.5.0" # Bevy is a simple, data-driven game engine built in Rust
 
-# The release profile configurations for optimization
-[profile.release]
-# Optimize for size on web builds
-codegen-units = 1
-debug = false
-incremental = false
-lto = true
-opt-level = 'z'
-overflow-checks = true
-panic = 'abort'
+# Specify the dependencies for the web build
+[dependencies.web]
+wasm-bindgen = "0.2.69" # Facilitate high-level interactions between Wasm modules and JavaScript
+wasm-pack = "0.9.1" # Your one-stop shop for building and working with Rust-generated WebAssembly
 
-[profile.dev]
-# Optimize for performance on native builds
-debug = true
-incremental = true
-lto = false
-opt-level = 3
-overflow-checks = false
-panic = 'unwind'
+# Specify the dependencies for the native build
+[dependencies.native]
+bevy-native = "0.5.0" # Bevy native is a simple, data-driven game engine built in Rust for native platforms
 
-# The feature flags for web builds
+# Specify the features for the web build
 [features]
 default = ["web"]
-web = ["bevy/webgl2"]
+web = ["bevy/web", "wasm-bindgen", "wasm-pack"]
+native = ["bevy/native", "bevy-native"]
+
+# Specify the release profiles
+[profile.release]
+# Optimize for size on the web
+opt-level = "s"
+# Optimize for performance on native platforms
+lto = true
+codegen-units = 1
 ```
 
-This `Cargo.toml` file specifies the package information, workspace configuration, build target, dependencies, release profiles, and feature flags. The `profile.release` section is configured for size optimization which is suitable for web builds, while the `profile.dev` section is configured for performance optimization which is suitable for native builds. The `features` section specifies the default features to be used in web builds.
+This Cargo.toml file specifies the package information, workspace configuration, build target, dependencies, features, and release profiles for your game. The dependencies are split into web and native dependencies, and the features are specified for each build. The release profiles are optimized for size on the web and performance on native platforms.
