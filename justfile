@@ -2,6 +2,49 @@
 default:
     @just --list
 
+# ============= DIRECTOR WORKFLOWS =============
+
+# Launch the full director studio for game review and iteration
+director:
+    @echo "🎬 Launching Director Studio..."
+    cd tools && cargo run --release --bin studio --features studio
+
+# Review generated game assets in the studio
+review:
+    @echo "🔍 Opening generated game for review..."
+    just director
+
+# Generate a new game and immediately open in studio for review
+generate-and-review: generate director
+    @echo "✨ Game generated and studio opened!"
+
+# Run the game to test it
+play:
+    @echo "🎮 Launching game..."
+    cargo run --release
+
+# ============= GENERATOR WORKFLOWS =============
+
+# Generate a complete game (headless AI generator)
+generate:
+    @echo "🤖 Running AI game generator..."
+    cd tools && cargo run --release --bin ai-gen
+
+# Generate with specific configuration
+generate-with CONFIG:
+    @echo "🤖 Running AI generator with config: {{CONFIG}}"
+    cd tools && cargo run --release --bin ai-gen -- --config {{CONFIG}}
+
+# Dry run to see what would be generated
+dry-run:
+    cd tools && cargo run --release --bin ai-gen -- --dry-run
+
+# Generate with caching disabled (fresh generation)
+generate-fresh:
+    cd tools && cargo run --release --bin ai-gen -- --no-cache
+
+# ============= DEVELOPMENT SETUP =============
+
 # Install all development dependencies
 install:
     @echo "Installing pre-commit..."
@@ -14,6 +57,7 @@ install:
     cargo install cargo-outdated || true
     cargo install cargo-machete || true
     cargo install cargo-tarpaulin || true
+    cargo install just || true
 
 # Complete development environment setup
 setup: install
@@ -24,6 +68,8 @@ setup: install
     @echo "Running initial checks..."
     pre-commit run --all-files || true
     @echo "Development environment ready!"
+
+# ============= QUALITY CHECKS =============
 
 # Run all quality checks
 check:
@@ -60,6 +106,8 @@ security:
 outdated:
     pre-commit run rust-outdated --all-files
 
+# ============= BUILD & RELEASE =============
+
 # Build all binaries
 build:
     @echo "Building game..."
@@ -67,24 +115,13 @@ build:
     @echo "Building tools..."
     cd tools && cargo build --release --all-features
 
-# Run the AI generator with optional arguments
-run *ARGS:
-    cd tools && cargo run --release --bin ai-gen -- {{ARGS}}
+# Build only the game
+build-game:
+    cargo build --release
 
-# Run the Bevy studio
-studio:
-    cd tools && cargo run --release --bin studio --features studio
-
-# Build and open documentation
-docs:
-    cargo doc --no-deps --open
-    cd tools && cargo doc --no-deps --all-features
-
-# Clean build artifacts
-clean:
-    cargo clean
-    cd tools && cargo clean
-    rm -f .secrets.baseline
+# Build only the tools
+build-tools:
+    cd tools && cargo build --release --all-features
 
 # Create optimized release builds
 release:
@@ -96,8 +133,61 @@ release:
 dist: release
     mkdir -p dist
     tar -czf dist/echoes-of-beastlight-linux-x64.tar.gz -C target/release echoes-of-beastlight || true
-    cd tools/target/release && tar -czf ../../../dist/ai-game-generator-linux-x64.tar.gz ai-gen
+    cd tools/target/release && tar -czf ../../../dist/ai-game-generator-linux-x64.tar.gz ai-gen studio
     @echo "Distribution packages created in dist/"
+
+# ============= DOCUMENTATION =============
+
+# Build and open documentation
+docs:
+    cargo doc --no-deps --open
+    cd tools && cargo doc --no-deps --all-features
+
+# Open director documentation
+docs-director:
+    @echo "Opening director documentation..."
+    xdg-open docs/director/project-overview.md || open docs/director/project-overview.md
+
+# Open technical documentation
+docs-tech:
+    @echo "Opening technical documentation..."
+    xdg-open docs/technical/ai-agent-context.md || open docs/technical/ai-agent-context.md
+
+# ============= UTILITIES =============
+
+# Clean build artifacts
+clean:
+    cargo clean
+    cd tools && cargo clean
+    rm -f .secrets.baseline
+    rm -rf dist/
+
+# Clean generated game files
+clean-generated:
+    rm -rf generated-test/
+    rm -f GENERATION_SUMMARY.json
+    rm -f GENERATION_SUMMARY.md
+    rm -f GENERATION_STATUS.md
+
+# Full clean (everything)
+clean-all: clean clean-generated
+    rm -rf .cache/
+    rm -rf .ai-generation/
+
+# Watch for changes and run tests
+watch:
+    cargo watch -x test
+
+# Run benchmarks
+bench:
+    cargo bench
+
+# Generate test coverage report
+coverage:
+    cd tools && cargo tarpaulin --out Html --output-dir ../target/coverage
+    @echo "Coverage report generated at target/coverage/index.html"
+
+# ============= CI/CD HELPERS =============
 
 # Simulate CI pipeline locally
 ci: check test security
@@ -115,23 +205,38 @@ update-tools:
     cargo install --locked cargo-outdated
     cargo install --locked cargo-machete
     cargo install --locked cargo-tarpaulin
+    cargo install --locked just
     pre-commit autoupdate
+
+# ============= ADVANCED WORKFLOWS =============
 
 # Run a specific pre-commit hook
 check-hook HOOK:
     pre-commit run {{HOOK}} --all-files
 
-# Watch for changes and run tests
-watch:
-    cargo watch -x test
+# Create a new release tag
+tag VERSION:
+    git tag -a v{{VERSION}} -m "Release v{{VERSION}}"
+    git push origin v{{VERSION}}
 
-# Run benchmarks
-bench:
-    cargo bench
+# Show project statistics
+stats:
+    @echo "=== Code Statistics ==="
+    tokei . --exclude target --exclude .git
+    @echo "\n=== Dependency Count ==="
+    cargo tree | wc -l
+    @echo "\n=== Binary Sizes ==="
+    ls -lh target/release/ | grep -E "(ai-gen|studio|echoes)" || echo "No release builds found"
 
-# Generate test coverage report
-coverage:
-    cd tools && cargo tarpaulin --out Html --output-dir ../target/coverage
+# Run the AI generator with custom prompts directory
+generate-custom PROMPTS_DIR:
+    cd tools && cargo run --release --bin ai-gen -- --prompts-dir {{PROMPTS_DIR}}
+
+# Profile the generator performance
+profile-generator:
+    cd tools && cargo build --release --bin ai-gen
+    perf record --call-graph=dwarf tools/target/release/ai-gen
+    perf report
 
 # Check the entire workspace
 workspace-check:
@@ -151,16 +256,24 @@ clippy-pedantic:
     cargo clippy --all-targets --all-features -- -W clippy::pedantic
     cd tools && cargo clippy --all-targets --all-features -- -W clippy::pedantic
 
-# Create a new release tag
-tag VERSION:
-    git tag -a v{{VERSION}} -m "Release v{{VERSION}}"
-    git push origin v{{VERSION}}
+# ============= DIRECTOR REVIEW WORKFLOWS =============
 
-# Show project statistics
-stats:
-    @echo "=== Code Statistics ==="
-    tokei
-    @echo "\n=== Dependency Count ==="
-    cargo tree | wc -l
-    @echo "\n=== Binary Sizes ==="
-    ls -lh target/release/ | grep -E "(ai-gen|studio|echoes)" || echo "No release builds found"
+# Review and approve generated code
+review-code:
+    @echo "📝 Opening code review interface..."
+    just director -- --mode code-review
+
+# Review and modify style guide
+review-style:
+    @echo "🎨 Opening style guide editor..."
+    just director -- --mode style-guide
+
+# Test monster taming mechanics
+test-taming:
+    @echo "🐾 Testing monster taming system..."
+    cargo test --package echoes-of-beastlight --test taming_tests
+
+# Generate world with specific seed
+generate-world SEED:
+    @echo "🌍 Generating world with seed: {{SEED}}"
+    cd tools && cargo run --release --bin ai-gen -- --world-seed {{SEED}}
