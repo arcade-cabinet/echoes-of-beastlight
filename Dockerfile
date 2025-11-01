@@ -1,5 +1,5 @@
 # Echoes of Beastlight - Development Environment
-FROM rust:1.75-slim
+FROM rust:1.91-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
