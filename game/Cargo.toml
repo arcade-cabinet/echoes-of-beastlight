@@ -8,13 +8,13 @@ description = "A JRPG adventure featuring monster taming and procedural world ge
 repository = "https://github.com/yourusername/echoes-of-beastlight"
 
 [dependencies]
-bevy = { version = "0.16.1", features = ["dynamic_linking"] }
-bevy_ecs_tilemap = "0.14"
-bevy-yoleck = "0.24"
-bevy_rapier2d = "0.27"
+bevy = { version = "0.17.0", features = ["dynamic_linking"] }
+bevy_ecs_tilemap = "0.17"
+bevy-yoleck = "0.29"
+bevy_rapier2d = "0.32"
 bevy_save = "1.0"
-bevy_cobweb = "0.17"
-bevy_cobweb_ui = "0.21"
+bevy_cobweb = "0.18"
+bevy_cobweb_ui = "0.22"
 beet_flow = "0.4"
 leafwing-input-manager = "0.17"
 serde = { version = "1.0", features = ["derive"] }

@@ -57,7 +57,7 @@ chrono = { version = "0.4", features = ["serde"] }
 colored = "2.2"
 
 # Bevy and UI dependencies (optional, for studio only)
-bevy = { version = "0.14", optional = true, default-features = false, features = [
+bevy = { version = "0.17", optional = true, default-features = false, features = [
     "bevy_asset",
     "bevy_winit",
     "bevy_core_pipeline",
@@ -76,8 +76,8 @@ bevy = { version = "0.14", optional = true, default-features = false, features =
     "x11",
     "wayland",
 ] }
-bevy_egui = { version = "0.28", optional = true }
-bevy-inspector-egui = { version = "0.25", optional = true }
+bevy_egui = { version = "0.38", optional = true }
+bevy-inspector-egui = { version = "0.35", optional = true }
 egui_dock = { version = "0.13", optional = true }
 egui_extras = { version = "0.28", optional = true }
 egui-notify = { version = "0.15", optional = true }
