@@ -18,6 +18,7 @@ export default defineConfig({
         '--ignore-gpu-blocklist',
         '--use-gl=angle',
         '--use-angle=swiftshader',
+        '--headless=new',
       ]
     }
   },

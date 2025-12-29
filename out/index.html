@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echoes of Beastlight</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #111;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 1280px;
+            height: 720px;
+            background-color: #222;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bevy-canvas"></canvas>
+    <script type="module">
+        import init from './echoes-of-beastlight.js';
+
+        async function run() {
+            try {
+                await init();
+                console.log("WASM initialized successfully");
+            } catch (err) {
+                console.error("Error loading WASM:", err);
+            }
+        }
+
+        run();
+    </script>
+</body>
+</html>

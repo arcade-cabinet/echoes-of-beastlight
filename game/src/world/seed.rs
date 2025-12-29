@@ -130,7 +130,7 @@ impl Plugin for SeedPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_message::<WorldSeedChanged>()
-            .add_systems(Startup, initialize_seed);
+            .add_systems(PreStartup, initialize_seed);
     }
 }
 
