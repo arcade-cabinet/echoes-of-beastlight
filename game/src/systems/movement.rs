@@ -9,13 +9,10 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-use bevy::prelude::*;
 use crate::components::*;
+use bevy::prelude::*;
 
-
-pub fn movement_system(
-    mut query: Query<(&mut Position, &Velocity)>
-) {
+pub fn movement_system(mut query: Query<(&mut Position, &Velocity)>) {
     for (mut pos, vel) in query.iter_mut() {
         pos.x += vel.x;
         pos.y += vel.y;

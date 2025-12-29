@@ -77,16 +77,28 @@ pub fn show_live_preview(ui: &mut egui::Ui) {
                 for x in 0..((rect.width() / grid_size) as i32 + 1) {
                     let x_pos = rect.left() + x as f32 * grid_size;
                     painter.line_segment(
-                        [egui::pos2(x_pos, rect.top()), egui::pos2(x_pos, rect.bottom())],
-                        egui::Stroke::new(1.0, egui::Color32::from_rgba_unmultiplied(255, 255, 255, 20)),
+                        [
+                            egui::pos2(x_pos, rect.top()),
+                            egui::pos2(x_pos, rect.bottom()),
+                        ],
+                        egui::Stroke::new(
+                            1.0,
+                            egui::Color32::from_rgba_unmultiplied(255, 255, 255, 20),
+                        ),
                     );
                 }
 
                 for y in 0..((rect.height() / grid_size) as i32 + 1) {
                     let y_pos = rect.top() + y as f32 * grid_size;
                     painter.line_segment(
-                        [egui::pos2(rect.left(), y_pos), egui::pos2(rect.right(), y_pos)],
-                        egui::Stroke::new(1.0, egui::Color32::from_rgba_unmultiplied(255, 255, 255, 20)),
+                        [
+                            egui::pos2(rect.left(), y_pos),
+                            egui::pos2(rect.right(), y_pos),
+                        ],
+                        egui::Stroke::new(
+                            1.0,
+                            egui::Color32::from_rgba_unmultiplied(255, 255, 255, 20),
+                        ),
                     );
                 }
 
@@ -141,7 +153,11 @@ pub fn show_inspector(ui: &mut egui::Ui) {
 
             ui.horizontal(|ui| {
                 ui.label("Scale:");
-                ui.add(egui::DragValue::new(&mut 1.0).speed(0.01).clamp_range(0.1..=10.0));
+                ui.add(
+                    egui::DragValue::new(&mut 1.0)
+                        .speed(0.01)
+                        .clamp_range(0.1..=10.0),
+                );
             });
         });
 

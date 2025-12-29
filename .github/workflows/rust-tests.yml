@@ -27,7 +27,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev
+        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev libwayland-dev libxkbcommon-dev libasound2-dev libudev-dev
 
     - name: Cache cargo registry
       uses: actions/cache@v4
@@ -76,7 +76,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev
+        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev libwayland-dev libxkbcommon-dev libasound2-dev libudev-dev
 
     - name: Install tarpaulin
       run: cargo install cargo-tarpaulin

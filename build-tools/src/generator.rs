@@ -9,33 +9,27 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-use anyhow::{Result, Context};
+use crate::config::GameConfig;
+use crate::git_tracker::{GenerationManifest, GitGenerationTracker, PromptNode};
+use crate::templates::Templates;
+use anyhow::{Context, Result};
 use async_openai::{
     Client,
     config::OpenAIConfig,
     types::{
         chat::{
-            ChatCompletionRequestMessage,
-            ChatCompletionRequestSystemMessageArgs,
-            ChatCompletionRequestUserMessageArgs,
-            CreateChatCompletionRequestArgs,
+            ChatCompletionRequestMessage, ChatCompletionRequestSystemMessageArgs,
+            ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs,
         },
-        images::{
-            CreateImageRequestArgs,
-            ImageSize,
-            Image,
-        },
+        images::{CreateImageRequestArgs, Image, ImageSize},
     },
 };
-use serde::{Serialize, Deserialize};
-use std::path::{Path, PathBuf};
+use indicatif::{ProgressBar, ProgressStyle};
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
-use tracing::{info, warn, debug};
-use indicatif::{ProgressBar, ProgressStyle};
-use crate::config::GameConfig;
-use crate::templates::Templates;
-use crate::git_tracker::{GitGenerationTracker, GenerationManifest, PromptNode};
+use std::path::{Path, PathBuf};
+use tracing::{debug, info, warn};
 
 pub struct AIGameGenerator {
     client: Client<OpenAIConfig>,
@@ -144,15 +138,23 @@ impl AIGameGenerator {
 
     async fn generate_with_ai(&mut self, system_prompt: &str, user_prompt: &str) -> Result<String> {
         // Count tokens
-        let system_tokens = self.tokenizer.encode_with_special_tokens(system_prompt).len();
+        let system_tokens = self
+            .tokenizer
+            .encode_with_special_tokens(system_prompt)
+            .len();
         let user_tokens = self.tokenizer.encode_with_special_tokens(user_prompt).len();
         let total_tokens = system_tokens + user_tokens;
 
-        debug!("Token count - System: {}, User: {}, Total: {}",
-               system_tokens, user_tokens, total_tokens);
+        debug!(
+            "Token count - System: {}, User: {}, Total: {}",
+            system_tokens, user_tokens, total_tokens
+        );
 
         // Generate cache key
-        let cache_key = format!("{:x}", md5::compute(format!("{}{}", system_prompt, user_prompt)));
+        let cache_key = format!(
+            "{:x}",
+            md5::compute(format!("{}{}", system_prompt, user_prompt))
+        );
         let cache_file = self.cache_dir.join(format!("{}.json", cache_key));
         let cache_hit = cache_file.exists() && self.use_cache;
 
@@ -190,12 +192,12 @@ impl AIGameGenerator {
             ChatCompletionRequestMessage::System(
                 ChatCompletionRequestSystemMessageArgs::default()
                     .content(system_prompt)
-                    .build()?
+                    .build()?,
             ),
             ChatCompletionRequestMessage::User(
                 ChatCompletionRequestUserMessageArgs::default()
                     .content(user_prompt)
-                    .build()?
+                    .build()?,
             ),
         ];
 
@@ -211,7 +213,8 @@ impl AIGameGenerator {
         let response = self.client.chat().create(request).await?;
 
         // Extract content
-        let content = response.choices
+        let content = response
+            .choices
             .first()
             .and_then(|choice| choice.message.content.clone())
             .context("No response content")?;
@@ -245,13 +248,19 @@ impl AIGameGenerator {
 
         if let Some(image_data) = response.data.first() {
             match &**image_data {
-                Image::Url { url, revised_prompt: _ } => {
+                Image::Url {
+                    url,
+                    revised_prompt: _,
+                } => {
                     // Download image from URL
                     let image_bytes = reqwest::get(url).await?.bytes().await?.to_vec();
                     let path = PathBuf::from("assets/sprites").join(filename);
                     self.write_file(&path, &image_bytes).await?;
                 }
-                Image::B64Json { b64_json: _, revised_prompt: _ } => {
+                Image::B64Json {
+                    b64_json: _,
+                    revised_prompt: _,
+                } => {
                     warn!("Received base64 response but requested URL format");
                 }
             }
@@ -311,7 +320,7 @@ impl AIGameGenerator {
             ProgressStyle::default_bar()
                 .template("{spinner:.green} [{bar:40.cyan/blue}] {pos}/{len} {msg}")
                 .unwrap()
-                .progress_chars("#>-")
+                .progress_chars("#>-"),
         );
 
         // Generate style guide FIRST
@@ -370,7 +379,7 @@ impl AIGameGenerator {
         Ok(())
     }
 
-    pub     async fn generate_style_guide(&mut self) -> Result<()> {
+    pub async fn generate_style_guide(&mut self) -> Result<()> {
         info!("🎨 Generating visual style guide...");
 
         let config = self.config.as_ref().context("Config not loaded")?;
@@ -392,16 +401,23 @@ impl AIGameGenerator {
             Each color should have 'hex', 'name', and 'usage' fields.",
             game_genre,
             game_title,
-            if game_theme.is_empty() { &game_genre } else { &game_theme },
+            if game_theme.is_empty() {
+                &game_genre
+            } else {
+                &game_theme
+            },
             graphics_perspective
         );
 
-        let palette_json = self.generate_with_ai(
-            "You are a game art director specializing in color theory and pixel art palettes.",
-            &palette_prompt
-        ).await?;
+        let palette_json = self
+            .generate_with_ai(
+                "You are a game art director specializing in color theory and pixel art palettes.",
+                &palette_prompt,
+            )
+            .await?;
 
-        self.write_file("assets/style/color-palette.json", palette_json.as_bytes()).await?;
+        self.write_file("assets/style/color-palette.json", palette_json.as_bytes())
+            .await?;
 
         // Generate style rules document
         let style_rules_prompt = format!(
@@ -414,17 +430,18 @@ impl AIGameGenerator {
             5. UI design patterns \
             6. Environmental art rules \
             Format as a markdown document.",
-            game_title,
-            sprite_size,
-            sprite_size
+            game_title, sprite_size, sprite_size
         );
 
-        let style_rules = self.generate_with_ai(
-            "You are a pixel art expert and game art director.",
-            &style_rules_prompt
-        ).await?;
+        let style_rules = self
+            .generate_with_ai(
+                "You are a pixel art expert and game art director.",
+                &style_rules_prompt,
+            )
+            .await?;
 
-        self.write_file("assets/style/style-rules.md", style_rules.as_bytes()).await?;
+        self.write_file("assets/style/style-rules.md", style_rules.as_bytes())
+            .await?;
 
         // Generate reference sprite sheet prompt
         let reference_prompt = format!(
@@ -437,20 +454,21 @@ impl AIGameGenerator {
             6. Effect samples (fire, magic sparkle) \
             All sprites should be {}x{} pixels. \
             Describe each element in detail for DALL-E 3 generation.",
-            game_title,
-            sprite_size,
-            sprite_size,
-            sprite_size,
-            sprite_size
+            game_title, sprite_size, sprite_size, sprite_size, sprite_size
         );
 
-        let reference_description = self.generate_with_ai(
-            "You are a pixel art designer creating visual references.",
-            &reference_prompt
-        ).await?;
+        let reference_description = self
+            .generate_with_ai(
+                "You are a pixel art designer creating visual references.",
+                &reference_prompt,
+            )
+            .await?;
 
         // Generate the actual reference image
-        match self.generate_image(&reference_description, "style-reference.png").await {
+        match self
+            .generate_image(&reference_description, "style-reference.png")
+            .await
+        {
             Ok(_) => info!("  ✓ Generated style reference image"),
             Err(e) => warn!("  ⚠ Failed to generate style reference: {}", e),
         }
@@ -475,7 +493,8 @@ impl AIGameGenerator {
                     "text": "#f4f4f4",
                     "highlight": "#41a6f6"
                 }
-            }).to_string()
+            })
+            .to_string()
         };
 
         // Generate UI element specifications
@@ -489,15 +508,15 @@ impl AIGameGenerator {
             5. Menu backgrounds \
             Use pixel art style matching {} perspective. \
             Output detailed descriptions for image generation.",
-            config.game.title,
-            palette_json,
-            config.graphics.perspective
+            config.game.title, palette_json, config.graphics.perspective
         );
 
-        let ui_specs = self.generate_with_ai(
-            "You are a UI/UX designer specializing in pixel art game interfaces.",
-            &ui_prompt
-        ).await?;
+        let ui_specs = self
+            .generate_with_ai(
+                "You are a UI/UX designer specializing in pixel art game interfaces.",
+                &ui_prompt,
+            )
+            .await?;
 
         // Generate UI sprite sheet
         match self.generate_image(&ui_specs, "ui-elements.png").await {
@@ -525,12 +544,12 @@ impl AIGameGenerator {
             game_title
         );
 
-        let cargo_content = self.generate_with_ai(
-            "You are a Rust and Bevy expert.",
-            &cargo_prompt
-        ).await?;
+        let cargo_content = self
+            .generate_with_ai("You are a Rust and Bevy expert.", &cargo_prompt)
+            .await?;
 
-        self.write_file("Cargo.toml", cargo_content.as_bytes()).await?;
+        self.write_file("Cargo.toml", cargo_content.as_bytes())
+            .await?;
 
         // Generate main.rs
         let main_prompt = format!(
@@ -541,17 +560,15 @@ impl AIGameGenerator {
             - Plugins: DefaultPlugins, TilemapPlugin, YoleckPlugin, WorldInspectorPlugin \
             - Basic camera setup for {} view \
             Output only Rust code, no explanations.",
-            game_title,
-            tile_size,
-            perspective
+            game_title, tile_size, perspective
         );
 
-        let main_content = self.generate_with_ai(
-            "You are a Rust and Bevy game engine expert.",
-            &main_prompt
-        ).await?;
+        let main_content = self
+            .generate_with_ai("You are a Rust and Bevy game engine expert.", &main_prompt)
+            .await?;
 
-        self.write_file("src/main.rs", main_content.as_bytes()).await?;
+        self.write_file("src/main.rs", main_content.as_bytes())
+            .await?;
 
         Ok(())
     }
@@ -560,7 +577,8 @@ impl AIGameGenerator {
         info!("🧩 Generating ECS components...");
 
         let components_code = self.templates.render_components()?;
-        self.write_file("src/components.rs", components_code.as_bytes()).await?;
+        self.write_file("src/components.rs", components_code.as_bytes())
+            .await?;
 
         Ok(())
     }
@@ -569,9 +587,15 @@ impl AIGameGenerator {
         info!("⚙️  Generating game systems...");
 
         let systems = vec![
-            ("movement", "Basic movement system with velocity and position"),
+            (
+                "movement",
+                "Basic movement system with velocity and position",
+            ),
             ("combat", "Turn-based combat with damage calculation"),
-            ("taming", "Monster taming with success rates and party management"),
+            (
+                "taming",
+                "Monster taming with success rates and party management",
+            ),
             ("inventory", "Item storage with equipment slots"),
         ];
 
@@ -584,12 +608,12 @@ impl AIGameGenerator {
                 name, desc
             );
 
-            let code = self.generate_with_ai(
-                "You are a Bevy ECS expert.",
-                &prompt
-            ).await?;
+            let code = self
+                .generate_with_ai("You are a Bevy ECS expert.", &prompt)
+                .await?;
 
-            self.write_file(format!("src/systems/{}.rs", name), code.as_bytes()).await?;
+            self.write_file(format!("src/systems/{}.rs", name), code.as_bytes())
+                .await?;
         }
 
         Ok(())
@@ -623,14 +647,17 @@ impl AIGameGenerator {
                 tile_size
             );
 
-            let level_content = self.generate_with_ai(
-                "You are a level designer creating Bevy Yoleck format levels.",
-                &level_prompt
-            ).await?;
+            let level_content = self
+                .generate_with_ai(
+                    "You are a level designer creating Bevy Yoleck format levels.",
+                    &level_prompt,
+                )
+                .await?;
 
             let level_filename = format!("{}.yol", zone_name_slug);
             let level_path = format!("assets/levels/{}", level_filename);
-            self.write_file(&level_path, level_content.as_bytes()).await?;
+            self.write_file(&level_path, level_content.as_bytes())
+                .await?;
 
             level_files.push(serde_json::json!({
                 "filename": level_filename
@@ -646,7 +673,8 @@ impl AIGameGenerator {
         ]);
 
         let index_json = serde_json::to_string_pretty(&index_content)?;
-        self.write_file("assets/levels/index.yoli", index_json.as_bytes()).await?;
+        self.write_file("assets/levels/index.yoli", index_json.as_bytes())
+            .await?;
 
         Ok(())
     }
@@ -705,8 +733,7 @@ impl AIGameGenerator {
             3. Ambient sounds for each biome \
             Use retro JRPG style with chiptune aesthetics. \
             Output as JSON with synthesis parameters for Web Audio API.",
-            game_title,
-            game_genre
+            game_title, game_genre
         );
 
         let audio_specs = self.generate_with_ai(
@@ -714,7 +741,8 @@ impl AIGameGenerator {
             &audio_prompt
         ).await?;
 
-        self.write_file("assets/audio/audio_specs.json", audio_specs.as_bytes()).await?;
+        self.write_file("assets/audio/audio_specs.json", audio_specs.as_bytes())
+            .await?;
 
         // Generate Web Audio implementation script
         let implementation_prompt = format!(
@@ -734,7 +762,8 @@ impl AIGameGenerator {
             &implementation_prompt
         ).await?;
 
-        self.write_file("assets/audio/game-audio.js", audio_script.as_bytes()).await?;
+        self.write_file("assets/audio/game-audio.js", audio_script.as_bytes())
+            .await?;
 
         // Generate audio documentation
         let doc_content = format!(
@@ -757,7 +786,8 @@ impl AIGameGenerator {
             game_title
         );
 
-        self.write_file("assets/audio/README.md", doc_content.as_bytes()).await?;
+        self.write_file("assets/audio/README.md", doc_content.as_bytes())
+            .await?;
 
         Ok(())
     }
@@ -779,7 +809,7 @@ impl AIGameGenerator {
 
         fs::write(
             "GENERATION_SUMMARY.json",
-            serde_json::to_string_pretty(&summary)?
+            serde_json::to_string_pretty(&summary)?,
         )?;
 
         info!("📊 Summary written to GENERATION_SUMMARY.json");
@@ -788,10 +818,12 @@ impl AIGameGenerator {
     }
 
     pub async fn test(&mut self) -> Result<()> {
-        let response = self.generate_with_ai(
-            "You are a helpful assistant.",
-            "Say 'Hello from Rust AI generator!'"
-        ).await?;
+        let response = self
+            .generate_with_ai(
+                "You are a helpful assistant.",
+                "Say 'Hello from Rust AI generator!'",
+            )
+            .await?;
 
         info!("Test response: {}", response);
 

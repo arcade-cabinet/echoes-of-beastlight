@@ -9,12 +9,12 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-use anyhow::{Result, Context};
-use git2::{Repository, Signature, Oid, Commit};
-use serde::{Serialize, Deserialize};
-use std::path::{Path, PathBuf};
-use std::collections::HashMap;
+use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
+use git2::{Commit, Oid, Repository, Signature};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
 /// Git-based generation tracker for perfect idempotency and versioning
@@ -134,7 +134,9 @@ impl GitGenerationTracker {
 
         // Navigate to parent
         for segment in parent_path {
-            current = current.children.iter_mut()
+            current = current
+                .children
+                .iter_mut()
                 .find(|child| child.id == segment)
                 .context("Parent path not found in cascade tree")?;
         }
@@ -173,7 +175,9 @@ impl GitGenerationTracker {
         };
 
         manifest.generated_files.insert(path.clone(), metadata);
-        manifest.cache_keys.insert(path.to_string_lossy().to_string(), hash);
+        manifest
+            .cache_keys
+            .insert(path.to_string_lossy().to_string(), hash);
 
         Ok(())
     }
@@ -194,7 +198,7 @@ impl GitGenerationTracker {
 
             // Check if content matches
             let current_content = std::fs::read(path)?;
-                            let current_hash = Self::calculate_file_hash(&current_content);
+            let current_hash = Self::calculate_file_hash(&current_content);
 
             if current_hash != metadata.hash {
                 return Ok(true);
@@ -203,7 +207,9 @@ impl GitGenerationTracker {
             // Check parent dependencies if requested
             if check_parents {
                 for parent in &metadata.parent_assets {
-                    if let Some(parent_path) = manifest.cache_keys.iter()
+                    if let Some(parent_path) = manifest
+                        .cache_keys
+                        .iter()
                         .find(|(_, hash)| **hash == parent.to_string_lossy().to_string())
                         .map(|(path, _)| PathBuf::from(path))
                     {
@@ -222,11 +228,7 @@ impl GitGenerationTracker {
     }
 
     /// Commit the current generation state
-    pub fn commit_generation(
-        &self,
-        manifest: &GenerationManifest,
-        message: &str,
-    ) -> Result<Oid> {
+    pub fn commit_generation(&self, manifest: &GenerationManifest, message: &str) -> Result<Oid> {
         // Stage all generated files
         let mut index = self.repo.index()?;
 
@@ -274,13 +276,24 @@ impl GitGenerationTracker {
         preview.push_str("# Generation Preview\n\n");
         preview.push_str(&format!("Generation ID: {}\n", manifest.id));
         preview.push_str(&format!("Timestamp: {}\n", manifest.timestamp));
-        preview.push_str(&format!("Total API Calls: {}\n", manifest.cascade_tree.total_api_calls));
-        preview.push_str(&format!("Estimated Cost: ${:.4}\n\n", manifest.cascade_tree.total_cost_estimate));
+        preview.push_str(&format!(
+            "Total API Calls: {}\n",
+            manifest.cascade_tree.total_api_calls
+        ));
+        preview.push_str(&format!(
+            "Estimated Cost: ${:.4}\n\n",
+            manifest.cascade_tree.total_cost_estimate
+        ));
 
         preview.push_str("## Files to Generate:\n");
         for (path, metadata) in &manifest.generated_files {
             let status = if path.exists() { "update" } else { "create" };
-            preview.push_str(&format!("- {} {} ({})\n", status, path.display(), metadata.size));
+            preview.push_str(&format!(
+                "- {} {} ({})\n",
+                status,
+                path.display(),
+                metadata.size
+            ));
         }
 
         preview.push_str("\n## Cascade Tree:\n");
@@ -345,7 +358,9 @@ impl GitGenerationTracker {
                 // Try to read manifest from this commit
                 if let Ok(entry) = tree.get_path(Path::new(".ai-generation/manifest.json")) {
                     if let Ok(blob) = self.repo.find_blob(entry.id()) {
-                        if let Ok(manifest) = serde_json::from_slice::<GenerationManifest>(blob.content()) {
+                        if let Ok(manifest) =
+                            serde_json::from_slice::<GenerationManifest>(blob.content())
+                        {
                             history.push(GenerationSummary {
                                 id: manifest.id,
                                 timestamp: manifest.timestamp,
@@ -366,16 +381,22 @@ impl GitGenerationTracker {
 
     fn ensure_tracking_branch(&self) -> Result<()> {
         // Check if branch exists
-        match self.repo.find_branch(&self.generation_branch, git2::BranchType::Local) {
+        match self
+            .repo
+            .find_branch(&self.generation_branch, git2::BranchType::Local)
+        {
             Ok(_) => {
                 // Branch exists, check it out
-                self.repo.set_head(&format!("refs/heads/{}", self.generation_branch))?;
+                self.repo
+                    .set_head(&format!("refs/heads/{}", self.generation_branch))?;
             }
             Err(_) => {
                 // Create new branch
                 let head_commit = self.get_head_commit()?;
-                self.repo.branch(&self.generation_branch, &head_commit, false)?;
-                self.repo.set_head(&format!("refs/heads/{}", self.generation_branch))?;
+                self.repo
+                    .branch(&self.generation_branch, &head_commit, false)?;
+                self.repo
+                    .set_head(&format!("refs/heads/{}", self.generation_branch))?;
             }
         }
 
@@ -407,10 +428,7 @@ impl GitGenerationTracker {
 
         output.push_str(&format!(
             "{}- {} [{}]{}\n",
-            indent,
-            node.prompt_type,
-            node.id,
-            cache_marker
+            indent, node.prompt_type, node.id, cache_marker
         ));
 
         if !node.generated_files.is_empty() {
@@ -498,8 +516,8 @@ impl GitGenerationTracker {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
     use std::fs;
+    use tempfile::TempDir;
 
     fn setup_test_repo() -> Result<TempDir> {
         let temp_dir = TempDir::new()?;
@@ -512,14 +530,7 @@ mod tests {
             index.write_tree()?
         };
         let tree = repo.find_tree(tree_id)?;
-        repo.commit(
-            Some("HEAD"),
-            &sig,
-            &sig,
-            "Initial commit",
-            &tree,
-            &[],
-        )?;
+        repo.commit(Some("HEAD"), &sig, &sig, "Initial commit", &tree, &[])?;
 
         Ok(temp_dir)
     }
@@ -570,10 +581,15 @@ mod tests {
             cache_hit: false,
         };
 
-        tracker.track_prompt(&mut manifest, vec![], prompt_node).unwrap();
+        tracker
+            .track_prompt(&mut manifest, vec![], prompt_node)
+            .unwrap();
 
         assert_eq!(manifest.cascade_tree.root_prompt.children.len(), 1);
-        assert_eq!(manifest.cascade_tree.root_prompt.children[0].id, "test-prompt");
+        assert_eq!(
+            manifest.cascade_tree.root_prompt.children[0].id,
+            "test-prompt"
+        );
         assert_eq!(manifest.cascade_tree.total_api_calls, 1);
         assert!(manifest.cascade_tree.total_cost_estimate > 0.0);
     }
@@ -609,7 +625,15 @@ mod tests {
         let file_path = PathBuf::from("test.txt");
         let content = b"test content";
 
-        tracker.track_file(&mut manifest, file_path.clone(), content, "prompt123".to_string(), vec![]).unwrap();
+        tracker
+            .track_file(
+                &mut manifest,
+                file_path.clone(),
+                content,
+                "prompt123".to_string(),
+                vec![],
+            )
+            .unwrap();
 
         assert!(manifest.generated_files.contains_key(&file_path));
         let metadata = &manifest.generated_files[&file_path];
@@ -637,7 +661,15 @@ mod tests {
         // Track a file - write it in the current directory
         let file_path = PathBuf::from("test.txt");
         fs::write(&file_path, "content").unwrap();
-        tracker.track_file(&mut manifest, file_path, b"content", "hash1".to_string(), vec![]).unwrap();
+        tracker
+            .track_file(
+                &mut manifest,
+                file_path,
+                b"content",
+                "hash1".to_string(),
+                vec![],
+            )
+            .unwrap();
 
         // Save manifest using the tracker's save method
         tracker.save_manifest(&manifest).unwrap();
@@ -707,7 +739,10 @@ mod tests {
 
         assert_eq!(manifest.id, deserialized.id);
         assert_eq!(manifest.parent_commit, deserialized.parent_commit);
-        assert_eq!(manifest.cascade_tree.total_api_calls, deserialized.cascade_tree.total_api_calls);
+        assert_eq!(
+            manifest.cascade_tree.total_api_calls,
+            deserialized.cascade_tree.total_api_calls
+        );
         assert_eq!(manifest.config_snapshot, deserialized.config_snapshot);
     }
 

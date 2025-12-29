@@ -29,27 +29,27 @@ pub struct ArtStyle {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ColorPalette {
     // Core world colors - corrupted light theme
-    pub primary_dark: Color,      // Deep shadow
-    pub primary_mid: Color,        // Twilight
-    pub primary_light: Color,      // Fading light
-    pub primary_bright: Color,     // Pure light (rare)
-    
+    pub primary_dark: Color,   // Deep shadow
+    pub primary_mid: Color,    // Twilight
+    pub primary_light: Color,  // Fading light
+    pub primary_bright: Color, // Pure light (rare)
+
     // Corruption colors
-    pub corruption_dark: Color,    // Deep corruption
-    pub corruption_mid: Color,     // Active corruption
-    pub corruption_glow: Color,    // Corruption energy
-    
+    pub corruption_dark: Color, // Deep corruption
+    pub corruption_mid: Color,  // Active corruption
+    pub corruption_glow: Color, // Corruption energy
+
     // Nature colors (being corrupted)
-    pub nature_earth: Color,       // Earth tones
-    pub nature_water: Color,       // Water (tainted)
-    pub nature_plant: Color,       // Vegetation (dying)
-    
+    pub nature_earth: Color, // Earth tones
+    pub nature_water: Color, // Water (tainted)
+    pub nature_plant: Color, // Vegetation (dying)
+
     // Magic/Energy colors
-    pub magic_pure: Color,         // Uncorrupted magic
-    pub magic_tainted: Color,      // Corrupted magic
-    pub energy_heal: Color,        // Healing energy
-    pub energy_harm: Color,        // Harmful energy
-    
+    pub magic_pure: Color,    // Uncorrupted magic
+    pub magic_tainted: Color, // Corrupted magic
+    pub energy_heal: Color,   // Healing energy
+    pub energy_harm: Color,   // Harmful energy
+
     // UI Semantic colors
     pub ui_health: Color,
     pub ui_mana: Color,
@@ -69,11 +69,11 @@ pub struct SpriteConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MonsterSizes {
-    pub tiny: UVec2,    // 16x16
-    pub small: UVec2,   // 32x32
-    pub medium: UVec2,  // 48x48
-    pub large: UVec2,   // 64x64
-    pub huge: UVec2,    // 96x96
+    pub tiny: UVec2,   // 16x16
+    pub small: UVec2,  // 32x32
+    pub medium: UVec2, // 48x48
+    pub large: UVec2,  // 64x64
+    pub huge: UVec2,   // 96x96
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -117,23 +117,23 @@ impl Default for StyleConfig {
                     primary_mid: Color::Srgba(Srgba::hex("#2a2a3e").unwrap()),
                     primary_light: Color::Srgba(Srgba::hex("#6a6a8e").unwrap()),
                     primary_bright: Color::Srgba(Srgba::hex("#ffffff").unwrap()),
-                    
+
                     // Purple corruption theme
                     corruption_dark: Color::Srgba(Srgba::hex("#1a0a2e").unwrap()),
                     corruption_mid: Color::Srgba(Srgba::hex("#53354a").unwrap()),
                     corruption_glow: Color::Srgba(Srgba::hex("#903749").unwrap()),
-                    
+
                     // Muted nature colors
                     nature_earth: Color::Srgba(Srgba::hex("#3e2723").unwrap()),
                     nature_water: Color::Srgba(Srgba::hex("#263238").unwrap()),
                     nature_plant: Color::Srgba(Srgba::hex("#1b5e20").unwrap()),
-                    
+
                     // Magic colors
                     magic_pure: Color::Srgba(Srgba::hex("#64b5f6").unwrap()),
                     magic_tainted: Color::Srgba(Srgba::hex("#7b1fa2").unwrap()),
                     energy_heal: Color::Srgba(Srgba::hex("#81c784").unwrap()),
                     energy_harm: Color::Srgba(Srgba::hex("#e57373").unwrap()),
-                    
+
                     // UI colors
                     ui_health: Color::Srgba(Srgba::hex("#d32f2f").unwrap()),
                     ui_mana: Color::Srgba(Srgba::hex("#1976d2").unwrap()),

@@ -102,7 +102,11 @@ impl Default for GameplayConfig {
                     speed: 12,
                     spirit: 20,
                 },
-                starting_abilities: vec!["Light Burst".to_string(), "Tame".to_string(), "Heal".to_string()],
+                starting_abilities: vec![
+                    "Light Burst".to_string(),
+                    "Tame".to_string(),
+                    "Heal".to_string(),
+                ],
                 max_party_size: 6,
             },
             monsters: MonsterConfig {
@@ -145,21 +149,31 @@ impl Default for GameplayConfig {
                         biome: "corrupted_forest".to_string(),
                         corruption_level: 0.2,
                         level_range: (1, 5),
-                        key_features: vec!["starting_town".to_string(), "basic_shops".to_string(), "taming_tutorial".to_string()],
+                        key_features: vec![
+                            "starting_town".to_string(),
+                            "basic_shops".to_string(),
+                            "taming_tutorial".to_string(),
+                        ],
                     },
                     ZoneDefinition {
                         name: "Whispering Woods".to_string(),
                         biome: "dark_forest".to_string(),
                         corruption_level: 0.4,
                         level_range: (5, 10),
-                        key_features: vec!["first_dungeon".to_string(), "corrupted_shrine".to_string()],
+                        key_features: vec![
+                            "first_dungeon".to_string(),
+                            "corrupted_shrine".to_string(),
+                        ],
                     },
                     ZoneDefinition {
                         name: "Crystal Caverns".to_string(),
                         biome: "underground".to_string(),
                         corruption_level: 0.6,
                         level_range: (10, 15),
-                        key_features: vec!["light_crystals".to_string(), "ancient_machinery".to_string()],
+                        key_features: vec![
+                            "light_crystals".to_string(),
+                            "ancient_machinery".to_string(),
+                        ],
                     },
                     ZoneDefinition {
                         name: "Shadowpeak Mountains".to_string(),
@@ -201,13 +215,24 @@ impl Default for GameplayConfig {
                         weak_against: vec!["Light".to_string(), "Pure".to_string()],
                     },
                 ],
-                status_effects: vec!["Poisoned".to_string(), "Blessed".to_string(), "Corrupted".to_string(), "Shielded".to_string(), "Stunned".to_string()],
+                status_effects: vec![
+                    "Poisoned".to_string(),
+                    "Blessed".to_string(),
+                    "Corrupted".to_string(),
+                    "Shielded".to_string(),
+                    "Stunned".to_string(),
+                ],
             },
             progression: ProgressionConfig {
                 level_cap: 50,
                 experience_curve: "exponential_smooth".to_string(),
                 skill_trees: true,
-                equipment_slots: vec!["weapon".to_string(), "armor".to_string(), "accessory".to_string(), "talisman".to_string()],
+                equipment_slots: vec![
+                    "weapon".to_string(),
+                    "armor".to_string(),
+                    "accessory".to_string(),
+                    "talisman".to_string(),
+                ],
             },
         }
     }

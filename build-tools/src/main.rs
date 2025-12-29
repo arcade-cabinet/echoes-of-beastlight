@@ -16,8 +16,8 @@ use tracing_subscriber::EnvFilter;
 
 mod config;
 mod generator;
-mod templates;
 mod git_tracker;
+mod templates;
 
 use generator::AIGameGenerator;
 
@@ -65,9 +65,11 @@ enum ComponentType {
 async fn main() -> Result<()> {
     // Initialize tracing
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env()
-            .add_directive("ai_game_generator=info".parse()?)
-            .add_directive("async_openai=warn".parse()?))
+        .with_env_filter(
+            EnvFilter::from_default_env()
+                .add_directive("ai_game_generator=info".parse()?)
+                .add_directive("async_openai=warn".parse()?),
+        )
         .init();
 
     let cli = Cli::parse();

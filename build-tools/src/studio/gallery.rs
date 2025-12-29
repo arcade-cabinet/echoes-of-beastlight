@@ -9,9 +9,9 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+use crate::studio::{AssetCache, GenerationRequest, GenerationSender};
 use bevy::prelude::*;
 use bevy_egui::egui;
-use crate::studio::{AssetCache, GenerationSender, GenerationRequest};
 use std::collections::HashMap;
 
 pub fn show_asset_gallery(

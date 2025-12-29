@@ -18,7 +18,7 @@ pub enum TileType {
     Terrain(TerrainType),
     Structure(StructureType),
     Transition(TransitionType),
-    
+
     // Entity tiles (conceptual)
     MonsterPart(MonsterPartType),
     ItemVisual(ItemVisualType),
@@ -95,7 +95,7 @@ impl Default for TileRecolorSystem {
     fn default() -> Self {
         use crate::config::style::StyleConfig;
         let style = StyleConfig::default();
-        
+
         Self {
             corruption_gradient: vec![
                 (0.0, style.visual.palette.primary_bright),
@@ -105,12 +105,30 @@ impl Default for TileRecolorSystem {
                 (1.0, style.visual.palette.corruption_dark),
             ],
             element_colors: HashMap::from([
-                ("fire".to_string(), Color::Srgba(Srgba::hex("#ff6b6b").unwrap())),
-                ("water".to_string(), Color::Srgba(Srgba::hex("#4ecdc4").unwrap())),
-                ("earth".to_string(), Color::Srgba(Srgba::hex("#8b6914").unwrap())),
-                ("air".to_string(), Color::Srgba(Srgba::hex("#95e1d3").unwrap())),
-                ("light".to_string(), Color::Srgba(Srgba::hex("#ffffff").unwrap())),
-                ("shadow".to_string(), Color::Srgba(Srgba::hex("#2c2c2c").unwrap())),
+                (
+                    "fire".to_string(),
+                    Color::Srgba(Srgba::hex("#ff6b6b").unwrap()),
+                ),
+                (
+                    "water".to_string(),
+                    Color::Srgba(Srgba::hex("#4ecdc4").unwrap()),
+                ),
+                (
+                    "earth".to_string(),
+                    Color::Srgba(Srgba::hex("#8b6914").unwrap()),
+                ),
+                (
+                    "air".to_string(),
+                    Color::Srgba(Srgba::hex("#95e1d3").unwrap()),
+                ),
+                (
+                    "light".to_string(),
+                    Color::Srgba(Srgba::hex("#ffffff").unwrap()),
+                ),
+                (
+                    "shadow".to_string(),
+                    Color::Srgba(Srgba::hex("#2c2c2c").unwrap()),
+                ),
             ]),
         }
     }
@@ -151,16 +169,16 @@ pub fn recolor_tiles_by_corruption(
         } else {
             // Apply corruption-based recoloring
             let corruption = game_tile.corruption_level.clamp(0.0, 1.0);
-            
+
             // Find the two colors to interpolate between
             let mut lower_color = recolor_system.corruption_gradient[0].1;
             let mut upper_color = recolor_system.corruption_gradient[0].1;
             let mut t = 0.0;
-            
+
             for i in 0..recolor_system.corruption_gradient.len() - 1 {
                 let (lower_threshold, lower) = recolor_system.corruption_gradient[i];
                 let (upper_threshold, upper) = recolor_system.corruption_gradient[i + 1];
-                
+
                 if corruption >= lower_threshold && corruption <= upper_threshold {
                     lower_color = lower;
                     upper_color = upper;
@@ -168,11 +186,11 @@ pub fn recolor_tiles_by_corruption(
                     break;
                 }
             }
-            
+
             // Interpolate between colors
             let lower_rgba = lower_color.to_linear();
             let upper_rgba = upper_color.to_linear();
-            
+
             color.0 = Color::LinearRgba(LinearRgba {
                 red: lower_rgba.red + (upper_rgba.red - lower_rgba.red) * t,
                 green: lower_rgba.green + (upper_rgba.green - lower_rgba.green) * t,
@@ -196,7 +214,7 @@ pub fn generate_tile_variant(
         TileType::Terrain(TerrainType::Water) => 2,
         _ => 1,
     };
-    
+
     (seed.get_value(&context, base_variants) as u32) + get_base_tile_index(tile_type)
 }
 
@@ -233,8 +251,7 @@ pub struct TilePlugin;
 
 impl Plugin for TilePlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_plugins(TilemapPlugin)
+        app.add_plugins(TilemapPlugin)
             .insert_resource(TileRecolorSystem::default())
             .add_systems(Update, recolor_tiles_by_corruption);
     }

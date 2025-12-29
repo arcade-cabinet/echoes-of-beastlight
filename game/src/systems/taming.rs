@@ -47,7 +47,9 @@ fn taming_system(
                 let taming_chance = (monster.health as f32 / monster.max_health as f32)
                     * (player.level as f32 / 100.0);
 
-                let bait_bonus = bait_query.iter().fold(0.0, |acc, bait| acc + bait.success_rate);
+                let bait_bonus = bait_query
+                    .iter()
+                    .fold(0.0, |acc, bait| acc + bait.success_rate);
 
                 let final_chance = taming_chance + bait_bonus;
 

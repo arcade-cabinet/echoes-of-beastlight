@@ -11,7 +11,6 @@
 
 use bevy::prelude::*;
 
-
 #[derive(Component, Debug, Clone)]
 pub struct Player {
     pub health: i32,
@@ -21,7 +20,11 @@ pub struct Player {
 
 impl Player {
     pub fn new(health: i32, mana: i32, level: u32) -> Self {
-        Self { health, mana, level }
+        Self {
+            health,
+            mana,
+            level,
+        }
     }
 }
 
@@ -35,7 +38,12 @@ pub struct Monster {
 
 impl Monster {
     pub fn new(species: String, health: i32, damage: i32, tameable: bool) -> Self {
-        Self { species, health, damage, tameable }
+        Self {
+            species,
+            health,
+            damage,
+            tameable,
+        }
     }
 }
 
