@@ -18,4 +18,13 @@ cargo build -p echoes-of-beastlight --release --target wasm32-unknown-unknown
 # Generate bindings
 wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/echoes-of-beastlight.wasm
 
-echo "✅ Build complete! Serve index.html to play."
+# Ensure index.html exists
+if [ ! -f ./out/index.html ]; then
+    cp game/assets/index.html ./out/index.html || echo "index.html already in out or missing"
+fi
+
+# Copy assets
+rm -rf ./out/assets
+cp -r game/assets ./out/assets
+
+echo "✅ Build complete! Serve ./out to play."
