@@ -1,0 +1,12 @@
+{
+  "name": "echoes-of-beastlight-e2e",
+  "version": "1.0.0",
+  "description": "E2E tests for Echoes of Beastlight",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}
