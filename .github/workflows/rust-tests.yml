@@ -49,25 +49,25 @@ jobs:
 
     - name: Check formatting
       run: cargo fmt --all -- --check
-      working-directory: tools
+      working-directory: build-tools
 
     - name: Run clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
-      working-directory: tools
+      working-directory: build-tools
 
     - name: Run tests
       run: cargo test --all-features --verbose
-      working-directory: tools
+      working-directory: build-tools
       env:
         OPENAI_API_KEY: test-key
 
     - name: Run tests with all features
       run: cargo test --all-features --verbose
-      working-directory: tools
+      working-directory: build-tools
 
     - name: Build documentation
       run: cargo doc --no-deps --all-features
-      working-directory: tools
+      working-directory: build-tools
 
   coverage:
     name: Code Coverage
@@ -91,14 +91,14 @@ jobs:
 
     - name: Generate coverage
       run: cargo tarpaulin --out Xml --all-features --verbose
-      working-directory: tools
+      working-directory: build-tools
       env:
         OPENAI_API_KEY: test-key
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        file: ./tools/cobertura.xml
+        file: ./build-tools/cobertura.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false

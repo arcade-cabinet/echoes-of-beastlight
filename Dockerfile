@@ -44,11 +44,11 @@ RUN pip3 install --no-cache-dir pyyaml
 WORKDIR /workspace
 
 # Copy package files first for better caching
-COPY tools/package*.json ./tools/
+COPY build-tools/project.json ./build-tools/
 COPY .github/actions/openai-game-gen/package*.json ./.github/actions/openai-game-gen/
 
 # Install Node dependencies
-RUN cd tools && npm ci
+# RUN cd build-tools && npm ci
 RUN cd .github/actions/openai-game-gen && npm ci && npm run build
 
 # Copy the rest of the project
