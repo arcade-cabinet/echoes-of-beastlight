@@ -10,9 +10,9 @@ rustup target add wasm32-unknown-unknown
 command -v wasm-bindgen-cli >/dev/null 2>&1 || cargo install wasm-bindgen-cli
 
 # Build
-cargo build --release --target wasm32-unknown-unknown
+cargo build -p echoes-of-beastlight --release --target wasm32-unknown-unknown
 
 # Generate bindings
-wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/beastlight.wasm
+wasm-bindgen --out-dir ./out/ --target web ./target/wasm32-unknown-unknown/release/echoes_of_beastlight.wasm
 
 echo "✅ Build complete! Serve index.html to play."

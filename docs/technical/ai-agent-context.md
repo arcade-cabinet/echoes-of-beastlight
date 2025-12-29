@@ -189,7 +189,7 @@ struct WorldNode {
 
 #### Edition 2024
 
-- Using Rust 1.88.0 for edition 2024 support
+- Using Rust 1.91 for edition 2024 support
 - Enables latest language features
 - Required for some dependencies
 
@@ -244,7 +244,7 @@ cargo run --bin ai-gen -- clean
 
 ### Environment Requirements
 
-- Rust 1.88.0+ (for edition 2024)
+- Rust 1.91+ (for edition 2024)
 - SDL2 development libraries (for studio only)
 - Git (for idempotency tracking)
 - OPENAI_API_KEY environment variable

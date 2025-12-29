@@ -20,13 +20,11 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.88.0
+          toolchain: 1.91
           components: rustfmt
 
       - name: Check formatting
-        run: |
-          cargo fmt --all -- --check
-          cd tools && cargo fmt --all -- --check
+        run: cargo fmt --all -- --check
 
   lint:
     name: Clippy Lint
@@ -37,7 +35,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.88.0
+          toolchain: 1.91
           components: clippy
 
       - name: Install system dependencies
@@ -52,9 +50,7 @@ jobs:
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run clippy
-        run: |
-          cargo clippy --all-targets --all-features -- -D warnings
-          cd tools && cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
   doc:
     name: Documentation Check
@@ -65,7 +61,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.88.0
+          toolchain: 1.91
 
       - name: Install system dependencies
         run: |
@@ -73,9 +69,7 @@ jobs:
           sudo apt-get install -y libsdl2-dev pkg-config libssl-dev
 
       - name: Check documentation
-        run: |
-          RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
-          cd tools && RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --all-features
 
   msrv:
     name: Minimum Supported Rust Version
@@ -86,7 +80,7 @@ jobs:
       - name: Install MSRV toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.88.0
+          toolchain: 1.91
 
       - name: Install system dependencies
         run: |
@@ -94,9 +88,7 @@ jobs:
           sudo apt-get install -y libsdl2-dev pkg-config libssl-dev
 
       - name: Check MSRV
-        run: |
-          cargo check --all-features
-          cd tools && cargo check --all-features
+        run: cargo check --workspace --all-features
 
   unused-deps:
     name: Check Unused Dependencies
@@ -107,13 +99,11 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.88.0
+          toolchain: 1.91
 
       - name: Install cargo-machete
         run: cargo install cargo-machete
 
       - name: Check for unused dependencies
-        run: |
-          cargo machete
-          cd tools && cargo machete
+        run: cargo machete
         continue-on-error: true # Don't fail the build, just report

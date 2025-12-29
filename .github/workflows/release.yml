@@ -35,7 +35,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.88.0
+          toolchain: 1.91
           targets: ${{ matrix.target }}
 
       - name: Install dependencies (Ubuntu)
@@ -46,18 +46,18 @@ jobs:
 
       - name: Build release binary
         run: |
-          cd tools
-          cargo build --release --target ${{ matrix.target }} --bin ai-gen
+          cd build-tools
+          cargo build --release --target ${{ matrix.target }} --bin studio
           cd ..
 
       - name: Create archive
         shell: bash
         run: |
-          cd target/${{ matrix.target }}/release
+          cd build-tools/target/${{ matrix.target }}/release
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            7z a ../../../${{ matrix.name }}.zip ai-gen.exe
+            7z a ../../../../${{ matrix.name }}.zip studio.exe
           else
-            tar czf ../../../${{ matrix.name }}.tar.gz ai-gen
+            tar czf ../../../../${{ matrix.name }}.tar.gz studio
           fi
           cd -
 
@@ -112,10 +112,10 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.88.0
+          toolchain: 1.91
 
       - name: Publish to crates.io
         run: |
-          cd tools
+          cd build-tools
           cargo publish --token ${{ secrets.CARGO_TOKEN }}
         continue-on-error: true # Don't fail the workflow if publish fails

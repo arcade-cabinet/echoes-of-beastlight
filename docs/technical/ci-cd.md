@@ -74,7 +74,7 @@ Configuration: `.github/renovate.json`
 Configuration: `.github/dependabot.yml`
 
 **Monitors**:
-- Cargo dependencies (root and tools)
+- Cargo dependencies (root and build-tools)
 - GitHub Actions
 - Weekly update schedule
 - Grouped updates for related packages
@@ -172,7 +172,7 @@ The release workflow will:
 ```bash
 # Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup default 1.88.0
+rustup default 1.91
 
 # Install development tools
 cargo install cargo-audit

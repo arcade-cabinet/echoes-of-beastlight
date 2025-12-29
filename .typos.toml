@@ -3,7 +3,7 @@
 [files]
 extend-exclude = [
     "target/",
-    "tools/target/",
+    "build-tools/target/",
     "Cargo.lock",
     "*.png",
     "*.jpg",

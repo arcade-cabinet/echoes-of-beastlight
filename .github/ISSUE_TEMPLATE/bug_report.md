@@ -31,7 +31,7 @@ Paste any error messages here
 ## Environment
 
 - OS: [e.g. Ubuntu 22.04, macOS 14.0, Windows 11]
-- Rust version: [e.g. 1.88.0]
+- Rust version: [e.g. 1.91]
 - Tool version: [e.g. 0.1.0]
 
 ## Configuration

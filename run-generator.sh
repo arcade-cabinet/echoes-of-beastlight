@@ -10,9 +10,9 @@ if [ -z "$OPENAI_API_KEY" ]; then
 fi
 
 # Build if needed
-if [ ! -f "target/release/ai-gen" ]; then
+if [ ! -f "target/release/generator-debug" ]; then
     echo "Building AI generator..."
-    cargo build -p ai-game-generator --release --bin ai-gen || exit 1
+    cargo build -p ai-game-generator --release --bin generator-debug || exit 1
 fi
 
 # Run the generator
@@ -31,4 +31,4 @@ echo ""
 export RUST_LOG=info,ai_game_generator=debug
 
 # Run with any passed arguments
-./target/release/ai-gen "$@"
+./target/release/generator-debug "$@"
