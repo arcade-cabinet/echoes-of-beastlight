@@ -26,15 +26,33 @@ pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
 
     // File tabs
     ui.horizontal(|ui| {
-        if ui.selectable_label(editor_state.current_file == Some("main.rs".into()), "main.rs").clicked() {
+        if ui
+            .selectable_label(
+                editor_state.current_file == Some("main.rs".into()),
+                "main.rs",
+            )
+            .clicked()
+        {
             editor_state.current_file = Some("main.rs".into());
             editor_state.file_content = get_sample_code("main.rs");
         }
-        if ui.selectable_label(editor_state.current_file == Some("player.rs".into()), "player.rs").clicked() {
+        if ui
+            .selectable_label(
+                editor_state.current_file == Some("player.rs".into()),
+                "player.rs",
+            )
+            .clicked()
+        {
             editor_state.current_file = Some("player.rs".into());
             editor_state.file_content = get_sample_code("player.rs");
         }
-        if ui.selectable_label(editor_state.current_file == Some("combat.rs".into()), "combat.rs").clicked() {
+        if ui
+            .selectable_label(
+                editor_state.current_file == Some("combat.rs".into()),
+                "combat.rs",
+            )
+            .clicked()
+        {
             editor_state.current_file = Some("combat.rs".into());
             editor_state.file_content = get_sample_code("combat.rs");
         }
@@ -87,7 +105,7 @@ pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
                     egui::TextEdit::multiline(&mut editor_state.file_content)
                         .code_editor()
                         .desired_width(f32::INFINITY)
-                        .desired_rows(30)
+                        .desired_rows(30),
                 );
 
                 if response.changed() {
@@ -98,14 +116,14 @@ pub fn show_code_editor(ui: &mut egui::Ui, editor_state: &mut EditorState) {
 }
 
 fn show_highlighted_code(ui: &mut egui::Ui, code: &str) {
-    use egui::{text::LayoutJob, TextFormat, Color32, FontId};
+    use egui::{Color32, FontId, TextFormat, text::LayoutJob};
 
     let mut job = LayoutJob::default();
 
     // Simple Rust syntax highlighting
     let keywords = vec![
-        "use", "mod", "fn", "let", "mut", "const", "struct", "impl", "pub", "if", "else",
-        "for", "while", "loop", "match", "return", "self", "Self", "true", "false",
+        "use", "mod", "fn", "let", "mut", "const", "struct", "impl", "pub", "if", "else", "for",
+        "while", "loop", "match", "return", "self", "Self", "true", "false",
     ];
 
     let lines = code.lines();
@@ -134,15 +152,16 @@ fn show_highlighted_code(ui: &mut egui::Ui, code: &str) {
             // Tokenize and highlight
             let words: Vec<&str> = remaining.split_whitespace().collect();
             for (i, word) in words.iter().enumerate() {
-                let color = if keywords.contains(&word.trim_end_matches(|c: char| !c.is_alphanumeric())) {
-                    Color32::from_rgb(200, 100, 200) // Keywords in purple
-                } else if word.starts_with('"') || word.starts_with('\'') {
-                    Color32::from_rgb(200, 150, 100) // Strings in orange
-                } else if word.chars().all(|c| c.is_numeric() || c == '.') {
-                    Color32::from_rgb(100, 200, 200) // Numbers in cyan
-                } else {
-                    Color32::from_gray(200) // Default text
-                };
+                let color =
+                    if keywords.contains(&word.trim_end_matches(|c: char| !c.is_alphanumeric())) {
+                        Color32::from_rgb(200, 100, 200) // Keywords in purple
+                    } else if word.starts_with('"') || word.starts_with('\'') {
+                        Color32::from_rgb(200, 150, 100) // Strings in orange
+                    } else if word.chars().all(|c| c.is_numeric() || c == '.') {
+                        Color32::from_rgb(100, 200, 200) // Numbers in cyan
+                    } else {
+                        Color32::from_gray(200) // Default text
+                    };
 
                 job.append(
                     word,
@@ -189,7 +208,8 @@ fn setup(mut commands: Commands) {
         },
         Player { speed: 150.0 },
     ));
-}"#.to_string(),
+}"#
+        .to_string(),
 
         "player.rs" => r#"use bevy::prelude::*;
 
@@ -224,7 +244,8 @@ pub fn player_movement(
             transform.translation += direction * 150.0 * time.delta_seconds();
         }
     }
-}"#.to_string(),
+}"#
+        .to_string(),
 
         _ => "// Generated code will appear here".to_string(),
     }

@@ -1,9 +1,9 @@
 use bevy::prelude::*;
-use rand::{Rng, SeedableRng};
+use rand::{Rng, SeedableRng, seq::IndexedRandom};
 use rand_chacha::ChaCha8Rng;
 use serde::{Deserialize, Serialize};
-use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 /// The master seed that drives all procedural generation
 #[derive(Resource, Debug, Clone, Serialize, Deserialize)]
@@ -12,13 +12,17 @@ pub struct WorldSeed {
     pub adjective: String,
     pub noun: String,
     pub verb: String,
-    
+
     /// The numeric seed derived from the words
     pub numeric_seed: u64,
-    
+
     /// The RNG for this world
-    #[serde(skip)]
+    #[serde(skip, default = "default_rng")]
     pub rng: ChaCha8Rng,
+}
+
+fn default_rng() -> ChaCha8Rng {
+    ChaCha8Rng::seed_from_u64(0)
 }
 
 impl WorldSeed {
@@ -26,7 +30,7 @@ impl WorldSeed {
     pub fn from_words(adjective: &str, noun: &str, verb: &str) -> Self {
         let seed_string = format!("{}-{}-{}", adjective, noun, verb);
         let numeric_seed = Self::hash_string(&seed_string);
-        
+
         Self {
             adjective: adjective.to_string(),
             noun: noun.to_string(),
@@ -35,67 +39,73 @@ impl WorldSeed {
             rng: ChaCha8Rng::seed_from_u64(numeric_seed),
         }
     }
-    
+
     /// Create a random world seed
     pub fn random() -> Self {
         use crate::config::generation::GenerationConfig;
         let config = GenerationConfig::default();
-        let mut rng = rand::thread_rng();
-        
+        let mut rng = rand::rng();
+
         // Pick random words from our lexicon
         let adj_category = ["mystical", "corrupted", "natural", "ancient"]
-            .choose(&mut rng).unwrap();
+            .choose(&mut rng)
+            .unwrap();
         let noun_category = ["mystical", "corrupted", "natural", "ancient"]
-            .choose(&mut rng).unwrap();
+            .choose(&mut rng)
+            .unwrap();
         let verb_category = ["mystical", "corrupted", "natural", "ancient"]
-            .choose(&mut rng).unwrap();
-        
+            .choose(&mut rng)
+            .unwrap();
+
         let adjective = match *adj_category {
             "mystical" => config.word_banks.adjectives.mystical.choose(&mut rng),
             "corrupted" => config.word_banks.adjectives.corrupted.choose(&mut rng),
             "natural" => config.word_banks.adjectives.natural.choose(&mut rng),
             "ancient" => config.word_banks.adjectives.ancient.choose(&mut rng),
             _ => unreachable!(),
-        }.unwrap();
-        
+        }
+        .unwrap();
+
         let noun = match *noun_category {
             "mystical" => config.word_banks.nouns.mystical.choose(&mut rng),
             "corrupted" => config.word_banks.nouns.corrupted.choose(&mut rng),
             "natural" => config.word_banks.nouns.natural.choose(&mut rng),
             "ancient" => config.word_banks.nouns.ancient.choose(&mut rng),
             _ => unreachable!(),
-        }.unwrap();
-        
+        }
+        .unwrap();
+
         let verb = match *verb_category {
             "mystical" => config.word_banks.verbs.mystical.choose(&mut rng),
             "corrupted" => config.word_banks.verbs.corrupted.choose(&mut rng),
             "natural" => config.word_banks.verbs.natural.choose(&mut rng),
             "ancient" => config.word_banks.verbs.ancient.choose(&mut rng),
             _ => unreachable!(),
-        }.unwrap();
-        
+        }
+        .unwrap();
+
         Self::from_words(adjective, noun, verb)
     }
-    
+
     /// Create a sub-seed for a specific system
     pub fn subseed(&self, context: &str) -> ChaCha8Rng {
         let combined = format!("{}-{}", self.numeric_seed, context);
         let subseed = Self::hash_string(&combined);
         ChaCha8Rng::seed_from_u64(subseed)
     }
-    
+
     /// Get a deterministic value for a specific context
     pub fn get_value(&self, context: &str, max: u64) -> u64 {
         let mut rng = self.subseed(context);
-        rng.gen_range(0..max)
+        rng.random_range(0..max)
     }
-    
+
     /// Get a deterministic float for a specific context
     pub fn get_float(&self, context: &str) -> f32 {
         let mut rng = self.subseed(context);
-        rng.gen()
+        rng.random()
     }
-    
+
     /// Hash a string to a u64
     fn hash_string(s: &str) -> u64 {
         let mut hasher = DefaultHasher::new();
@@ -114,7 +124,7 @@ pub struct ProceduralEntity {
 }
 
 /// Event for when the world seed changes
-#[derive(Event)]
+#[derive(Event, Message)]
 pub struct WorldSeedChanged {
     pub old_seed: Option<WorldSeed>,
     pub new_seed: WorldSeed,
@@ -124,16 +134,12 @@ pub struct SeedPlugin;
 
 impl Plugin for SeedPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_event::<WorldSeedChanged>()
-            .add_systems(Startup, initialize_seed);
+        app.add_message::<WorldSeedChanged>()
+            .add_systems(PreStartup, initialize_seed);
     }
 }
 
-fn initialize_seed(
-    mut commands: Commands,
-    mut events: EventWriter<WorldSeedChanged>,
-) {
+fn initialize_seed(mut commands: Commands, mut events: MessageWriter<WorldSeedChanged>) {
     // Check for command line seed or create random
     let seed = if let Some(seed_arg) = std::env::args().find(|arg| arg.starts_with("--seed=")) {
         let seed_str = seed_arg.trim_start_matches("--seed=");
@@ -147,13 +153,13 @@ fn initialize_seed(
     } else {
         WorldSeed::random()
     };
-    
+
     info!("World Seed: {}-{}-{}", seed.adjective, seed.noun, seed.verb);
-    
-    events.send(WorldSeedChanged {
+
+    events.write(WorldSeedChanged {
         old_seed: None,
         new_seed: seed.clone(),
     });
-    
+
     commands.insert_resource(seed);
 }

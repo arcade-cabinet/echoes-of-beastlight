@@ -11,8 +11,8 @@
 
 pub mod config;
 pub mod generator;
-pub mod templates;
 pub mod git_tracker;
+pub mod templates;
 
 // Re-export commonly used types
 pub use config::GameConfig;

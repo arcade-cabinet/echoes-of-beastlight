@@ -133,9 +133,9 @@ impl GameConfig {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
-    use tempfile::TempDir;
     use std::fs::File;
     use std::io::Write;
+    use tempfile::TempDir;
 
     #[test]
     fn test_default_genre() {
@@ -222,8 +222,10 @@ type: "dungeon"
 
         assert_eq!(config.game.title, deserialized.game.title);
         assert_eq!(config.hero.name, deserialized.hero.name);
-        assert_eq!(config.environments.outdoor_zones.len(),
-                   deserialized.environments.outdoor_zones.len());
+        assert_eq!(
+            config.environments.outdoor_zones.len(),
+            deserialized.environments.outdoor_zones.len()
+        );
         assert_eq!(config.graphics.tile_size, deserialized.graphics.tile_size);
         assert_eq!(config.audio.music_style, deserialized.audio.music_style);
     }
@@ -310,17 +312,15 @@ audio:
                 abilities: vec!["Slash".to_string(), "Block".to_string()],
             },
             environments: Environments {
-                outdoor_zones: vec![
-                    Zone {
-                        name: "Test Zone".to_string(),
-                        zone_type: "outdoor".to_string(),
-                        description: "A test zone".to_string(),
-                        biome: "forest".to_string(),
-                        difficulty: 1,
-                        monsters: vec!["Slime".to_string()],
-                        features: vec!["tree".to_string()],
-                    }
-                ],
+                outdoor_zones: vec![Zone {
+                    name: "Test Zone".to_string(),
+                    zone_type: "outdoor".to_string(),
+                    description: "A test zone".to_string(),
+                    biome: "forest".to_string(),
+                    difficulty: 1,
+                    monsters: vec!["Slime".to_string()],
+                    features: vec!["tree".to_string()],
+                }],
                 dungeons: vec![],
                 special_areas: vec![],
                 map_generation: MapGeneration {
@@ -329,7 +329,7 @@ audio:
                         dungeon: "rooms_and_corridors".to_string(),
                         cave: "drunken_walk".to_string(),
                         special: "maze".to_string(),
-                    }
+                    },
                 },
             },
             generation_rules: GenerationRules {

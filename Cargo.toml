@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "game",
+    "build-tools",
+]
+resolver = "2"

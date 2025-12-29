@@ -10,28 +10,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts, EguiPlugin};
+use bevy_egui::{EguiContexts, EguiPlugin, egui};
 use bevy_inspector_egui::prelude::*;
+use crossbeam_channel::{Receiver, Sender, unbounded};
 use egui_dock::{DockArea, DockState, Style as DockStyle};
 use std::sync::{Arc, Mutex};
-use crossbeam_channel::{unbounded, Receiver, Sender};
 use uuid::Uuid;
 
-mod wizard;
-mod gallery;
-mod preview;
-mod editor;
 mod console;
+mod editor;
+mod gallery;
 mod generator;
+mod preview;
 mod theme;
+mod wizard;
 
-pub use wizard::*;
-pub use gallery::*;
-pub use preview::*;
-pub use editor::*;
 pub use console::*;
+pub use editor::*;
+pub use gallery::*;
 pub use generator::*;
+pub use preview::*;
 pub use theme::*;
+pub use wizard::*;
 
 /// Main application plugin that orchestrates the entire game generation studio
 pub struct GameGeneratorStudioPlugin;
@@ -45,10 +45,8 @@ impl Plugin for GameGeneratorStudioPlugin {
             .init_resource::<ProjectDatabase>()
             .init_resource::<AssetCache>()
             .init_resource::<GenerationTasks>()
-
             // Communication channels
             .insert_resource(create_generation_channels())
-
             // Plugins
             .add_plugins(DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
@@ -60,16 +58,18 @@ impl Plugin for GameGeneratorStudioPlugin {
             }))
             .add_plugins(EguiPlugin)
             .add_plugins(WorldInspectorPlugin::new())
-
             // Systems
             .add_systems(Startup, setup_studio)
-            .add_systems(Update, (
-                studio_ui_system,
-                generation_task_processor,
-                live_preview_updater,
-                asset_hot_reload_system,
-            ).chain())
-
+            .add_systems(
+                Update,
+                (
+                    studio_ui_system,
+                    generation_task_processor,
+                    live_preview_updater,
+                    asset_hot_reload_system,
+                )
+                    .chain(),
+            )
             // States
             .init_state::<StudioPhase>()
             .add_systems(OnEnter(StudioPhase::Setup), enter_setup_wizard)
@@ -82,7 +82,7 @@ impl Plugin for GameGeneratorStudioPlugin {
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum StudioPhase {
     #[default]
-    Setup,      // Initial wizard
+    Setup, // Initial wizard
     Generation, // Asset generation
     LiveEdit,   // Live game editing
 }
@@ -155,9 +155,9 @@ pub fn studio_ui_system(
                         .pick_file()
                     {
                         // Load project
-                        studio_state.notifications.push(Notification::info(
-                            format!("Loading project: {:?}", path)
-                        ));
+                        studio_state
+                            .notifications
+                            .push(Notification::info(format!("Loading project: {:?}", path)));
                     }
                 }
                 ui.separator();
@@ -221,7 +221,7 @@ pub fn studio_ui_system(
                 }
                 if ui.button("ℹ️ About").clicked() {
                     studio_state.notifications.push(Notification::info(
-                        "Echoes of Beastlight Studio v0.1.0\nAI-powered game generation"
+                        "Echoes of Beastlight Studio v0.1.0\nAI-powered game generation",
                     ));
                 }
             });
@@ -243,9 +243,15 @@ pub fn studio_ui_system(
             // Generation progress
             if current_phase.get() == &StudioPhase::Generation {
                 let progress = generation_state.overall_progress();
-                ui.add(egui::ProgressBar::new(progress)
-                    .text(format!("{:.0}% - {}", progress * 100.0, generation_state.current_task))
-                    .desired_width(200.0));
+                ui.add(
+                    egui::ProgressBar::new(progress)
+                        .text(format!(
+                            "{:.0}% - {}",
+                            progress * 100.0,
+                            generation_state.current_task
+                        ))
+                        .desired_width(200.0),
+                );
             }
 
             // Memory usage
@@ -274,18 +280,21 @@ pub fn studio_ui_system(
 
         DockArea::new(&mut *dock_state)
             .style(DockStyle::from_egui(ui.style()))
-            .show_inside(ui, &mut TabViewer {
-                wizard_state: &mut wizard_state,
-                current_phase: current_phase.get(),
-                generation_tx: &generation_tx,
-                generation_rx: &generation_rx,
-                next_phase: &mut next_phase,
-                generation_state: &mut generation_state,
-                asset_cache: &asset_cache,
-                console_state,
-                editor_state: &mut editor_state,
-                studio_state: &mut studio_state,
-            });
+            .show_inside(
+                ui,
+                &mut TabViewer {
+                    wizard_state: &mut wizard_state,
+                    current_phase: current_phase.get(),
+                    generation_tx: &generation_tx,
+                    generation_rx: &generation_rx,
+                    next_phase: &mut next_phase,
+                    generation_state: &mut generation_state,
+                    asset_cache: &asset_cache,
+                    console_state,
+                    editor_state: &mut editor_state,
+                    studio_state: &mut studio_state,
+                },
+            );
     });
 
     // Notifications
@@ -332,21 +341,13 @@ impl egui_dock::TabViewer for TabViewer<'_> {
                 self.next_phase,
                 self.generation_tx,
             ),
-            DockTab::AssetGallery => gallery::show_asset_gallery(
-                ui,
-                self.asset_cache,
-                self.generation_tx,
-            ),
-            DockTab::CodeEditor => editor::show_code_editor(
-                ui,
-                self.editor_state,
-            ),
+            DockTab::AssetGallery => {
+                gallery::show_asset_gallery(ui, self.asset_cache, self.generation_tx)
+            }
+            DockTab::CodeEditor => editor::show_code_editor(ui, self.editor_state),
             DockTab::LivePreview => preview::show_live_preview(ui),
             DockTab::Inspector => preview::show_inspector(ui),
-            DockTab::Console => console::show_console(
-                ui,
-                self.console_state,
-            ),
+            DockTab::Console => console::show_console(ui, self.console_state),
             DockTab::Timeline => show_timeline(ui),
             DockTab::StyleGuide => show_style_guide(ui, self.generation_state),
             DockTab::Documentation => show_documentation(ui),
@@ -361,7 +362,11 @@ fn create_default_dock_state() -> DockState<DockTab> {
     // Create default layout
     let tree = state.main_surface_mut();
 
-    let [left, right] = tree.split_left(egui_dock::NodeIndex::root(), 0.2, vec![DockTab::AssetGallery]);
+    let [left, right] = tree.split_left(
+        egui_dock::NodeIndex::root(),
+        0.2,
+        vec![DockTab::AssetGallery],
+    );
     let [center, bottom] = tree.split_below(right, 0.7, vec![DockTab::Console]);
     let [preview, inspector] = tree.split_right(center, 0.7, vec![DockTab::Inspector]);
 
@@ -398,11 +403,14 @@ fn show_style_guide(ui: &mut egui::Ui, generation_state: &GeneratorState) {
             for (name, color) in &generation_state.style_guide.colors {
                 ui.vertical(|ui| {
                     let (r, g, b, _) = color.to_tuple();
-                    ui.colored_label(egui::Color32::from_rgb(
-                        (r * 255.0) as u8,
-                        (g * 255.0) as u8,
-                        (b * 255.0) as u8
-                    ), "████");
+                    ui.colored_label(
+                        egui::Color32::from_rgb(
+                            (r * 255.0) as u8,
+                            (g * 255.0) as u8,
+                            (b * 255.0) as u8,
+                        ),
+                        "████",
+                    );
                     ui.small(name);
                 });
             }
@@ -481,7 +489,10 @@ fn generation_task_processor(
                 generation_state.complete_task(task_id, output);
             }
             GenerationResult::Error { task_id, error } => {
-                console.log(ConsoleLevel::Error, format!("✗ Task {} failed: {}", task_id, error));
+                console.log(
+                    ConsoleLevel::Error,
+                    format!("✗ Task {} failed: {}", task_id, error),
+                );
                 generation_state.fail_task(task_id, error);
             }
             GenerationResult::Progress { task_id, progress } => {
@@ -579,7 +590,10 @@ fn show_notifications(ctx: &egui::Context, notifications: &mut Vec<Notification>
 
         egui::Window::new("notification")
             .id(egui::Id::new(i))
-            .fixed_pos(egui::pos2(ctx.screen_rect().width() - 320.0, 50.0 + i as f32 * 80.0))
+            .fixed_pos(egui::pos2(
+                ctx.screen_rect().width() - 320.0,
+                50.0 + i as f32 * 80.0,
+            ))
             .fixed_size(egui::vec2(300.0, 60.0))
             .collapsible(false)
             .title_bar(false)
@@ -594,12 +608,15 @@ fn show_notifications(ctx: &egui::Context, notifications: &mut Vec<Notification>
                 };
 
                 ui.horizontal(|ui| {
-                    ui.colored_label(color, match notif.level {
-                        NotificationLevel::Info => "ℹ️",
-                        NotificationLevel::Warning => "⚠️",
-                        NotificationLevel::Error => "❌",
-                        NotificationLevel::Success => "✅",
-                    });
+                    ui.colored_label(
+                        color,
+                        match notif.level {
+                            NotificationLevel::Info => "ℹ️",
+                            NotificationLevel::Warning => "⚠️",
+                            NotificationLevel::Error => "❌",
+                            NotificationLevel::Success => "✅",
+                        },
+                    );
                     ui.label(&notif.message);
                 });
             });

@@ -10,7 +10,7 @@ By participating in this project, you agree to abide by our code of conduct: be 
 
 ### Prerequisites
 
-1. Rust 1.88.0 or later
+1. Rust 1.91 or later
 2. System dependencies:
 
    ```bash

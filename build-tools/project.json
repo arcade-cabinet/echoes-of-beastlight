@@ -1,53 +1,53 @@
 {
-  "name": "tools",
+  "name": "build-tools",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "tools",
+  "sourceRoot": "build-tools",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["tools/**/*.js"]
+        "lintFilePatterns": ["build-tools/**/*.js"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
       "options": {
-        "jestConfig": "tools/jest.config.js",
+        "jestConfig": "build-tools/jest.config.js",
         "passWithNoTests": true
       }
     },
     "validate-assets": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "commands": ["node tools/validate-assets.js"]
+        "commands": ["node build-tools/validate-assets.js"]
       }
     },
     "generate": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "node tools/metaprompt-runner.js",
+        "command": "node build-tools/metaprompt-runner.js",
         "cwd": "."
       }
     },
     "generate:dry": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "node tools/metaprompt-runner.js --dry-run",
+        "command": "node build-tools/metaprompt-runner.js --dry-run",
         "cwd": "."
       }
     },
     "generate:v2": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "node tools/metaprompt-runner-v2.js",
+        "command": "node build-tools/metaprompt-runner-v2.js",
         "cwd": "."
       }
     },
     "generate:v2:dry": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "command": "node tools/metaprompt-runner-v2.js --dry-run",
+        "command": "node build-tools/metaprompt-runner-v2.js --dry-run",
         "cwd": "."
       }
     }

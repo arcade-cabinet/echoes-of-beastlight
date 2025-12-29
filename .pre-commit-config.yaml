@@ -6,7 +6,7 @@ default_stages: [commit]
 
 # Configure environment
 default_language_version:
-  rust: 1.88.0
+  rust: 1.91
 
 repos:
   # Rust tooling
@@ -14,14 +14,14 @@ repos:
     hooks:
       - id: rust-fmt
         name: Rust Format
-        entry: bash -c 'cargo fmt --all -- --check && cd tools && cargo fmt --all -- --check'
+        entry: cargo fmt --all -- --check
         language: system
         types: [rust]
         pass_filenames: false
 
       - id: rust-clippy
         name: Rust Clippy
-        entry: bash -c 'cargo clippy --all-targets --all-features -- -D warnings && cd tools && cargo clippy --all-targets --all-features -- -D warnings'
+        entry: cargo clippy --workspace --all-targets --all-features -- -D warnings
         language: system
         types: [rust]
         pass_filenames: false
@@ -29,7 +29,7 @@ repos:
 
       - id: rust-test
         name: Rust Tests
-        entry: bash -c 'cargo test --lib && cd tools && cargo test --lib'
+        entry: cargo test --workspace --lib
         language: system
         types: [rust]
         pass_filenames: false
@@ -37,14 +37,14 @@ repos:
 
       - id: rust-doc
         name: Rust Doc Check
-        entry: bash -c 'RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features && cd tools && RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features'
+        entry: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps --all-features
         language: system
         types: [rust]
         pass_filenames: false
 
       - id: rust-audit
         name: Rust Security Audit
-        entry: bash -c 'cargo audit && cd tools && cargo audit'
+        entry: cargo audit
         language: system
         pass_filenames: false
         types: [rust]
@@ -58,7 +58,7 @@ repos:
 
       - id: rust-outdated
         name: Check Outdated Dependencies
-        entry: bash -c 'cargo outdated --exit-code 1 || true'
+        entry: cargo outdated --workspace
         language: system
         pass_filenames: false
         types: [rust, toml]
@@ -66,7 +66,7 @@ repos:
 
       - id: rust-unused-deps
         name: Check Unused Dependencies
-        entry: bash -c 'cargo machete && cd tools && cargo machete'
+        entry: cargo machete
         language: system
         pass_filenames: false
         types: [rust, toml]
@@ -134,7 +134,7 @@ repos:
           - .license-header
           - --comment-style
           - //
-        exclude: "^(target/|tools/target/)"
+        exclude: "^(target/|build-tools/target/)"
 
   # Security scanning
   - repo: https://github.com/Yelp/detect-secrets

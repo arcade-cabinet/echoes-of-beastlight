@@ -1,5 +1,5 @@
 # Echoes of Beastlight - Development Environment
-FROM rust:1.75-slim
+FROM rust:1.91-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -44,12 +44,13 @@ RUN pip3 install --no-cache-dir pyyaml
 WORKDIR /workspace
 
 # Copy package files first for better caching
-COPY tools/package*.json ./tools/
-COPY .github/actions/openai-game-gen/package*.json ./.github/actions/openai-game-gen/
+# (Commented out as package.json files are missing in this repository)
+# COPY build-tools/package*.json ./build-tools/
+# COPY .github/actions/openai-game-gen/package*.json ./.github/actions/openai-game-gen/
 
 # Install Node dependencies
-RUN cd tools && npm ci
-RUN cd .github/actions/openai-game-gen && npm ci && npm run build
+# RUN cd build-tools && npm ci
+# RUN cd .github/actions/openai-game-gen && npm ci && npm run build
 
 # Copy the rest of the project
 COPY . .

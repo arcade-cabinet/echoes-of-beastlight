@@ -12,11 +12,11 @@
 #[cfg(feature = "studio")]
 use bevy::prelude::*;
 
-mod studio;
 mod config;
 mod generator;
-mod templates;
 mod git_tracker;
+mod studio;
+mod templates;
 
 #[cfg(feature = "studio")]
 use studio::GameGeneratorStudioPlugin;
@@ -28,9 +28,7 @@ fn main() {
         std::env::set_var("RUST_LOG", "info,studio=debug");
     }
 
-    App::new()
-        .add_plugins(GameGeneratorStudioPlugin)
-        .run();
+    App::new().add_plugins(GameGeneratorStudioPlugin).run();
 }
 
 #[cfg(not(feature = "studio"))]

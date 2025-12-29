@@ -27,9 +27,9 @@ updates:
       # - dependency-name: "example"
       #   versions: ["1.x", "2.x"]
 
-  # Rust dependencies in tools directory
+  # Rust dependencies in build-tools directory
   - package-ecosystem: "cargo"
-    directory: "/tools"
+    directory: "/build-tools"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -38,7 +38,7 @@ updates:
     labels:
       - "dependencies"
       - "rust"
-      - "tools"
+      - "build-tools"
     commit-message:
       prefix: "chore"
       include: "scope"

@@ -23,30 +23,30 @@ generate-and-review:
 # Play the generated game
 play:
     @echo "🎮 Launching Echoes of Beastlight..."
-    cargo run --release
+    cargo run -p echoes-of-beastlight --release
 
 # ============= GENERATOR WORKFLOWS =============
 
 # Generate game assets (via build script)
 generate:
     @echo "🤖 Generating game assets..."
-    ECHOES_GENERATE=1 cargo build
+    ECHOES_GENERATE=1 cargo build -p echoes-of-beastlight
 
 # Generate with specific config
 generate-with CONFIG:
     @echo "🤖 Generating with config: {{CONFIG}}"
-    ECHOES_GENERATE=1 ECHOES_CONFIG={{CONFIG}} cargo build
+    ECHOES_GENERATE=1 ECHOES_CONFIG={{CONFIG}} cargo build -p echoes-of-beastlight
 
 # Dry run generation (no API calls)
 dry-run:
     @echo "🌊 Dry run generation..."
-    ECHOES_GENERATE=1 ECHOES_DRY_RUN=1 cargo build
+    ECHOES_GENERATE=1 ECHOES_DRY_RUN=1 cargo build -p echoes-of-beastlight
 
 # Force fresh generation (ignore cache)
 generate-fresh:
     @echo "🔄 Fresh generation (ignoring cache)..."
     rm -rf game/.cascade-cache
-    ECHOES_GENERATE=1 cargo build
+    ECHOES_GENERATE=1 cargo build -p echoes-of-beastlight
 
 # ============= DEVELOPMENT SETUP =============
 
@@ -82,57 +82,54 @@ check:
 
 # Auto-fix code issues
 fix:
-    cargo fmt --all
-    cd build-tools && cargo fmt --all
-    cargo fix --allow-dirty --allow-staged
-    cd build-tools && cargo fix --allow-dirty --allow-staged
+    cargo fmt --workspace
+    cargo fix --workspace --allow-dirty --allow-staged
     pre-commit run --all-files markdownlint || true
     pre-commit run --all-files prettier || true
 
 # Check code formatting
 format:
-    pre-commit run rust-fmt --all-files
+    cargo fmt --workspace -- --check
 
 # Run clippy linting
 lint:
-    pre-commit run rust-clippy --all-files
+    cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 # Run all tests
 test:
-    pre-commit run rust-test --all-files
+    cargo test --workspace --all-features
 
 # Run security checks
 security:
-    pre-commit run rust-audit --all-files
-    pre-commit run rust-deny --all-files
-    pre-commit run detect-secrets --all-files
+    cargo audit
+    cargo deny check
+    detect-secrets scan > .secrets.baseline || true
 
 # Check for outdated dependencies
 outdated:
-    pre-commit run rust-outdated --all-files
+    cargo outdated --workspace
 
 # ============= BUILD & RELEASE =============
 
 # Build all binaries
 build:
     @echo "Building game..."
-    cargo build --release
+    cargo build -p echoes-of-beastlight --release
     @echo "Building tools..."
-    cd build-tools && cargo build --release --all-features
+    cargo build -p ai-game-generator --release --all-features
 
 # Build only the game
 build-game:
-    cargo build --release
+    cargo build -p echoes-of-beastlight --release
 
 # Build only the tools
 build-tools:
-    cd build-tools && cargo build --release --all-features
+    cargo build -p ai-game-generator --release --all-features
 
 # Create optimized release builds
 release:
     @echo "Creating release builds..."
-    cargo build --release
-    cd build-tools && cargo build --release --all-features
+    cargo build --workspace --release --all-features
 
 # Create distribution packages
 dist: release
@@ -145,8 +142,7 @@ dist: release
 
 # Build and open documentation
 docs:
-    cargo doc --no-deps --open
-    cd build-tools && cargo doc --no-deps --all-features
+    cargo doc --workspace --no-deps --all-features
 
 # Open director documentation
 docs-director:
@@ -163,7 +159,6 @@ docs-tech:
 # Clean build artifacts
 clean:
     cargo clean
-    cd build-tools && cargo clean
     rm -f .secrets.baseline
     rm -rf dist/
 
@@ -189,7 +184,7 @@ bench:
 
 # Generate test coverage report
 coverage:
-    cd build-tools && cargo tarpaulin --out Html --output-dir ../target/coverage
+    cargo tarpaulin --workspace --out Html --output-dir target/coverage
     @echo "Coverage report generated at target/coverage/index.html"
 
 # ============= CI/CD HELPERS =============
@@ -239,8 +234,8 @@ generate-custom PROMPTS_DIR:
 
 # Profile the generator performance
 profile-generator:
-    cd build-tools && cargo build --release --bin generator-debug
-    perf record --call-graph=dwarf build-tools/target/release/generator-debug test
+    cargo build -p ai-game-generator --release --bin generator-debug
+    perf record --call-graph=dwarf target/release/generator-debug test
     perf report
 
 # Check the entire workspace
@@ -288,14 +283,14 @@ generate-world SEED:
 # Debug individual generator components
 debug-component COMPONENT:
     @echo "🔧 Testing {{COMPONENT}} generation..."
-    cd build-tools && cargo run --release --bin generator-debug -- component {{COMPONENT}}
+    cargo run -p ai-game-generator --release --bin generator-debug -- component {{COMPONENT}}
 
 # Run generator test
 debug-test:
     @echo "🧪 Running generator test..."
-    cd build-tools && cargo run --release --bin generator-debug -- test
+    cargo run -p ai-game-generator --release --bin generator-debug -- test
 
 # List available debug components
 debug-help:
     @echo "Available components: core, components, systems, levels, sprites, audio"
-    cd build-tools && cargo run --bin generator-debug -- component --help
+    cargo run -p ai-game-generator --bin generator-debug -- component --help

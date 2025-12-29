@@ -9,16 +9,16 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
+use crate::studio::{Notification, NotificationLevel, wizard::GameConfiguration};
 use bevy::prelude::*;
 use crossbeam_channel::{Receiver, Sender};
 use dashmap::DashMap;
 use image::{DynamicImage, ImageBuffer, Rgba};
 use petgraph::graph::{DiGraph, NodeIndex};
 use rayon::prelude::*;
-use std::collections::{HashMap, BinaryHeap};
+use std::collections::{BinaryHeap, HashMap};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use crate::studio::{wizard::GameConfiguration, Notification, NotificationLevel};
 
 /// Main generator state tracking all generation tasks
 #[derive(Resource, Default)]
@@ -41,7 +41,9 @@ impl GeneratorState {
             return 0.0;
         }
 
-        let completed = self.tasks.iter()
+        let completed = self
+            .tasks
+            .iter()
             .filter(|t| matches!(t.status, TaskStatus::Completed))
             .count();
 
@@ -144,10 +146,21 @@ pub struct AssetMetadata {
 /// Generation request types
 #[derive(Debug, Clone)]
 pub enum GenerationRequest {
-    FullGame { config: GameConfiguration },
-    SingleAsset { asset_type: String, params: HashMap<String, String> },
-    RegenerateAsset { asset_id: String, modifications: HashMap<String, String> },
-    BatchOperation { assets: Vec<String>, operation: BatchOp },
+    FullGame {
+        config: GameConfiguration,
+    },
+    SingleAsset {
+        asset_type: String,
+        params: HashMap<String, String>,
+    },
+    RegenerateAsset {
+        asset_id: String,
+        modifications: HashMap<String, String>,
+    },
+    BatchOperation {
+        assets: Vec<String>,
+        operation: BatchOp,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -160,16 +173,22 @@ pub enum BatchOp {
 /// Generation results
 #[derive(Debug)]
 pub enum GenerationResult {
-    Success { task_id: Uuid, output: GenerationOutput },
-    Error { task_id: Uuid, error: String },
-    Progress { task_id: Uuid, progress: f32 },
+    Success {
+        task_id: Uuid,
+        output: GenerationOutput,
+    },
+    Error {
+        task_id: Uuid,
+        error: String,
+    },
+    Progress {
+        task_id: Uuid,
+        progress: f32,
+    },
 }
 
 /// Main generation loop that runs in a separate thread
-pub async fn run_generation_loop(
-    rx: Receiver<GenerationRequest>,
-    tx: Sender<GenerationResult>,
-) {
+pub async fn run_generation_loop(rx: Receiver<GenerationRequest>, tx: Sender<GenerationResult>) {
     let generator = match ConsistentAssetGenerator::new().await {
         Ok(g) => g,
         Err(e) => {
@@ -186,17 +205,29 @@ pub async fn run_generation_loop(
                 }
             }
             GenerationRequest::SingleAsset { asset_type, params } => {
-                if let Err(e) = generator.generate_single_asset(&asset_type, params, tx.clone()).await {
+                if let Err(e) = generator
+                    .generate_single_asset(&asset_type, params, tx.clone())
+                    .await
+                {
                     error!("Failed to generate asset: {}", e);
                 }
             }
-            GenerationRequest::RegenerateAsset { asset_id, modifications } => {
-                if let Err(e) = generator.regenerate_asset(&asset_id, modifications, tx.clone()).await {
+            GenerationRequest::RegenerateAsset {
+                asset_id,
+                modifications,
+            } => {
+                if let Err(e) = generator
+                    .regenerate_asset(&asset_id, modifications, tx.clone())
+                    .await
+                {
                     error!("Failed to regenerate asset: {}", e);
                 }
             }
             GenerationRequest::BatchOperation { assets, operation } => {
-                if let Err(e) = generator.batch_operation(assets, operation, tx.clone()).await {
+                if let Err(e) = generator
+                    .batch_operation(assets, operation, tx.clone())
+                    .await
+                {
                     error!("Failed to perform batch operation: {}", e);
                 }
             }
@@ -241,7 +272,8 @@ impl ConsistentAssetGenerator {
 
         // Phase 1: Generate style guide first
         let style_guide_id = Uuid::new_v4();
-        self.generate_style_guide(&config, style_guide_id, tx.clone()).await?;
+        self.generate_style_guide(&config, style_guide_id, tx.clone())
+            .await?;
 
         // Phase 2: Generate core assets in dependency order
         let tasks = self.create_generation_tasks(&config)?;
@@ -281,8 +313,12 @@ impl ConsistentAssetGenerator {
         let style_image = self.generate_image(&style_prompt, (512, 512)).await?;
 
         // Extract style features for consistency
-        let style_features = self.style_transfer.extract_style_features(&style_image).await?;
-        self.style_transfer.cache_style_features("master_style", style_features)?;
+        let style_features = self
+            .style_transfer
+            .extract_style_features(&style_image)
+            .await?;
+        self.style_transfer
+            .cache_style_features("master_style", style_features)?;
 
         // Process to pixel art style
         let processed = self.pixel_processor.process_to_pixel_art(style_image)?;
@@ -328,17 +364,20 @@ impl ConsistentAssetGenerator {
 
         // Apply style transfer if we have a master style
         let final_result = if let Some(master_style) = self.get_cached_style("master_style")? {
-            self.apply_style_consistency(result, &master_style, 0.3).await?
+            self.apply_style_consistency(result, &master_style, 0.3)
+                .await?
         } else {
             result
         };
 
         // Cache the result
-        self.smart_cache.store_asset(
-            &format!("{}_{}", asset_type, task_id),
-            &final_result.data,
-            final_result.metadata.clone()
-        ).await?;
+        self.smart_cache
+            .store_asset(
+                &format!("{}_{}", asset_type, task_id),
+                &final_result.data,
+                final_result.metadata.clone(),
+            )
+            .await?;
 
         tx.send(GenerationResult::Success {
             task_id,
@@ -354,7 +393,8 @@ impl ConsistentAssetGenerator {
         prompt: &str,
         params: &HashMap<String, String>,
     ) -> anyhow::Result<GenerationOutput> {
-        let size = params.get("size")
+        let size = params
+            .get("size")
             .and_then(|s| s.parse::<u32>().ok())
             .unwrap_or(32);
 
@@ -401,13 +441,14 @@ impl ConsistentAssetGenerator {
         operation: BatchOp,
         tx: Sender<GenerationResult>,
     ) -> anyhow::Result<()> {
-        let results: Vec<_> = assets.par_iter()
-            .filter_map(|asset_id| {
-                match self.apply_operation(asset_id, &operation) {
+        let results: Vec<_> = assets
+            .par_iter()
+            .filter_map(
+                |asset_id| match self.apply_operation(asset_id, &operation) {
                     Ok(output) => Some(Ok((Uuid::new_v4(), output))),
                     Err(e) => Some(Err(e)),
-                }
-            })
+                },
+            )
             .collect();
 
         for result in results {
@@ -442,14 +483,16 @@ impl ConsistentAssetGenerator {
                     let image = image::load_from_memory(&asset_data)?;
 
                     // Get the style to apply
-                    if let Some(style_features) = self.style_transfer.style_embeddings.get(style_id) {
+                    if let Some(style_features) = self.style_transfer.style_embeddings.get(style_id)
+                    {
                         // Apply style transfer
-                        let styled = tokio::runtime::Handle::current()
-                            .block_on(self.style_transfer.apply_style_transfer(
+                        let styled = tokio::runtime::Handle::current().block_on(
+                            self.style_transfer.apply_style_transfer(
                                 &image,
                                 &style_features,
-                                *strength
-                            ))?;
+                                *strength,
+                            ),
+                        )?;
 
                         Ok(GenerationOutput {
                             data: image_to_bytes(&styled)?,
@@ -475,7 +518,7 @@ impl ConsistentAssetGenerator {
                     let resized = image.resize_exact(
                         dimensions.0,
                         dimensions.1,
-                        image::imageops::FilterType::Nearest
+                        image::imageops::FilterType::Nearest,
                     );
 
                     metadata.dimensions = Some(*dimensions);
@@ -517,7 +560,8 @@ impl ConsistentAssetGenerator {
                     });
 
                     // Create color mapping
-                    let color_map: HashMap<Rgba<u8>, Rgba<u8>> = sorted_colors.iter()
+                    let color_map: HashMap<Rgba<u8>, Rgba<u8>> = sorted_colors
+                        .iter()
                         .zip(palette.iter().cycle())
                         .map(|(old_color, new_color)| {
                             let rgba = Rgba([
@@ -650,7 +694,11 @@ impl PixelArtProcessor {
         Ok(outlined)
     }
 
-    fn quantize_colors(&self, image: DynamicImage, color_count: u32) -> anyhow::Result<DynamicImage> {
+    fn quantize_colors(
+        &self,
+        image: DynamicImage,
+        color_count: u32,
+    ) -> anyhow::Result<DynamicImage> {
         // Simple color quantization
         let rgba = image.to_rgba8();
         let mut result = ImageBuffer::new(rgba.width(), rgba.height());
@@ -754,10 +802,14 @@ impl AssetDependencyGraph {
 
     pub fn add_dependency(&mut self, from: &str, to: &str, relation: RelationType) {
         if let (Some(&from_idx), Some(&to_idx)) = (self.node_map.get(from), self.node_map.get(to)) {
-            self.graph.add_edge(from_idx, to_idx, AssetRelation {
-                relation_type: relation,
-                weight: 1.0,
-            });
+            self.graph.add_edge(
+                from_idx,
+                to_idx,
+                AssetRelation {
+                    relation_type: relation,
+                    weight: 1.0,
+                },
+            );
         }
     }
 
@@ -765,7 +817,8 @@ impl AssetDependencyGraph {
         petgraph::algo::toposort(&self.graph, None)
             .ok()
             .map(|indices| {
-                indices.into_iter()
+                indices
+                    .into_iter()
                     .map(|idx| self.graph[idx].id.clone())
                     .collect()
             })
@@ -787,7 +840,7 @@ impl SmartCache {
         Ok(Self {
             cache_dir,
             memory_cache: Arc::new(Mutex::new(lru::LruCache::new(
-                std::num::NonZeroUsize::new(100).unwrap()
+                std::num::NonZeroUsize::new(100).unwrap(),
             ))),
         })
     }
@@ -882,7 +935,8 @@ impl PromptOptimizer {
     }
 
     pub fn record_result(&self, prompt: &str, quality: f32, duration: std::time::Duration) {
-        self.success_history.entry(prompt.to_string())
+        self.success_history
+            .entry(prompt.to_string())
             .and_modify(|metrics| {
                 metrics.success_rate = (metrics.success_rate + quality) / 2.0;
                 metrics.generation_time = duration;
@@ -918,19 +972,16 @@ impl SpriteSheetOptimizer {
         }
 
         let frame_size = frames[0].dimensions();
-        let frames_per_row = ((self.max_atlas_size.0 - self.padding) / (frame_size.0 + self.padding)).min(frames.len() as u32);
-        let rows_needed = ((frames.len() as u32 + frames_per_row - 1) / frames_per_row).min(
-            (self.max_atlas_size.1 - self.padding) / (frame_size.1 + self.padding)
-        );
+        let frames_per_row = ((self.max_atlas_size.0 - self.padding)
+            / (frame_size.0 + self.padding))
+            .min(frames.len() as u32);
+        let rows_needed = ((frames.len() as u32 + frames_per_row - 1) / frames_per_row)
+            .min((self.max_atlas_size.1 - self.padding) / (frame_size.1 + self.padding));
 
         let atlas_width = frames_per_row * (frame_size.0 + self.padding) + self.padding;
         let atlas_height = rows_needed * (frame_size.1 + self.padding) + self.padding;
 
-        let mut atlas = ImageBuffer::from_pixel(
-            atlas_width,
-            atlas_height,
-            Rgba([0, 0, 0, 0])
-        );
+        let mut atlas = ImageBuffer::from_pixel(atlas_width, atlas_height, Rgba([0, 0, 0, 0]));
 
         let mut positions = HashMap::new();
 
@@ -943,10 +994,7 @@ impl SpriteSheetOptimizer {
 
             image::imageops::overlay(&mut atlas, frame, x.into(), y.into());
 
-            positions.insert(
-                format!("frame_{}", i),
-                (x, y, frame_size.0, frame_size.1)
-            );
+            positions.insert(format!("frame_{}", i), (x, y, frame_size.0, frame_size.1));
         }
 
         Ok((DynamicImage::ImageRgba8(atlas), positions))
@@ -975,13 +1023,12 @@ impl ParallelGenerationPipeline {
 
         // Process each level in parallel
         for level_tasks in task_levels {
-            let futures: Vec<_> = level_tasks.into_iter()
+            let futures: Vec<_> = level_tasks
+                .into_iter()
                 .map(|task| {
                     let tx = tx.clone();
                     let generator = self.generator.clone();
-                    async move {
-                        generator.process_single_task(task, tx).await
-                    }
+                    async move { generator.process_single_task(task, tx).await }
                 })
                 .collect();
 
@@ -1001,13 +1048,16 @@ impl ParallelGenerationPipeline {
 fn image_to_bytes(image: &DynamicImage) -> anyhow::Result<Vec<u8>> {
     use image::ImageOutputFormat;
     let mut bytes = Vec::new();
-    image.write_to(&mut std::io::Cursor::new(&mut bytes), ImageOutputFormat::Png)?;
+    image.write_to(
+        &mut std::io::Cursor::new(&mut bytes),
+        ImageOutputFormat::Png,
+    )?;
     Ok(bytes)
 }
 
 impl ConsistentAssetGenerator {
     async fn generate_image(&self, prompt: &str, size: (u32, u32)) -> anyhow::Result<DynamicImage> {
-        use async_openai::types::{CreateImageRequestArgs, ImageSize, ImageModel};
+        use async_openai::types::{CreateImageRequestArgs, ImageModel, ImageSize};
 
         let image_size = match size {
             (256, 256) => ImageSize::S256x256,
@@ -1037,8 +1087,13 @@ impl ConsistentAssetGenerator {
         Err(anyhow::anyhow!("Failed to generate image"))
     }
 
-    async fn generate_tileset(&self, prompt: &str, params: &HashMap<String, String>) -> anyhow::Result<GenerationOutput> {
-        let tile_size = params.get("tile_size")
+    async fn generate_tileset(
+        &self,
+        prompt: &str,
+        params: &HashMap<String, String>,
+    ) -> anyhow::Result<GenerationOutput> {
+        let tile_size = params
+            .get("tile_size")
             .and_then(|s| s.parse::<u32>().ok())
             .unwrap_or(16);
 
@@ -1066,8 +1121,15 @@ impl ConsistentAssetGenerator {
         })
     }
 
-    async fn generate_ui_element(&self, prompt: &str, params: &HashMap<String, String>) -> anyhow::Result<GenerationOutput> {
-        let element_type = params.get("element_type").cloned().unwrap_or_else(|| "button".into());
+    async fn generate_ui_element(
+        &self,
+        prompt: &str,
+        params: &HashMap<String, String>,
+    ) -> anyhow::Result<GenerationOutput> {
+        let element_type = params
+            .get("element_type")
+            .cloned()
+            .unwrap_or_else(|| "button".into());
 
         let ui_prompt = format!(
             "Game UI {} element: {}. \
@@ -1092,9 +1154,16 @@ impl ConsistentAssetGenerator {
         })
     }
 
-    async fn generate_audio(&self, prompt: &str, params: &HashMap<String, String>) -> anyhow::Result<GenerationOutput> {
+    async fn generate_audio(
+        &self,
+        prompt: &str,
+        params: &HashMap<String, String>,
+    ) -> anyhow::Result<GenerationOutput> {
         // Since direct audio generation isn't available, generate specifications
-        let audio_type = params.get("audio_type").cloned().unwrap_or_else(|| "sfx".into());
+        let audio_type = params
+            .get("audio_type")
+            .cloned()
+            .unwrap_or_else(|| "sfx".into());
 
         let audio_spec = serde_json::json!({
             "type": audio_type,
@@ -1131,7 +1200,8 @@ impl ConsistentAssetGenerator {
         base_image: &DynamicImage,
         params: &HashMap<String, String>,
     ) -> anyhow::Result<Vec<DynamicImage>> {
-        let frame_count = params.get("frame_count")
+        let frame_count = params
+            .get("frame_count")
             .and_then(|s| s.parse::<usize>().ok())
             .unwrap_or(4);
 
@@ -1154,13 +1224,18 @@ impl ConsistentAssetGenerator {
         Ok(())
     }
 
-    fn create_generation_tasks(&self, config: &GameConfiguration) -> anyhow::Result<Vec<GenerationTask>> {
+    fn create_generation_tasks(
+        &self,
+        config: &GameConfiguration,
+    ) -> anyhow::Result<Vec<GenerationTask>> {
         let mut tasks = Vec::new();
 
         // Create character generation tasks
         tasks.push(GenerationTask {
             id: Uuid::new_v4(),
-            task_type: TaskType::Character { name: "hero".into() },
+            task_type: TaskType::Character {
+                name: "hero".into(),
+            },
             status: TaskStatus::Pending,
             progress: 0.0,
             output: None,
@@ -1171,7 +1246,9 @@ impl ConsistentAssetGenerator {
         // Create tileset tasks
         tasks.push(GenerationTask {
             id: Uuid::new_v4(),
-            task_type: TaskType::Tileset { theme: "grassland".into() },
+            task_type: TaskType::Tileset {
+                theme: "grassland".into(),
+            },
             status: TaskStatus::Pending,
             progress: 0.0,
             output: None,
@@ -1189,7 +1266,11 @@ impl ConsistentAssetGenerator {
         Ok(())
     }
 
-    async fn generate_game_code(&self, config: &GameConfiguration, tx: Sender<GenerationResult>) -> anyhow::Result<()> {
+    async fn generate_game_code(
+        &self,
+        config: &GameConfiguration,
+        tx: Sender<GenerationResult>,
+    ) -> anyhow::Result<()> {
         // Generate Bevy game code based on configuration and assets
         Ok(())
     }
@@ -1202,11 +1283,14 @@ impl ConsistentAssetGenerator {
     ) -> anyhow::Result<GenerationOutput> {
         // Apply style transfer to ensure consistency
         if let Ok(content_image) = image::load_from_memory(&content.data) {
-            let styled = self.style_transfer.apply_style_transfer(
-                &content_image,
-                &[0.5, 0.5, 0.5], // Placeholder style features
-                strength
-            ).await?;
+            let styled = self
+                .style_transfer
+                .apply_style_transfer(
+                    &content_image,
+                    &[0.5, 0.5, 0.5], // Placeholder style features
+                    strength,
+                )
+                .await?;
 
             Ok(GenerationOutput {
                 data: image_to_bytes(&styled)?,
@@ -1222,7 +1306,11 @@ impl ConsistentAssetGenerator {
         Ok(None)
     }
 
-    async fn process_single_task(&self, task: GenerationTask, tx: Sender<GenerationResult>) -> anyhow::Result<()> {
+    async fn process_single_task(
+        &self,
+        task: GenerationTask,
+        tx: Sender<GenerationResult>,
+    ) -> anyhow::Result<()> {
         // Process individual generation task
         match task.task_type {
             TaskType::Character { name } => {

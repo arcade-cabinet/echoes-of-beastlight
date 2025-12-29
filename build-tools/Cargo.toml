@@ -32,32 +32,32 @@ studio = ["dep:bevy", "dep:bevy_egui", "dep:bevy-inspector-egui", "dep:egui_dock
 
 [dependencies]
 tokio = { version = "1.47", features = ["full"] }
-async-openai = { version = "0.23", default-features = false, features = ["rustls"] }
-tiktoken-rs = "0.5"
+async-openai = { version = "0.31", features = ["full", "rustls"] }
+tiktoken-rs = "0.9"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
-toml = "0.8"
+toml = "0.9"
 anyhow = "1.0"
 thiserror = "1.0"
 clap = { version = "4.5", features = ["derive"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 walkdir = "2.5"
-reqwest = { version = "0.11", default-features = false, features = ["json", "stream", "rustls-tls"] }
-image = "0.24"
-base64 = "0.21"
-indicatif = "0.17"
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+image = "0.25"
+base64 = "0.22"
+indicatif = "0.18"
 handlebars = "5.1"
 minijinja = { version = "2.0", features = ["loader"] }
 rayon = "1.10"
 futures = "0.3"
-md5 = "0.7"
+md5 = "0.8"
 chrono = { version = "0.4", features = ["serde"] }
 colored = "2.2"
 
 # Bevy and UI dependencies (optional, for studio only)
-bevy = { version = "0.14", optional = true, default-features = false, features = [
+bevy = { version = "0.17", optional = true, default-features = false, features = [
     "bevy_asset",
     "bevy_winit",
     "bevy_core_pipeline",
@@ -76,43 +76,43 @@ bevy = { version = "0.14", optional = true, default-features = false, features =
     "x11",
     "wayland",
 ] }
-bevy_egui = { version = "0.28", optional = true }
-bevy-inspector-egui = { version = "0.25", optional = true }
-egui_dock = { version = "0.13", optional = true }
-egui_extras = { version = "0.28", optional = true }
-egui-notify = { version = "0.15", optional = true }
+bevy_egui = { version = "0.38", optional = true }
+bevy-inspector-egui = { version = "0.35", optional = true }
+egui_dock = { version = "0.18", optional = true }
+egui_extras = { version = "0.33", optional = true }
+egui-notify = { version = "0.21", optional = true }
 
 # Advanced generation features
 dashmap = "5.5"
-petgraph = "0.6"
-lru = "0.12"
+petgraph = "0.8"
+lru = "0.16"
 zstd = "0.13"
 crossbeam = "0.8"
 crossbeam-channel = "0.5"
 uuid = { version = "1.17", features = ["v4", "serde"] }
 indexmap = "2.10"
-rfd = { version = "0.12", optional = true }
+rfd = { version = "0.16", optional = true }
 webbrowser = "0.8"
-imageproc = "0.23"
-nalgebra = "0.32"
-ndarray = "0.15"
+imageproc = "0.25"
+nalgebra = "0.34"
+ndarray = "0.17"
 blake3 = "1.8"
 notify = "6.1"
-ron = "0.8"
+ron = "0.12"
 
 # Git integration
-git2 = { version = "0.18", default-features = false, features = ["vendored-openssl"] }
+git2 = { version = "0.20", default-features = false, features = ["vendored-openssl"] }
 
 [dev-dependencies]
 # Testing framework
 tokio-test = "0.4"
-mockall = "0.12"
+mockall = "0.14"
 proptest = "1.4"
 pretty_assertions = "1.4"
 
 # HTTP mocking for OpenAI API tests
-reqwest-middleware = "0.2"
-reqwest-retry = "0.3"
+reqwest-middleware = "0.4"
+reqwest-retry = "0.8"
 wiremock = "0.6"
 
 # File system testing

@@ -21,13 +21,13 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: 1.88.0
+        toolchain: 1.91
         components: rustfmt, clippy
 
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev
+        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev libwayland-dev libxkbcommon-dev libasound2-dev libudev-dev
 
     - name: Cache cargo registry
       uses: actions/cache@v4
@@ -49,25 +49,17 @@ jobs:
 
     - name: Check formatting
       run: cargo fmt --all -- --check
-      working-directory: tools
 
     - name: Run clippy
-      run: cargo clippy --all-targets --all-features -- -D warnings
-      working-directory: tools
+      run: cargo clippy --workspace --all-targets --all-features -- -D warnings
 
     - name: Run tests
-      run: cargo test --all-features --verbose
-      working-directory: tools
+      run: cargo test --workspace --all-features --verbose
       env:
         OPENAI_API_KEY: test-key
 
-    - name: Run tests with all features
-      run: cargo test --all-features --verbose
-      working-directory: tools
-
     - name: Build documentation
-      run: cargo doc --no-deps --all-features
-      working-directory: tools
+      run: cargo doc --workspace --no-deps --all-features
 
   coverage:
     name: Code Coverage
@@ -79,26 +71,25 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: 1.88.0
+        toolchain: 1.91
 
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev
+        sudo apt-get install -y libsdl2-dev pkg-config libssl-dev libwayland-dev libxkbcommon-dev libasound2-dev libudev-dev
 
     - name: Install tarpaulin
       run: cargo install cargo-tarpaulin
 
     - name: Generate coverage
-      run: cargo tarpaulin --out Xml --all-features --verbose
-      working-directory: tools
+      run: cargo tarpaulin --workspace --out Xml --all-features --verbose
       env:
         OPENAI_API_KEY: test-key
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
       with:
-        file: ./tools/cobertura.xml
+        file: cobertura.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false

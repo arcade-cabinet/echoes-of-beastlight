@@ -19,7 +19,7 @@ The Echoes of Beastlight AI Game Studio is built as a pure Rust application with
 
 ## Key Components
 
-### Studio Application (`tools/src/studio/`)
+### Studio Application (`build-tools/src/studio/`)
 
 ```
 studio/

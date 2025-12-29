@@ -38,7 +38,7 @@ services:
     volumes:
       - .:/workspace
     working_dir: /workspace
-    command: node tools/validate-assets.js
+    command: node build-tools/validate-assets.js
     depends_on:
       - dev
 
