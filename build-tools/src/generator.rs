@@ -253,7 +253,7 @@ impl AIGameGenerator {
                     revised_prompt: _,
                 } => {
                     // Download image from URL
-                    let image_bytes = reqwest::get(url).await?.bytes().await?.to_vec();
+                    let image_bytes = reqwest::get(url).await?.bytes().await?;
                     let path = PathBuf::from("assets/sprites").join(filename);
                     self.write_file(&path, &image_bytes).await?;
                 }

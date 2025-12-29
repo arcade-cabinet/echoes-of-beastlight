@@ -7,6 +7,9 @@ test('load game and check for visual glitches', async ({ page }) => {
     console.log(`BROWSER CONSOLE [${msg.type()}]: ${msg.text()}`);
   });
 
+  const logs: string[] = [];
+  page.on('console', msg => logs.push(msg.text()));
+
   await page.goto('http://localhost:8000');
 
   // Wait for the canvas to be present (Bevy uses a canvas)
@@ -22,10 +25,7 @@ test('load game and check for visual glitches', async ({ page }) => {
   
   // Here we would use image analysis capabilities
   // For now, we just ensure it loaded without obvious errors in console
-  const logs: string[] = [];
-  page.on('console', msg => logs.push(logs.join('\n')));
-  
-  const errors = logs.filter(log => log.includes('error') || log.includes('panic'));
+  const errors = logs.filter(log => log.toLowerCase().includes('error') || log.toLowerCase().includes('panic'));
   expect(errors).toHaveLength(0);
 });
 

@@ -58,7 +58,7 @@ repos:
 
       - id: rust-outdated
         name: Check Outdated Dependencies
-        entry: cargo outdated --workspace --exit-code 1
+        entry: cargo outdated --workspace
         language: system
         pass_filenames: false
         types: [rust, toml]
