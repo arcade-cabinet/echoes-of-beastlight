@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use rand::{Rng, SeedableRng};
+use rand::{Rng, SeedableRng, seq::IndexedRandom};
 use rand_chacha::ChaCha8Rng;
 use serde::{Deserialize, Serialize};
 use std::hash::{Hash, Hasher};
@@ -17,8 +17,12 @@ pub struct WorldSeed {
     pub numeric_seed: u64,
     
     /// The RNG for this world
-    #[serde(skip)]
+    #[serde(skip, default = "default_rng")]
     pub rng: ChaCha8Rng,
+}
+
+fn default_rng() -> ChaCha8Rng {
+    ChaCha8Rng::seed_from_u64(0)
 }
 
 impl WorldSeed {
@@ -40,7 +44,7 @@ impl WorldSeed {
     pub fn random() -> Self {
         use crate::config::generation::GenerationConfig;
         let config = GenerationConfig::default();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         
         // Pick random words from our lexicon
         let adj_category = ["mystical", "corrupted", "natural", "ancient"]
@@ -87,13 +91,13 @@ impl WorldSeed {
     /// Get a deterministic value for a specific context
     pub fn get_value(&self, context: &str, max: u64) -> u64 {
         let mut rng = self.subseed(context);
-        rng.gen_range(0..max)
+        rng.random_range(0..max)
     }
     
     /// Get a deterministic float for a specific context
     pub fn get_float(&self, context: &str) -> f32 {
         let mut rng = self.subseed(context);
-        rng.gen()
+        rng.random()
     }
     
     /// Hash a string to a u64
@@ -114,7 +118,7 @@ pub struct ProceduralEntity {
 }
 
 /// Event for when the world seed changes
-#[derive(Event)]
+#[derive(Event, Message)]
 pub struct WorldSeedChanged {
     pub old_seed: Option<WorldSeed>,
     pub new_seed: WorldSeed,
@@ -125,14 +129,14 @@ pub struct SeedPlugin;
 impl Plugin for SeedPlugin {
     fn build(&self, app: &mut App) {
         app
-            .add_event::<WorldSeedChanged>()
+            .add_message::<WorldSeedChanged>()
             .add_systems(Startup, initialize_seed);
     }
 }
 
 fn initialize_seed(
     mut commands: Commands,
-    mut events: EventWriter<WorldSeedChanged>,
+    mut events: MessageWriter<WorldSeedChanged>,
 ) {
     // Check for command line seed or create random
     let seed = if let Some(seed_arg) = std::env::args().find(|arg| arg.starts_with("--seed=")) {
@@ -150,7 +154,7 @@ fn initialize_seed(
     
     info!("World Seed: {}-{}-{}", seed.adjective, seed.noun, seed.verb);
     
-    events.send(WorldSeedChanged {
+    events.write(WorldSeedChanged {
         old_seed: None,
         new_seed: seed.clone(),
     });

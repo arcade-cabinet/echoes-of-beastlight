@@ -14,13 +14,17 @@ use async_openai::{
     Client,
     config::OpenAIConfig,
     types::{
-        CreateChatCompletionRequestArgs,
-        CreateImageRequestArgs,
-        ChatCompletionRequestMessage,
-        ChatCompletionRequestSystemMessageArgs,
-        ChatCompletionRequestUserMessageArgs,
-        ImageSize,
-        Image,
+        chat::{
+            ChatCompletionRequestMessage,
+            ChatCompletionRequestSystemMessageArgs,
+            ChatCompletionRequestUserMessageArgs,
+            CreateChatCompletionRequestArgs,
+        },
+        images::{
+            CreateImageRequestArgs,
+            ImageSize,
+            Image,
+        },
     },
 };
 use serde::{Serialize, Deserialize};
@@ -237,13 +241,13 @@ impl AIGameGenerator {
             .size(ImageSize::S1024x1024)
             .build()?;
 
-        let response = self.client.images().create(request).await?;
+        let response = self.client.images().generate(request).await?;
 
         if let Some(image_data) = response.data.first() {
             match &**image_data {
                 Image::Url { url, revised_prompt: _ } => {
                     // Download image from URL
-                    let image_bytes = reqwest::get(url).await?.bytes().await?;
+                    let image_bytes = reqwest::get(url).await?.bytes().await?.to_vec();
                     let path = PathBuf::from("assets/sprites").join(filename);
                     self.write_file(&path, &image_bytes).await?;
                 }

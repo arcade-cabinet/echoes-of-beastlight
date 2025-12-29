@@ -32,7 +32,7 @@ studio = ["dep:bevy", "dep:bevy_egui", "dep:bevy-inspector-egui", "dep:egui_dock
 
 [dependencies]
 tokio = { version = "1.47", features = ["full"] }
-async-openai = { version = "0.31", default-features = false, features = ["rustls"] }
+async-openai = { version = "0.31", features = ["full", "rustls"] }
 tiktoken-rs = "0.9"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

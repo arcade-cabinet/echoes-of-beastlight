@@ -13,9 +13,9 @@ pub struct GenerationConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WorldGenConfig {
-    pub method: &'static str,
-    pub seed_components: Vec<&'static str>,
-    pub biome_transition: &'static str,
+    pub method: String,
+    pub seed_components: Vec<String>,
+    pub biome_transition: String,
     pub landmark_density: f32,
 }
 
@@ -29,15 +29,15 @@ pub struct MonsterGenConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MonsterArchetype {
-    pub name: &'static str,
-    pub base_element: &'static str,
-    pub body_type: &'static str,
-    pub behavior: &'static str,
+    pub name: String,
+    pub base_element: String,
+    pub body_type: String,
+    pub behavior: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ItemGenConfig {
-    pub rarity_distribution: HashMap<&'static str, f32>,
+    pub rarity_distribution: HashMap<String, f32>,
     pub enchantment_chance: f32,
     pub corruption_items: bool,
     pub legendary_uniques: bool,
@@ -45,8 +45,8 @@ pub struct ItemGenConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DungeonGenConfig {
-    pub algorithm: &'static str,
-    pub room_types: Vec<&'static str>,
+    pub algorithm: String,
+    pub room_types: Vec<String>,
     pub puzzle_complexity: f32,
     pub treasure_density: f32,
 }
@@ -60,46 +60,46 @@ pub struct WordBanks {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WordBank {
-    pub mystical: Vec<&'static str>,
-    pub corrupted: Vec<&'static str>,
-    pub natural: Vec<&'static str>,
-    pub ancient: Vec<&'static str>,
+    pub mystical: Vec<String>,
+    pub corrupted: Vec<String>,
+    pub natural: Vec<String>,
+    pub ancient: Vec<String>,
 }
 
 impl Default for GenerationConfig {
     fn default() -> Self {
         Self {
             world_generation: WorldGenConfig {
-                method: "mad_libs_dag",
-                seed_components: vec!["adjective", "noun", "verb"],
-                biome_transition: "corruption_gradient",
+                method: "mad_libs_dag".to_string(),
+                seed_components: vec!["adjective".to_string(), "noun".to_string(), "verb".to_string()],
+                biome_transition: "corruption_gradient".to_string(),
                 landmark_density: 0.15,
             },
             monster_generation: MonsterGenConfig {
                 base_types: vec![
                     MonsterArchetype {
-                        name: "Wisp",
-                        base_element: "Light",
-                        body_type: "ethereal",
-                        behavior: "curious",
+                        name: "Wisp".to_string(),
+                        base_element: "Light".to_string(),
+                        body_type: "ethereal".to_string(),
+                        behavior: "curious".to_string(),
                     },
                     MonsterArchetype {
-                        name: "Shade",
-                        base_element: "Shadow",
-                        body_type: "amorphous",
-                        behavior: "stalker",
+                        name: "Shade".to_string(),
+                        base_element: "Shadow".to_string(),
+                        body_type: "amorphous".to_string(),
+                        behavior: "stalker".to_string(),
                     },
                     MonsterArchetype {
-                        name: "Treant",
-                        base_element: "Nature",
-                        body_type: "plant",
-                        behavior: "guardian",
+                        name: "Treant".to_string(),
+                        base_element: "Nature".to_string(),
+                        body_type: "plant".to_string(),
+                        behavior: "guardian".to_string(),
                     },
                     MonsterArchetype {
-                        name: "Crystal Beast",
-                        base_element: "Earth",
-                        body_type: "mineral",
-                        behavior: "territorial",
+                        name: "Crystal Beast".to_string(),
+                        base_element: "Earth".to_string(),
+                        body_type: "mineral".to_string(),
+                        behavior: "territorial".to_string(),
                     },
                 ],
                 corruption_variants: true,
@@ -108,39 +108,39 @@ impl Default for GenerationConfig {
             },
             item_generation: ItemGenConfig {
                 rarity_distribution: HashMap::from([
-                    ("common", 0.6),
-                    ("uncommon", 0.25),
-                    ("rare", 0.12),
-                    ("epic", 0.03),
+                    ("common".to_string(), 0.6),
+                    ("uncommon".to_string(), 0.25),
+                    ("rare".to_string(), 0.12),
+                    ("epic".to_string(), 0.03),
                 ]),
                 enchantment_chance: 0.2,
                 corruption_items: true,
                 legendary_uniques: true,
             },
             dungeon_generation: DungeonGenConfig {
-                algorithm: "wave_function_collapse",
-                room_types: vec!["entrance", "combat", "puzzle", "treasure", "boss"],
+                algorithm: "wave_function_collapse".to_string(),
+                room_types: vec!["entrance".to_string(), "combat".to_string(), "puzzle".to_string(), "treasure".to_string(), "boss".to_string()],
                 puzzle_complexity: 0.7,
                 treasure_density: 0.3,
             },
             word_banks: WordBanks {
                 adjectives: WordBank {
-                    mystical: vec!["Ethereal", "Luminous", "Arcane", "Celestial", "Astral"],
-                    corrupted: vec!["Twisted", "Blighted", "Tainted", "Forsaken", "Hollow"],
-                    natural: vec!["Verdant", "Ancient", "Primal", "Wild", "Untamed"],
-                    ancient: vec!["Forgotten", "Elder", "Primordial", "Timeless", "Eternal"],
+                    mystical: vec!["Ethereal".to_string(), "Luminous".to_string(), "Arcane".to_string(), "Celestial".to_string(), "Astral".to_string()],
+                    corrupted: vec!["Twisted".to_string(), "Blighted".to_string(), "Tainted".to_string(), "Forsaken".to_string(), "Hollow".to_string()],
+                    natural: vec!["Verdant".to_string(), "Ancient".to_string(), "Primal".to_string(), "Wild".to_string(), "Untamed".to_string()],
+                    ancient: vec!["Forgotten".to_string(), "Elder".to_string(), "Primordial".to_string(), "Timeless".to_string(), "Eternal".to_string()],
                 },
                 nouns: WordBank {
-                    mystical: vec!["Crystal", "Beacon", "Nexus", "Sanctum", "Altar"],
-                    corrupted: vec!["Void", "Blight", "Maw", "Scar", "Rift"],
-                    natural: vec!["Grove", "Spring", "Glade", "Hollow", "Vale"],
-                    ancient: vec!["Ruins", "Temple", "Citadel", "Monument", "Archive"],
+                    mystical: vec!["Crystal".to_string(), "Beacon".to_string(), "Nexus".to_string(), "Sanctum".to_string(), "Altar".to_string()],
+                    corrupted: vec!["Void".to_string(), "Blight".to_string(), "Maw".to_string(), "Scar".to_string(), "Rift".to_string()],
+                    natural: vec!["Grove".to_string(), "Spring".to_string(), "Glade".to_string(), "Hollow".to_string(), "Vale".to_string()],
+                    ancient: vec!["Ruins".to_string(), "Temple".to_string(), "Citadel".to_string(), "Monument".to_string(), "Archive".to_string()],
                 },
                 verbs: WordBank {
-                    mystical: vec!["Shimmers", "Resonates", "Pulses", "Glows", "Hums"],
-                    corrupted: vec!["Festers", "Consumes", "Corrupts", "Devours", "Spreads"],
-                    natural: vec!["Blooms", "Flows", "Grows", "Thrives", "Whispers"],
-                    ancient: vec!["Slumbers", "Watches", "Remembers", "Endures", "Awaits"],
+                    mystical: vec!["Shimmers".to_string(), "Resonates".to_string(), "Pulses".to_string(), "Glows".to_string(), "Hums".to_string()],
+                    corrupted: vec!["Festers".to_string(), "Consumes".to_string(), "Corrupts".to_string(), "Devours".to_string(), "Spreads".to_string()],
+                    natural: vec!["Blooms".to_string(), "Flows".to_string(), "Grows".to_string(), "Thrives".to_string(), "Whispers".to_string()],
+                    ancient: vec!["Slumbers".to_string(), "Watches".to_string(), "Remembers".to_string(), "Endures".to_string(), "Awaits".to_string()],
                 },
             },
         }

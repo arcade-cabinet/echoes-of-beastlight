@@ -21,7 +21,7 @@ fn main() {
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "Echoes of Beastlight".to_string(),
-                    resolution: (1280.0, 720.0).into(),
+                    resolution: (1280, 720).into(),
                     ..default()
                 }),
                 ..default()
@@ -35,5 +35,5 @@ fn main() {
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2d);
 }

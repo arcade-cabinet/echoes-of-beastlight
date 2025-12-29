@@ -71,11 +71,8 @@ pub fn generate_map_from_seed(
     seed: Res<WorldSeed>,
     lexicon: Res<Lexicon>,
     asset_server: Res<AssetServer>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let map_id = format!("map_{}_{}", seed.get_value("map_x", 1000), seed.get_value("map_y", 1000));
-    let mut rng = seed.subseed(&map_id);
     
     // Generate map name
     let map_name = generate_name_from_lexicon(
@@ -191,7 +188,7 @@ fn generate_tile_type(
     map_id: &str,
     biome: BiomeType,
     pos: IVec2,
-    corruption: f32,
+    _corruption: f32,
 ) -> TileType {
     let context = format!("{}_tile_{}_{}", map_id, pos.x, pos.y);
     let noise = seed.get_float(&context);
@@ -346,11 +343,9 @@ fn generate_initial_world(
     seed: Res<WorldSeed>,
     lexicon: Res<Lexicon>,
     asset_server: Res<AssetServer>,
-    meshes: ResMut<Assets<Mesh>>,
-    materials: ResMut<Assets<ColorMaterial>>,
 ) {
     info!("Generating world from seed: {}-{}-{}", seed.adjective, seed.noun, seed.verb);
     
     // Generate the starting map
-    generate_map_from_seed(commands, seed, lexicon, asset_server, meshes, materials);
+    generate_map_from_seed(commands, seed, lexicon, asset_server);
 }

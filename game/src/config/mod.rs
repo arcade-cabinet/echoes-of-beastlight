@@ -16,20 +16,20 @@ pub struct GameConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameMetadata {
-    pub name: &'static str,
-    pub version: &'static str,
-    pub genre: &'static str,
-    pub description: &'static str,
+    pub name: String,
+    pub version: String,
+    pub genre: String,
+    pub description: String,
 }
 
 impl Default for GameConfig {
     fn default() -> Self {
         Self {
             metadata: GameMetadata {
-                name: "Echoes of Beastlight",
-                version: "0.1.0",
-                genre: "JRPG with Monster Taming",
-                description: "A mystical journey through a world where light itself has become corrupted",
+                name: "Echoes of Beastlight".to_string(),
+                version: "0.1.0".to_string(),
+                genre: "JRPG with Monster Taming".to_string(),
+                description: "A mystical journey through a world where light itself has become corrupted".to_string(),
             },
             style: style::StyleConfig::default(),
             gameplay: game::GameplayConfig::default(),

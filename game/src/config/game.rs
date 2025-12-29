@@ -13,10 +13,10 @@ pub struct GameplayConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HeroConfig {
-    pub name: &'static str,
-    pub class: &'static str,
+    pub name: String,
+    pub class: String,
     pub base_stats: BaseStats,
-    pub starting_abilities: Vec<&'static str>,
+    pub starting_abilities: Vec<String>,
     pub max_party_size: usize,
 }
 
@@ -41,7 +41,7 @@ pub struct MonsterConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RarityTier {
-    pub name: &'static str,
+    pub name: String,
     pub color: Color,
     pub spawn_weight: f32,
     pub stat_multiplier: f32,
@@ -57,43 +57,43 @@ pub struct WorldConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ZoneDefinition {
-    pub name: &'static str,
-    pub biome: &'static str,
+    pub name: String,
+    pub biome: String,
     pub corruption_level: f32,
     pub level_range: (u32, u32),
-    pub key_features: Vec<&'static str>,
+    pub key_features: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CombatConfig {
-    pub system: &'static str,
+    pub system: String,
     pub action_points: bool,
     pub elemental_types: Vec<ElementType>,
-    pub status_effects: Vec<&'static str>,
+    pub status_effects: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ElementType {
-    pub name: &'static str,
+    pub name: String,
     pub color: Color,
-    pub strong_against: Vec<&'static str>,
-    pub weak_against: Vec<&'static str>,
+    pub strong_against: Vec<String>,
+    pub weak_against: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProgressionConfig {
     pub level_cap: u32,
-    pub experience_curve: &'static str,
+    pub experience_curve: String,
     pub skill_trees: bool,
-    pub equipment_slots: Vec<&'static str>,
+    pub equipment_slots: Vec<String>,
 }
 
 impl Default for GameplayConfig {
     fn default() -> Self {
         Self {
             hero: HeroConfig {
-                name: "Luna",
-                class: "Lightkeeper",
+                name: "Luna".to_string(),
+                class: "Lightkeeper".to_string(),
                 base_stats: BaseStats {
                     health: 100,
                     mana: 50,
@@ -102,7 +102,7 @@ impl Default for GameplayConfig {
                     speed: 12,
                     spirit: 20,
                 },
-                starting_abilities: vec!["Light Burst", "Tame", "Heal"],
+                starting_abilities: vec!["Light Burst".to_string(), "Tame".to_string(), "Heal".to_string()],
                 max_party_size: 6,
             },
             monsters: MonsterConfig {
@@ -112,26 +112,26 @@ impl Default for GameplayConfig {
                 type_effectiveness: true,
                 rarity_tiers: vec![
                     RarityTier {
-                        name: "Common",
-                        color: Color::hex("#9e9e9e").unwrap(),
+                        name: "Common".to_string(),
+                        color: Color::Srgba(Srgba::hex("#9e9e9e").unwrap()),
                         spawn_weight: 0.6,
                         stat_multiplier: 1.0,
                     },
                     RarityTier {
-                        name: "Uncommon",
-                        color: Color::hex("#4caf50").unwrap(),
+                        name: "Uncommon".to_string(),
+                        color: Color::Srgba(Srgba::hex("#4caf50").unwrap()),
                         spawn_weight: 0.25,
                         stat_multiplier: 1.2,
                     },
                     RarityTier {
-                        name: "Rare",
-                        color: Color::hex("#2196f3").unwrap(),
+                        name: "Rare".to_string(),
+                        color: Color::Srgba(Srgba::hex("#2196f3").unwrap()),
                         spawn_weight: 0.12,
                         stat_multiplier: 1.5,
                     },
                     RarityTier {
-                        name: "Epic",
-                        color: Color::hex("#9c27b0").unwrap(),
+                        name: "Epic".to_string(),
+                        color: Color::Srgba(Srgba::hex("#9c27b0").unwrap()),
                         spawn_weight: 0.03,
                         stat_multiplier: 2.0,
                     },
@@ -141,73 +141,73 @@ impl Default for GameplayConfig {
                 seed_based: true,
                 zones: vec![
                     ZoneDefinition {
-                        name: "Glintrock Village",
-                        biome: "corrupted_forest",
+                        name: "Glintrock Village".to_string(),
+                        biome: "corrupted_forest".to_string(),
                         corruption_level: 0.2,
                         level_range: (1, 5),
-                        key_features: vec!["starting_town", "basic_shops", "taming_tutorial"],
+                        key_features: vec!["starting_town".to_string(), "basic_shops".to_string(), "taming_tutorial".to_string()],
                     },
                     ZoneDefinition {
-                        name: "Whispering Woods",
-                        biome: "dark_forest",
+                        name: "Whispering Woods".to_string(),
+                        biome: "dark_forest".to_string(),
                         corruption_level: 0.4,
                         level_range: (5, 10),
-                        key_features: vec!["first_dungeon", "corrupted_shrine"],
+                        key_features: vec!["first_dungeon".to_string(), "corrupted_shrine".to_string()],
                     },
                     ZoneDefinition {
-                        name: "Crystal Caverns",
-                        biome: "underground",
+                        name: "Crystal Caverns".to_string(),
+                        biome: "underground".to_string(),
                         corruption_level: 0.6,
                         level_range: (10, 15),
-                        key_features: vec!["light_crystals", "ancient_machinery"],
+                        key_features: vec!["light_crystals".to_string(), "ancient_machinery".to_string()],
                     },
                     ZoneDefinition {
-                        name: "Shadowpeak Mountains",
-                        biome: "corrupted_peaks",
+                        name: "Shadowpeak Mountains".to_string(),
+                        biome: "corrupted_peaks".to_string(),
                         corruption_level: 0.8,
                         level_range: (15, 20),
-                        key_features: vec!["boss_lair", "light_temple"],
+                        key_features: vec!["boss_lair".to_string(), "light_temple".to_string()],
                     },
                 ],
                 day_night_cycle: true,
                 corruption_spreading: true,
             },
             combat: CombatConfig {
-                system: "turn_based_tactical",
+                system: "turn_based_tactical".to_string(),
                 action_points: true,
                 elemental_types: vec![
                     ElementType {
-                        name: "Light",
-                        color: Color::hex("#ffffff").unwrap(),
-                        strong_against: vec!["Shadow", "Corruption"],
-                        weak_against: vec!["Void"],
+                        name: "Light".to_string(),
+                        color: Color::Srgba(Srgba::hex("#ffffff").unwrap()),
+                        strong_against: vec!["Shadow".to_string(), "Corruption".to_string()],
+                        weak_against: vec!["Void".to_string()],
                     },
                     ElementType {
-                        name: "Shadow",
-                        color: Color::hex("#1a1a1a").unwrap(),
-                        strong_against: vec!["Nature", "Spirit"],
-                        weak_against: vec!["Light"],
+                        name: "Shadow".to_string(),
+                        color: Color::Srgba(Srgba::hex("#1a1a1a").unwrap()),
+                        strong_against: vec!["Nature".to_string(), "Spirit".to_string()],
+                        weak_against: vec!["Light".to_string()],
                     },
                     ElementType {
-                        name: "Nature",
-                        color: Color::hex("#4caf50").unwrap(),
-                        strong_against: vec!["Earth", "Water"],
-                        weak_against: vec!["Shadow", "Corruption"],
+                        name: "Nature".to_string(),
+                        color: Color::Srgba(Srgba::hex("#4caf50").unwrap()),
+                        strong_against: vec!["Earth".to_string(), "Water".to_string()],
+                        weak_against: vec!["Shadow".to_string(), "Corruption".to_string()],
                     },
                     ElementType {
-                        name: "Corruption",
-                        color: Color::hex("#7b1fa2").unwrap(),
-                        strong_against: vec!["Nature", "Spirit"],
-                        weak_against: vec!["Light", "Pure"],
+                        name: "Corruption".to_string(),
+                        color: Color::Srgba(Srgba::hex("#7b1fa2").unwrap()),
+                        strong_against: vec!["Nature".to_string(), "Spirit".to_string()],
+                        weak_against: vec!["Light".to_string(), "Pure".to_string()],
                     },
                 ],
-                status_effects: vec!["Poisoned", "Blessed", "Corrupted", "Shielded", "Stunned"],
+                status_effects: vec!["Poisoned".to_string(), "Blessed".to_string(), "Corrupted".to_string(), "Shielded".to_string(), "Stunned".to_string()],
             },
             progression: ProgressionConfig {
                 level_cap: 50,
-                experience_curve: "exponential_smooth",
+                experience_curve: "exponential_smooth".to_string(),
                 skill_trees: true,
-                equipment_slots: vec!["weapon", "armor", "accessory", "talisman"],
+                equipment_slots: vec!["weapon".to_string(), "armor".to_string(), "accessory".to_string(), "talisman".to_string()],
             },
         }
     }
