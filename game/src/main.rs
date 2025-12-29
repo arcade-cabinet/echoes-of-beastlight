@@ -13,6 +13,7 @@ mod config;
 mod world;
 
 use bevy::prelude::*;
+use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 fn main() {
@@ -22,6 +23,7 @@ fn main() {
                 primary_window: Some(Window {
                     title: "Echoes of Beastlight".to_string(),
                     resolution: (1280, 720).into(),
+                    canvas: Some("#bevy-canvas".to_string()),
                     ..default()
                 }),
                 ..default()
@@ -29,6 +31,7 @@ fn main() {
             config::ConfigPlugin,
             world::WorldPlugin,
         ))
+        .add_plugins(EguiPlugin::default())
         .add_plugins(WorldInspectorPlugin::new())
         .add_systems(Startup, setup_camera)
         .run();

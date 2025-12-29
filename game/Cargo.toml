@@ -13,6 +13,7 @@ bevy_ecs_tilemap = "0.17"
 bevy-yoleck = "0.29"
 bevy_rapier2d = "0.32"
 bevy-inspector-egui = "0.35"
+bevy_egui = "0.37"
 leafwing-input-manager = "0.19"
 serde = { version = "1.0", features = ["derive"] }
 ron = "0.12"
