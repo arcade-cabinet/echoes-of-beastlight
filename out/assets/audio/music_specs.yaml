@@ -1,0 +1,61 @@
+```yaml
+Title Theme:
+  BPM: 120
+  Time Signature: 4/4
+  Key Signature: C Major
+  Instrument Layers:
+    Lead: Square wave melody, volume envelope attack: 0.01s, decay: 0.2s, sustain: 0.8, release: 0.05s
+    Bass: Triangle wave bassline, volume envelope attack: 0.02s, decay: 0.1s, sustain: 0.7, release: 0.08s
+    Drums: Noise channel, volume envelope attack: 0.001s, decay: 0.05s, sustain: 0.3, release: 0.02s
+    Harmony: Pulse wave harmony, volume envelope attack: 0.02s, decay: 0.2s, sustain: 0.8, release: 0.05s
+  Loop Structure: Intro - A Section - B Section - A Section - Outro
+  Dynamic Variations: Crescendo during B section for build-up, decrescendo during Outro
+
+Overworld Theme:
+  BPM: 100
+  Time Signature: 3/4
+  Key Signature: G Major
+  Instrument Layers:
+    Lead: Square wave melody, volume envelope attack: 0.01s, decay: 0.2s, sustain: 0.8, release: 0.05s
+    Bass: Triangle wave bassline, volume envelope attack: 0.02s, decay: 0.1s, sustain: 0.7, release: 0.08s
+    Drums: Noise channel, volume envelope attack: 0.001s, decay: 0.05s, sustain: 0.3, release: 0.02s
+    Harmony: Pulse wave harmony, volume envelope attack: 0.02s, decay: 0.2s, sustain: 0.8, release: 0.05s
+  Loop Structure: Intro - A Section - B Section - A Section - Outro
+  Dynamic Variations: Crescendo during B section for build-up, decrescendo during Outro
+
+Battle Theme:
+  BPM: 140
+  Time Signature: 4/4
+  Key Signature: A Minor
+  Instrument Layers:
+    Lead: Square wave melody, volume envelope attack: 0.01s, decay: 0.2s, sustain: 0.8, release: 0.05s
+    Bass: Triangle wave bassline, volume envelope attack: 0.02s, decay: 0.1s, sustain: 0.7, release: 0.08s
+    Drums: Noise channel, volume envelope attack: 0.001s, decay: 0.05s, sustain: 0.3, release: 0.02s
+    Harmony: Pulse wave harmony, volume envelope attack: 0.02s, decay: 0.2s, sustain: 0.8, release: 0.05s
+  Loop Structure: Intro - A Section - B Section - A Section - Outro
+  Dynamic Variations: Crescendo during B section for build-up, decrescendo during Outro
+
+Victory Fanfare:
+  BPM: 120
+  Time Signature: 4/4
+  Key Signature: C Major
+  Instrument Layers:
+    Lead: Square wave melody, volume envelope attack: 0.01s, decay: 0.2s, sustain: 0.8, release: 0.05s
+    Bass: Triangle wave bassline, volume envelope attack: 0.02s, decay: 0.1s, sustain: 0.7, release: 0.08s
+    Drums: Noise channel, volume envelope attack: 0.001s, decay: 0.05s, sustain: 0.3, release: 0.02s
+    Harmony: Pulse wave harmony, volume envelope attack: 0.02s, decay: 0.2s, sustain: 0.8, release: 0.05s
+  Loop Structure: Single play-through with no loop
+  Dynamic Variations: Crescendo during middle section for build-up, decrescendo during Outro
+
+Shop Theme:
+  BPM: 90
+  Time Signature: 4/4
+  Key Signature: D Major
+  Instrument Layers:
+    Lead: Square wave melody, volume envelope attack: 0.01s, decay: 0.2s, sustain: 0.8, release: 0.05s
+    Bass: Triangle wave bassline, volume envelope attack: 0.02s, decay: 0.1s, sustain: 0.7, release: 0.08s
+    Drums: Noise channel, volume envelope attack: 0.001s, decay: 0.05s, sustain: 0.3, release: 0.02s
+    Harmony: Pulse wave harmony, volume envelope attack: 0.02s, decay: 0.2s, sustain: 0.8, release: 0.05s
+  Loop Structure: Intro - A Section - B Section - A Section - Outro
+  Dynamic Variations: Crescendo during B section for build-up, decrescendo during Outro
+```
