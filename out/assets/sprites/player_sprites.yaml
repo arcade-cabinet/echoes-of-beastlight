@@ -1,0 +1,31 @@
+sprite: Cael
+size: 32x32
+color_palette: hero (max 16 colors)
+style: Final Fantasy VI meets Pokemon GSC tilesets
+animations:
+  - name: idle
+    frames:
+      - frame 1: Cael stands straight, looking forward. He is wearing a dark green tunic and brown pants. His brown boots are slightly lighter than his pants. His hair is blonde, and he has a small, round shield on his back made of a light brown color. His skin is a light peach color.
+      - frame 2: The same as frame 1, but Cael shifts his weight slightly, causing his clothes to ripple with the movement. The shield on his back moves slightly.
+  - name: walk
+    directions:
+      - up
+      - down
+      - left
+      - right
+    frames:
+      - frame 1: Cael takes a step forward with his right foot, his left arm swinging forward to balance. His clothes and shield move slightly with the motion.
+      - frame 2: Cael's right foot is flat on the ground, and he begins to lift his left foot. His left arm swings back as his right arm swings forward.
+      - frame 3: Cael's left foot is now in front, and his right arm is swung back. His clothes and shield continue to move with his steps.
+      - frame 4: Cael's left foot is flat on the ground, and he begins to lift his right foot. His arms swing in the opposite direction, and his clothes and shield move with the motion.
+  - name: attack
+    frames:
+      - frame 1: Cael reaches behind him to grab the handle of his shield.
+      - frame 2: Cael swings the shield in front of him, holding it with both hands. His body leans into the swing.
+      - frame 3: Cael's shield is fully extended in front of him, and he stands firm.
+  - name: special_ability
+    frames:
+      - frame 1: Cael reaches into a pouch at his belt and pulls out a small, glowing object.
+      - frame 2: Cael holds the object above his head. The glow intensifies, and a small aura of light forms around him.
+      - frame 3: Cael throws the object in front of him. The glow from the object lights up the area around him.
+      - frame 4: The object explodes in a burst of light, leaving a small cloud of smoke. Cael returns to his normal stance.

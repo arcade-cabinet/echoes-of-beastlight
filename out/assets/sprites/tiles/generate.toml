@@ -1,0 +1,117 @@
+# Tile Sprite Generation Prompt
+[prompt]
+type = "tilemap"
+target = "base_tiles"
+
+[context]
+config_path = "src/config/style.rs"
+tile_system = "src/world/tiles.rs"
+
+[requirements]
+tile_size = 32
+tiles_per_type = 4  # Variants for each base type
+
+[[tiles]]
+name = "grass"
+variants = 4
+description = """
+Basic grass tile with subtle texture variation. Should tile seamlessly.
+Base color should be neutral gray (#808080) for recoloring.
+Include small details like individual grass blades at edges.
+"""
+
+[[tiles]]
+name = "sand"
+variants = 4
+description = """
+Desert sand tile with wind patterns. Seamless tiling.
+Base neutral gray with subtle dune textures.
+"""
+
+[[tiles]]
+name = "stone"
+variants = 3
+description = """
+Rocky ground tile with cracks and pebbles. 
+Neutral gray base with good contrast for recoloring.
+"""
+
+[[tiles]]
+name = "water"
+variants = 2
+description = """
+Animated water tile (2 frames). Semi-transparent.
+Gray base that will be recolored to blue tones.
+Include subtle wave patterns.
+"""
+
+[[tiles]]
+name = "mountain"
+variants = 2
+description = """
+Impassable mountain/cliff tile. Should look raised.
+Gray base with strong shadows for depth.
+"""
+
+[[tiles]]
+name = "forest"
+variants = 3
+description = """
+Dense tree canopy tile. Should partially obscure.
+Gray base with leaf/branch patterns.
+"""
+
+[[tiles]]
+name = "corrupted"
+variants = 2
+description = """
+Corrupted ground with veiny, organic patterns.
+Gray base that will show purple corruption when recolored.
+"""
+
+[structures]
+[[structures.dungeon]]
+name = "dungeon_entrance"
+description = """
+Dark cave or portal entrance. Should stand out clearly.
+Stone archway with darkness inside. Gray base.
+"""
+
+[[structures.shop]]
+name = "shop_icon"
+description = """
+Merchant stall or shop building. Friendly appearance.
+Small building with awning or sign. Gray base.
+"""
+
+[[structures.town]]
+name = "town_center"
+description = """
+Town building tile. Can be composed for larger structures.
+Simple house or building segment. Gray base.
+"""
+
+[style]
+description = """
+All tiles must be:
+- 32x32 pixels exactly
+- Grayscale (will be recolored by corruption system)
+- Seamlessly tileable (except structures)
+- Clean pixel art with no anti-aliasing
+- Consistent perspective (top-down 3/4 view)
+
+The grayscale values should provide good contrast:
+- Light areas: #CCCCCC
+- Mid tones: #808080  
+- Dark areas: #333333
+- Outlines: #000000
+
+This allows the corruption gradient to work effectively.
+"""
+
+[output]
+format = "png"
+layout = "atlas"
+atlas_size = "512x512"
+padding = 1
+filename = "tilemap.png"

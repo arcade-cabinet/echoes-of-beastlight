@@ -1,0 +1,96 @@
+{
+  "game_audio": [
+    {
+      "type": "Title theme",
+      "description": "Mysterious, SNES orchestra (Chrono Trigger vibe)",
+      "BPM": 80,
+      "instruments": [
+        "Strings",
+        "Flute",
+        "Percussion",
+        "Harp"
+      ],
+      "duration": "3:00 minutes",
+      "sound_file": "Echoes_of_Beastlight_Title_Theme.mp3"
+    },
+    {
+      "type": "Battle theme",
+      "description": "Intense, fast-paced",
+      "BPM": 130,
+      "instruments": [
+        "Brass",
+        "Percussion",
+        "Strings",
+        "Electric Guitar"
+      ],
+      "duration": "2:30 minutes",
+      "sound_file": "Echoes_of_Beastlight_Battle_Theme.mp3"
+    },
+    {
+      "type": "Victory fanfare",
+      "description": "Triumphant, short",
+      "BPM": 110,
+      "instruments": [
+        "Horn",
+        "Strings",
+        "Timpani"
+      ],
+      "duration": "0:30 minutes",
+      "sound_file": "Echoes_of_Beastlight_Victory_Fanfare.mp3"
+    },
+    {
+      "type": "Sound effect",
+      "description": "Menu select",
+      "BPM": "N/A",
+      "instruments": [
+        "Synth"
+      ],
+      "duration": "0:02 seconds",
+      "sound_file": "Echoes_of_Beastlight_Menu_Select.wav"
+    },
+    {
+      "type": "Sound effect",
+      "description": "Attack",
+      "BPM": "N/A",
+      "instruments": [
+        "Drum Hit",
+        "Synth"
+      ],
+      "duration": "0:03 seconds",
+      "sound_file": "Echoes_of_Beastlight_Attack.wav"
+    },
+    {
+      "type": "Sound effect",
+      "description": "Item pickup",
+      "BPM": "N/A",
+      "instruments": [
+        "Harp",
+        "Chime"
+      ],
+      "duration": "0:04 seconds",
+      "sound_file": "Echoes_of_Beastlight_Item_Pickup.wav"
+    },
+    {
+      "type": "Sound effect",
+      "description": "Level up",
+      "BPM": "N/A",
+      "instruments": [
+        "Chimes",
+        "Synth"
+      ],
+      "duration": "0:05 seconds",
+      "sound_file": "Echoes_of_Beastlight_Level_Up.wav"
+    },
+    {
+      "type": "Sound effect",
+      "description": "Tame success",
+      "BPM": "N/A",
+      "instruments": [
+        "Harp",
+        "Chimes"
+      ],
+      "duration": "0:05 seconds",
+      "sound_file": "Echoes_of_Beastlight_Tame_Success.wav"
+    }
+  ]
+}
