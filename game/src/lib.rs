@@ -13,7 +13,7 @@
 // This file organizes all game modules
 
 pub mod components;
-pub mod tilemaps;
 pub mod systems;
+pub mod tilemaps;
 
 pub use components::*;

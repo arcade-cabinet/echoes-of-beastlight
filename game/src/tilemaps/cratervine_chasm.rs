@@ -59,15 +59,38 @@ pub fn setup_tilemap(
         .chunk_dimensions(32, 32)
         .tile_dimensions(32, 32)
         .dimensions(32, 32)
-        .add_layer(TilemapLayer { kind: LayerKind::Dense, z_order: 0 }, 0)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse, z_order: 1 }, 1)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse, z_order: 2 }, 2);
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Dense,
+                z_order: 0,
+            },
+            0,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+                z_order: 1,
+            },
+            1,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+                z_order: 2,
+            },
+            2,
+        );
 
     commands.spawn_bundle(map);
 }
 
 // Helper functions
-pub fn spawn_tile(map_query: &mut MapQuery, pos: TilePos, tile: CratervineChasmTile, layer_id: u16) {
+pub fn spawn_tile(
+    map_query: &mut MapQuery,
+    pos: TilePos,
+    tile: CratervineChasmTile,
+    layer_id: u16,
+) {
     map_query.set_tile(pos, tile, layer_id).unwrap();
 }
 
@@ -75,7 +98,12 @@ pub fn check_collision(map_query: &MapQuery, pos: TilePos, layer_id: u16) -> boo
     map_query.get_tile(pos, layer_id).is_some()
 }
 
-pub fn update_tile_graphics(map_query: &mut MapQuery, pos: TilePos, tile: CratervineChasmTile, layer_id: u16) {
+pub fn update_tile_graphics(
+    map_query: &mut MapQuery,
+    pos: TilePos,
+    tile: CratervineChasmTile,
+    layer_id: u16,
+) {
     map_query.set_tile(pos, tile, layer_id).unwrap();
 }
 

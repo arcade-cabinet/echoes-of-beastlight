@@ -1,6 +1,6 @@
-pub mod style;
 pub mod game;
 pub mod generation;
+pub mod style;
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -29,7 +29,8 @@ impl Default for GameConfig {
                 name: "Echoes of Beastlight",
                 version: "0.1.0",
                 genre: "JRPG with Monster Taming",
-                description: "A mystical journey through a world where light itself has become corrupted",
+                description:
+                    "A mystical journey through a world where light itself has become corrupted",
             },
             style: style::StyleConfig::default(),
             gameplay: game::GameplayConfig::default(),

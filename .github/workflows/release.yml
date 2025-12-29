@@ -46,7 +46,7 @@ jobs:
 
       - name: Build release binary
         run: |
-          cd tools
+          cd build-tools
           cargo build --release --target ${{ matrix.target }} --bin ai-gen
           cd ..
 
@@ -116,6 +116,6 @@ jobs:
 
       - name: Publish to crates.io
         run: |
-          cd tools
+          cd build-tools
           cargo publish --token ${{ secrets.CARGO_TOKEN }}
         continue-on-error: true # Don't fail the workflow if publish fails

@@ -41,9 +41,24 @@ pub fn setup_tilemap(mut commands: Commands, asset_server: Res<AssetServer>) {
         .chunk_dimensions(32, 32, 1)
         .tile_dimensions(32, 32)
         .dimensions(10, 10)
-        .add_layer(TilemapLayer { kind: LayerKind::Dense }, 0)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse }, 1)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse }, 2)
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Dense,
+            },
+            0,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+            },
+            1,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+            },
+            2,
+        )
         .build();
 
     // Spawn tilemap bundle
@@ -78,13 +93,12 @@ pub fn spawn_tile(
         sprite_index: 0,
         tint: Color::WHITE,
     };
-    commands.entity(tilemap_handle.id()).insert_bundle((layer, tile));
+    commands
+        .entity(tilemap_handle.id())
+        .insert_bundle((layer, tile));
 }
 
-pub fn check_collision(
-    tilemap_query: Query<&Handle<Tilemap>>,
-    position: UVec2,
-) -> bool {
+pub fn check_collision(tilemap_query: Query<&Handle<Tilemap>>, position: UVec2) -> bool {
     let tilemap_handle = tilemap_query.single().unwrap();
     let collision_layer = tilemap_handle.get_layer(&LayerType::Collision).unwrap();
     collision_layer.get_tile(position).is_some()
@@ -102,7 +116,9 @@ pub fn update_tile_graphics(
         TileType::Flowers => 1,
         TileType::DirtPath => 2,
     };
-    commands.entity(tilemap_handle.id()).insert((position, tile_index));
+    commands
+        .entity(tilemap_handle.id())
+        .insert((position, tile_index));
 }
 
 pub fn handle_chunk_loading(

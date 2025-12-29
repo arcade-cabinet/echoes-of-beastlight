@@ -43,33 +43,46 @@ impl Tile for ForgottenRootsTile {
     }
 }
 
-pub fn setup_tilemap(mut commands: Commands, asset_server: Res<AssetServer>, texture_atlases: ResMut<Assets<TextureAtlas>>) {
+pub fn setup_tilemap(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    texture_atlases: ResMut<Assets<TextureAtlas>>,
+) {
     // Load the texture atlas for the tilemap
     let texture_handle = asset_server.load("textures/forgotten_roots_tiles.png");
     let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 3, 1);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     // Create the tilemap layers
-    let floor_layer = LayerBuilder::<ForgottenRootsTile>::new(&mut commands, LayerSettings::new(
-        MapSize(32, 32),
-        ChunkSize(32, 32),
-        TextureAtlasSettings::default(),
-        0, // z-index for floor layer
-    ));
+    let floor_layer = LayerBuilder::<ForgottenRootsTile>::new(
+        &mut commands,
+        LayerSettings::new(
+            MapSize(32, 32),
+            ChunkSize(32, 32),
+            TextureAtlasSettings::default(),
+            0, // z-index for floor layer
+        ),
+    );
 
-    let walls_layer = LayerBuilder::<ForgottenRootsTile>::new(&mut commands, LayerSettings::new(
-        MapSize(32, 32),
-        ChunkSize(32, 32),
-        TextureAtlasSettings::default(),
-        1, // z-index for walls layer
-    ));
+    let walls_layer = LayerBuilder::<ForgottenRootsTile>::new(
+        &mut commands,
+        LayerSettings::new(
+            MapSize(32, 32),
+            ChunkSize(32, 32),
+            TextureAtlasSettings::default(),
+            1, // z-index for walls layer
+        ),
+    );
 
-    let tech_layer = LayerBuilder::<ForgottenRootsTile>::new(&mut commands, LayerSettings::new(
-        MapSize(32, 32),
-        ChunkSize(32, 32),
-        TextureAtlasSettings::default(),
-        2, // z-index for tech layer
-    ));
+    let tech_layer = LayerBuilder::<ForgottenRootsTile>::new(
+        &mut commands,
+        LayerSettings::new(
+            MapSize(32, 32),
+            ChunkSize(32, 32),
+            TextureAtlasSettings::default(),
+            2, // z-index for tech layer
+        ),
+    );
 
     // Create the tilemap
     let tilemap = TilemapBundle::builder()

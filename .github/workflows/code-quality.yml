@@ -26,7 +26,7 @@ jobs:
       - name: Check formatting
         run: |
           cargo fmt --all -- --check
-          cd tools && cargo fmt --all -- --check
+          cd build-tools && cargo fmt --all -- --check
 
   lint:
     name: Clippy Lint
@@ -54,7 +54,7 @@ jobs:
       - name: Run clippy
         run: |
           cargo clippy --all-targets --all-features -- -D warnings
-          cd tools && cargo clippy --all-targets --all-features -- -D warnings
+          cd build-tools && cargo clippy --all-targets --all-features -- -D warnings
 
   doc:
     name: Documentation Check
@@ -75,7 +75,7 @@ jobs:
       - name: Check documentation
         run: |
           RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
-          cd tools && RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
+          cd build-tools && RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
 
   msrv:
     name: Minimum Supported Rust Version
@@ -96,7 +96,7 @@ jobs:
       - name: Check MSRV
         run: |
           cargo check --all-features
-          cd tools && cargo check --all-features
+          cd build-tools && cargo check --all-features
 
   unused-deps:
     name: Check Unused Dependencies
@@ -115,5 +115,5 @@ jobs:
       - name: Check for unused dependencies
         run: |
           cargo machete
-          cd tools && cargo machete
+          cd build-tools && cargo machete
         continue-on-error: true # Don't fail the build, just report

@@ -22,9 +22,7 @@ impl Templates {
     pub fn new() -> Self {
         let mut handlebars = Handlebars::new();
         handlebars.register_escape_fn(handlebars::no_escape);
-        Self {
-            handlebars,
-        }
+        Self { handlebars }
     }
 
     pub async fn load(&mut self) -> Result<()> {
@@ -98,7 +96,8 @@ impl bevy_inspector_egui::Inspectable for Player {
     }
 }"#;
 
-        self.handlebars.register_template_string("components", template)?;
+        self.handlebars
+            .register_template_string("components", template)?;
         Ok(())
     }
 
@@ -114,7 +113,8 @@ pub fn {{system_name}}_system(
     {{body}}
 }"#;
 
-        self.handlebars.register_template_string("system", template)?;
+        self.handlebars
+            .register_template_string("system", template)?;
         Ok(())
     }
 
@@ -159,7 +159,8 @@ pub fn setup_{{zone_name}}_tilemap(
     });
 }"#;
 
-        self.handlebars.register_template_string("tilemap", template)?;
+        self.handlebars
+            .register_template_string("tilemap", template)?;
         Ok(())
     }
 
@@ -182,13 +183,7 @@ pub fn setup_{{zone_name}}_tilemap(
         let sanitized_name = zone_name
             .to_lowercase()
             .chars()
-            .map(|c| {
-                if c.is_alphanumeric() {
-                    c
-                } else {
-                    '_'
-                }
-            })
+            .map(|c| if c.is_alphanumeric() { c } else { '_' })
             .collect::<String>()
             .trim_matches('_')
             .to_string();
@@ -210,7 +205,6 @@ pub struct QueryDef {
 #[cfg(test)]
 mod tests {
     use super::*;
-
 
     #[tokio::test]
     async fn test_templates_new() {
@@ -264,12 +258,10 @@ mod tests {
         let mut templates = Templates::new();
         templates.load().await.unwrap();
 
-        let queries = vec![
-            QueryDef {
-                name: "mut player_query".to_string(),
-                types: "&mut Transform, &Player".to_string(),
-            }
-        ];
+        let queries = vec![QueryDef {
+            name: "mut player_query".to_string(),
+            types: "&mut Transform, &Player".to_string(),
+        }];
 
         let body = "// System logic here";
         let result = templates.render_system("movement", queries, body);
@@ -301,7 +293,7 @@ mod tests {
             QueryDef {
                 name: "mut health_query".to_string(),
                 types: "&mut Health".to_string(),
-            }
+            },
         ];
 
         let body = r#"
@@ -369,7 +361,10 @@ mod tests {
             let result = templates.render_tilemap(zone_name);
             assert!(result.is_ok());
             let rendered = result.unwrap();
-            println!("Zone: '{}' -> Expected: '{}'\nRendered:\n{}", zone_name, expected_fn, rendered);
+            println!(
+                "Zone: '{}' -> Expected: '{}'\nRendered:\n{}",
+                zone_name, expected_fn, rendered
+            );
             assert!(rendered.contains(&format!("pub fn {}", expected_fn)));
         }
     }
@@ -393,7 +388,10 @@ mod tests {
 
         let result = templates.render_components();
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("Template not found"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Template not found"));
     }
 
     #[tokio::test]
@@ -410,15 +408,15 @@ mod tests {
         assert!(rendered.contains(") {"));
 
         // Test with complex query types
-        let queries = vec![
-            QueryDef {
-                name: "complex_query".to_string(),
-                types: "(Entity, &Transform, &Player, Option<&Health>), With<Active>".to_string(),
-            }
-        ];
+        let queries = vec![QueryDef {
+            name: "complex_query".to_string(),
+            types: "(Entity, &Transform, &Player, Option<&Health>), With<Active>".to_string(),
+        }];
         let result = templates.render_system("complex", queries, "// Complex");
         assert!(result.is_ok());
         let rendered = result.unwrap();
-        assert!(rendered.contains("complex_query: Query<(Entity, &Transform, &Player, Option<&Health>), With<Active>>"));
+        assert!(rendered.contains(
+            "complex_query: Query<(Entity, &Transform, &Player, Option<&Health>), With<Active>>"
+        ));
     }
 }

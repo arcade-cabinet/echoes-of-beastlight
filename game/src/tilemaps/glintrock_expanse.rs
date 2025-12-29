@@ -28,7 +28,11 @@ impl Default for GlintrockTile {
 }
 
 impl Tile for GlintrockTile {
-    fn sprite(&self, _: &mut bevy::render::renderer::RenderContext, _: &mut bevy::render::renderer::RenderResources) -> Option<usize> {
+    fn sprite(
+        &self,
+        _: &mut bevy::render::renderer::RenderContext,
+        _: &mut bevy::render::renderer::RenderResources,
+    ) -> Option<usize> {
         match self {
             Self::CrystalGrass => Some(0),
             Self::Stone => Some(1),
@@ -38,7 +42,11 @@ impl Tile for GlintrockTile {
 }
 
 // Tilemap setup function
-pub fn setup_tilemap(mut commands: Commands, asset_server: Res<AssetServer>, mut tilemap_res: ResMut<TilemapResource<GlintrockTile>>) {
+pub fn setup_tilemap(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut tilemap_res: ResMut<TilemapResource<GlintrockTile>>,
+) {
     let texture_handle = asset_server.load("textures/glintrock_tiles.png");
     let tilemap = Tilemap::builder()
         .texture_atlas(texture_handle)
@@ -47,9 +55,27 @@ pub fn setup_tilemap(mut commands: Commands, asset_server: Res<AssetServer>, mut
         .tile_dimensions(16, 16)
         .auto_chunk()
         .auto_spawn(2, 2)
-        .add_layer(TilemapLayer { kind: LayerKind::Dense, ..Default::default() }, 0)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse, ..Default::default() }, 1)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse, ..Default::default() }, 2)
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Dense,
+                ..Default::default()
+            },
+            0,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+                ..Default::default()
+            },
+            1,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+                ..Default::default()
+            },
+            2,
+        )
         .z_layers(3)
         .finish()
         .unwrap();
@@ -59,7 +85,13 @@ pub fn setup_tilemap(mut commands: Commands, asset_server: Res<AssetServer>, mut
 
 // Helper functions
 /// Spawns a tile at the given position.
-pub fn spawn_tile(tile: GlintrockTile, x: u32, y: u32, z: u32, tilemap: &mut Tilemap<GlintrockTile>) {
+pub fn spawn_tile(
+    tile: GlintrockTile,
+    x: u32,
+    y: u32,
+    z: u32,
+    tilemap: &mut Tilemap<GlintrockTile>,
+) {
     tilemap.insert_tile((x, y, z), tile).unwrap();
 }
 
@@ -69,12 +101,21 @@ pub fn check_collision(x: u32, y: u32, tilemap: &Tilemap<GlintrockTile>) -> bool
 }
 
 /// Updates the graphics of a tile at the given position.
-pub fn update_tile_graphics(x: u32, y: u32, z: u32, tile: GlintrockTile, tilemap: &mut Tilemap<GlintrockTile>) {
+pub fn update_tile_graphics(
+    x: u32,
+    y: u32,
+    z: u32,
+    tile: GlintrockTile,
+    tilemap: &mut Tilemap<GlintrockTile>,
+) {
     tilemap.insert_tile((x, y, z), tile).unwrap();
 }
 
 /// Handles the loading and unloading of chunks.
-pub fn handle_chunk_loading_unloading(camera_transform: &Transform, tilemap: &mut Tilemap<GlintrockTile>) {
+pub fn handle_chunk_loading_unloading(
+    camera_transform: &Transform,
+    tilemap: &mut Tilemap<GlintrockTile>,
+) {
     let center = camera_transform.translation;
     tilemap.auto_spawn(center, 2, 2);
 }

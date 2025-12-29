@@ -13,8 +13,8 @@
 // Source: game-config.yaml
 // Template: src/tilemaps/mod
 
-pub mod verdant_flats;
-pub mod glintrock_expanse;
-pub mod cratervine_chasm;
 pub mod ashbarrow_wastes;
+pub mod cratervine_chasm;
 pub mod forgotten_roots;
+pub mod glintrock_expanse;
+pub mod verdant_flats;

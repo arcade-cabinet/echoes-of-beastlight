@@ -79,7 +79,12 @@ impl ConsoleState {
         self.scroll_to_bottom = true;
     }
 
-    pub fn log_with_source(&mut self, level: ConsoleLevel, message: impl Into<String>, source: impl Into<String>) {
+    pub fn log_with_source(
+        &mut self,
+        level: ConsoleLevel,
+        message: impl Into<String>,
+        source: impl Into<String>,
+    ) {
         self.logs.push_back(LogEntry {
             timestamp: std::time::Instant::now(),
             level,
@@ -129,7 +134,9 @@ impl ConsoleState {
                     Err("Usage: generate <asset_type> [options]".into())
                 }
             }
-            "list" => Ok("Available assets:\n- characters\n- tilesets\n- ui_elements\n- audio".into()),
+            "list" => {
+                Ok("Available assets:\n- characters\n- tilesets\n- ui_elements\n- audio".into())
+            }
             _ => Err(format!("Unknown command: {}", parts[0])),
         }
     }
@@ -140,7 +147,8 @@ impl ConsoleState {
          clear - Clear console\n\
          generate <type> - Generate asset of specified type\n\
          list - List available asset types\n\
-         ".into()
+         "
+        .into()
     }
 }
 
@@ -260,7 +268,9 @@ fn should_show_entry(entry: &LogEntry, filter: &LogFilter) -> bool {
     if !filter.search_term.is_empty() {
         let search_lower = filter.search_term.to_lowercase();
         let message_lower = entry.message.to_lowercase();
-        let source_match = entry.source.as_ref()
+        let source_match = entry
+            .source
+            .as_ref()
             .map(|s| s.to_lowercase().contains(&search_lower))
             .unwrap_or(false);
 

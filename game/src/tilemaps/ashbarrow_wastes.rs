@@ -50,9 +50,27 @@ pub fn setup_tilemap(
         .dimensions(config.map_size)
         .chunk_dimensions(config.chunk_size)
         .texture_dimensions(config.tile_size)
-        .add_layer(TilemapLayer { kind: LayerKind::Dense }, "terrain", 0)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse }, "hazards", 1)
-        .add_layer(TilemapLayer { kind: LayerKind::Sparse }, "collision", 2)
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Dense,
+            },
+            "terrain",
+            0,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+            },
+            "hazards",
+            1,
+        )
+        .add_layer(
+            TilemapLayer {
+                kind: LayerKind::Sparse,
+            },
+            "collision",
+            2,
+        )
         .texture_atlas(texture_atlas_handle.clone())
         .finish()
         .unwrap();

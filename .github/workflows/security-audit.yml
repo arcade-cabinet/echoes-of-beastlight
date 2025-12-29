@@ -38,7 +38,7 @@ jobs:
       - name: Run security audit
         run: |
           cargo audit
-          cd tools && cargo audit
+          cd build-tools && cargo audit
 
       - name: Run cargo-deny
         uses: EmbarkStudios/cargo-deny-action@v1
@@ -50,7 +50,7 @@ jobs:
       - name: Check for known vulnerabilities in dependencies
         run: |
           cargo tree --duplicate
-          cd tools && cargo tree --duplicate
+          cd build-tools && cargo tree --duplicate
 
   dependency-review:
     name: Dependency Review
@@ -83,4 +83,4 @@ jobs:
           echo "## Root workspace"
           cargo outdated
           echo "## Tools workspace"
-          cd tools && cargo outdated
+          cd build-tools && cargo outdated
