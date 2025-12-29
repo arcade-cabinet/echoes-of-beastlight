@@ -1,0 +1,81 @@
+Tilemap Data: null
+1. Grass Tile:
+  - Index: 0
+  - Collision: false
+  - Palette Variations: Green, Light Green, Dark Green
+2. Tree Tile:
+  - Index: 1
+  - Collision: true
+  - Palette Variations: Brown, Green, Dark Green
+3. Water Tile:
+  - Index: 2
+  - Collision: true
+  - Palette Variations: Blue, Light Blue, Dark Blue
+4. Stone Tile:
+  - Index: 3
+  - Collision: true
+  - Palette Variations: Gray, Dark Gray, Light Gray
+5. Path Tile:
+  - Index: 4
+  - Collision: false
+  - Palette Variations: Brown, Light Brown, Dark Brown
+6. Flower Tile:
+  - Index: 5
+  - Collision: false
+  - Palette Variations: Red, Yellow, Pink, White
+7. Bush Tile:
+  - Index: 6
+  - Collision: true
+  - Palette Variations: Green, Dark Green
+8. Sand Tile:
+  - Index: 7
+  - Collision: false
+  - Palette Variations: Yellow, Dark Yellow, Light Yellow
+9. Bridge Tile:
+  - Index: 8
+  - Collision: false
+  - Palette Variations: Brown, Dark Brown, Light Brown
+10. Mountain Tile:
+  - Index: 9
+  - Collision: true
+  - Palette Variations: Gray, Dark Gray, Light Gray
+11. Cave Tile:
+  - Index: 10
+  - Collision: true
+  - Palette Variations: Dark Gray, Black
+12. Lava Tile:
+  - Index: 11
+  - Collision: true
+  - Palette Variations: Red, Orange, Yellow
+13. Snow Tile:
+  - Index: 12
+  - Collision: false
+  - Palette Variations: White, Light Blue
+14. Ice Tile:
+  - Index: 13
+  - Collision: true
+  - Palette Variations: Light Blue, White
+15. Cloud Tile:
+  - Index: 14
+  - Collision: true
+  - Palette Variations: White, Light Gray
+16. Sky Tile:
+  - Index: 15
+  - Collision: false
+  - Palette Variations: Blue, Light Blue, Dark Blue, Orange, Pink, Purple, Red
+17. Mud Tile:
+  - Index: 16
+  - Collision: false
+  - Palette Variations: Brown, Dark Brown
+18. Swamp Tile:
+  - Index: 17
+  - Collision: true
+  - Palette Variations: Dark Green, Brown
+19. Cliff Tile:
+  - Index: 18
+  - Collision: true
+  - Palette Variations: Gray, Dark Gray
+20. Grassland Tile:
+  - Index: 19
+  - Collision: false
+  - Palette Variations: Green, Light Green, Dark Green, Brown

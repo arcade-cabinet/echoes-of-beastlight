@@ -1,0 +1,66 @@
+# Monster Sprite Generation Prompt
+[prompt]
+type = "sprite_batch"
+target = "monster_sprites"
+
+[context]
+config_path = "src/config/game.rs"
+monster_archetypes = "MonsterArchetype"
+rarity_tiers = "RarityTier"
+
+[monsters]
+# Base form monsters that can be tamed
+[[monsters.wisp]]
+name = "Lumewisp"
+archetype = "Wisp"
+size = "small"
+element = "Light"
+description = """
+A small floating orb of pure light energy. Semi-transparent with a glowing core.
+Tendrils of light trail behind it as it moves. Corruption shows as dark spots.
+"""
+
+[[monsters.shade]]
+name = "Umbral"
+archetype = "Shade" 
+size = "medium"
+element = "Shadow"
+description = """
+An amorphous shadow creature that shifts and flows. Has glowing purple eyes.
+Body is made of living darkness with wispy edges. Can stretch and compress.
+"""
+
+[[monsters.treant]]
+name = "Thornling"
+archetype = "Treant"
+size = "medium" 
+element = "Nature"
+description = """
+A small walking tree with gnarled branches for arms. Moss and small flowers grow on it.
+Corruption appears as withered branches and purple veins in the bark.
+"""
+
+[[monsters.crystal]]
+name = "Shardling"
+archetype = "Crystal Beast"
+size = "small"
+element = "Earth"
+description = """
+A creature made of floating crystal shards in a vaguely animal shape.
+Crystals glow from within. Corruption makes crystals turn dark purple.
+"""
+
+[style]
+pixel_perfect = true
+outline_width = 1
+color_limit = 16
+animations = ["idle", "move", "attack", "hurt"]
+
+[corruption_variants]
+enabled = true
+stages = ["pure", "tainted", "corrupted"]
+visual_changes = """
+- Pure: Original colors, healthy appearance
+- Tainted: 30% corruption, purple veins/spots appearing
+- Corrupted: 70% corruption, dark purple/black coloring, glowing eyes
+"""
