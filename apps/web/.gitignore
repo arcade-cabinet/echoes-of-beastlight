@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Editor
+.idea/
+.vscode/
+
+# OS
+.DS_Store
