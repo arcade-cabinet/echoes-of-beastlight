@@ -139,7 +139,7 @@ runs:
         elif [ -n "$JULES_API_KEY" ]; then
           echo "Using Google API (Jules key)"
           # Fallback to agentic-control with Google
-          npm install -g agentic-control@1.1.0 @ai-sdk/google 2>/dev/null || true
+          npm install -g agentic-control@1.1.0 @ai-sdk/google@1.2.0
           echo '{"triage": {"provider": "google"}}' > agentic.config.json
           export GOOGLE_API_KEY="$JULES_API_KEY"
           

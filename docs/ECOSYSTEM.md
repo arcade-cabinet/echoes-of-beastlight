@@ -34,25 +34,25 @@ The **Ecosystem** is a unified family of GitHub Actions workflows powered by `@a
 
 ```yaml
 # Fleet orchestration
-- uses: jbcom/nodejs-agentic-control/actions/agentic-orchestrator@main
+- uses: ./.github/actions/agentic-orchestrator
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
     command: summary
 
 # PR review
-- uses: jbcom/nodejs-agentic-control/actions/agentic-pr-review@main
+- uses: ./.github/actions/agentic-pr-review
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
     model: glm-4.6:cloud
 
 # Issue triage
-- uses: jbcom/nodejs-agentic-control/actions/agentic-issue-triage@main
+- uses: ./.github/actions/agentic-issue-triage
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
     issue_number: ${{ github.event.issue.number }}
 
 # CI resolution
-- uses: jbcom/nodejs-agentic-control/actions/agentic-ci-resolution@main
+- uses: ./.github/actions/agentic-ci-resolution
   with:
     github_token: ${{ secrets.GITHUB_TOKEN }}
     run_id: ${{ github.event.workflow_run.id }}

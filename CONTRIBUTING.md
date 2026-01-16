@@ -1,6 +1,6 @@
 ---
-version: 1.0.1
-last_updated: 2026-01-03T02:21:30Z
+version: 1.0.2
+last_updated: 2026-01-16T00:00:00Z
 sync_type: always
 ---
 

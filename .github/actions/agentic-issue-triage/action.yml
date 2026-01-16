@@ -104,8 +104,9 @@ runs:
 
           Jules will analyze the issue and create a PR."
           else
-            echo "Failed to create Jules session: $RESPONSE"
-            gh issue comment "$ISSUE_NUMBER" --body "❌ Failed to create Jules session. Please check logs."
+            ERROR_MSG=$(echo "$RESPONSE" | jq -r '.error.message // "Unknown error - could not parse response"' 2>/dev/null || echo "Unknown error")
+            echo "Failed to create Jules session: $ERROR_MSG"
+            gh issue comment "$ISSUE_NUMBER" --body "❌ Failed to create Jules session: $ERROR_MSG"
             exit 1
           fi
           exit 0
