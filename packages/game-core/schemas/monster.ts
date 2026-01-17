@@ -42,7 +42,7 @@ export type MonsterAbility = z.infer<typeof MonsterAbilitySchema>;
  * Used by procedural generator
  */
 export const MonsterSpeciesSchema = z.object({
-	id: z.string(),
+	id: z.string().uuid(),
 	name: z.string(),
 	description: z.string(),
 	element: ElementTypeSchema,
