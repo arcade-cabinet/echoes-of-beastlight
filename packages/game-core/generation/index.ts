@@ -3,10 +3,10 @@
  */
 
 export {
-	generateMonsterSpecies,
 	createMonsterInstance,
+	generateMonsterSpecies,
 	generateWildEncounter,
 	type MonsterGenParams,
 } from './monster-generator.js';
 
-export { generateQuest, generateAreaQuests, type QuestGenParams } from './quest-generator.js';
+export { generateAreaQuests, generateQuest, type QuestGenParams } from './quest-generator.js';

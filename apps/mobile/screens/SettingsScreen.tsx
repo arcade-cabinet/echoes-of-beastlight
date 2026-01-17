@@ -1,7 +1,6 @@
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Slider from '@react-native-community/slider';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { RootStackParamList } from '../App';
 import { useGameStore } from '../stores/gameStore';
@@ -87,9 +86,7 @@ export function SettingsScreen({ navigation }: SettingsScreenProps) {
 						style={[styles.toggleButton, settings.battleAnimations && styles.toggleButtonActive]}
 						onPress={() => updateSettings({ battleAnimations: !settings.battleAnimations })}
 					>
-						<Text style={styles.toggleButtonText}>
-							{settings.battleAnimations ? 'ON' : 'OFF'}
-						</Text>
+						<Text style={styles.toggleButtonText}>{settings.battleAnimations ? 'ON' : 'OFF'}</Text>
 					</Pressable>
 				</View>
 			</View>

@@ -1,5 +1,4 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { RootStackParamList } from '../App';

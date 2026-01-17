@@ -1,9 +1,9 @@
 import type {
+	BiomeType,
+	ObjectiveType,
 	Quest,
 	QuestObjective,
 	QuestReward,
-	ObjectiveType,
-	BiomeType,
 } from '../schemas/index.js';
 
 /**
@@ -78,7 +78,7 @@ const DIFFICULTY_MULTS: Record<'easy' | 'normal' | 'hard', number> = {
  */
 function generateObjectives(
 	template: QuestTemplate,
-	difficulty: 'easy' | 'normal' | 'hard'
+	difficulty: 'easy' | 'normal' | 'hard',
 ): QuestObjective[] {
 	const diffMult = DIFFICULTY_MULTS[difficulty];
 
@@ -91,7 +91,10 @@ function generateObjectives(
 		return {
 			id: `obj-${index}`,
 			type,
-			description: `Complete ${type.replace(/([A-Z])/g, ' $1').toLowerCase().trim()}`,
+			description: `Complete ${type
+				.replace(/([A-Z])/g, ' $1')
+				.toLowerCase()
+				.trim()}`,
 			targetCount,
 			currentCount: 0,
 			isComplete: false,
@@ -106,7 +109,7 @@ function generateObjectives(
 function calculateRewards(
 	template: QuestTemplate,
 	playerLevel: number,
-	difficulty: 'easy' | 'normal' | 'hard'
+	difficulty: 'easy' | 'normal' | 'hard',
 ): QuestReward {
 	const diffMult = DIFFICULTY_MULTS[difficulty];
 	const baseExp = 50 + playerLevel * 20;
@@ -141,7 +144,7 @@ export function generateQuest(params: QuestGenParams): Quest {
 		.replace('{npc}', 'the Village Elder');
 
 	return {
-		id: `quest-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+		id: crypto.randomUUID(),
 		title,
 		description,
 		status: 'NotStarted',
@@ -165,6 +168,6 @@ export function generateAreaQuests(biome: BiomeType, playerLevel: number, count 
 				| 'easy'
 				| 'normal'
 				| 'hard',
-		})
+		}),
 	);
 }

@@ -66,7 +66,7 @@ export function BabylonView({ style }: BabylonViewProps) {
 
 	return (
 		<View style={style}>
-			<EngineView camera={null} onInitialized={onInitialized} />
+			<EngineView onInitialized={onInitialized} />
 		</View>
 	);
 }

@@ -1,9 +1,9 @@
-import { create } from 'zustand';
 import {
+	createNewPlayerSave,
 	type PlayerSave,
 	type PlayerSettings,
-	createNewPlayerSave,
 } from '@echoes-of-beastlight/game-core';
+import { create } from 'zustand';
 
 interface GameState {
 	player: PlayerSave | null;

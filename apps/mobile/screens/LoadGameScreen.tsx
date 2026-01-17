@@ -1,5 +1,4 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { RootStackParamList } from '../App';
@@ -50,9 +49,7 @@ export function LoadGameScreen({ navigation }: LoadGameScreenProps) {
 									Level {item.level} | {formatPlaytime(item.playtime)}
 								</Text>
 							</View>
-							<Text style={styles.saveDate}>
-								{new Date(item.updatedAt).toLocaleDateString()}
-							</Text>
+							<Text style={styles.saveDate}>{new Date(item.updatedAt).toLocaleDateString()}</Text>
 						</Pressable>
 					)}
 				/>

@@ -47,7 +47,7 @@ export const QuestRewardSchema = z.object({
 		z.object({
 			itemId: z.string(),
 			quantity: z.number().int().min(1),
-		})
+		}),
 	),
 	unlocks: z.array(z.string()).default([]), // area/feature IDs
 });

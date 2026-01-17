@@ -1,5 +1,4 @@
 import type { PlayerSave } from '@echoes-of-beastlight/game-core';
-import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface GameHUDProps {

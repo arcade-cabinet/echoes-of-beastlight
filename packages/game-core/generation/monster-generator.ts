@@ -1,4 +1,10 @@
-import type { MonsterSpecies, MonsterInstance, ElementType, Rarity, BiomeType } from '../schemas/index.js';
+import type {
+	BiomeType,
+	ElementType,
+	MonsterInstance,
+	MonsterSpecies,
+	Rarity,
+} from '../schemas/index.js';
 
 /**
  * Monster generation parameters
@@ -89,7 +95,7 @@ export function generateMonsterSpecies(biome: BiomeType, rarity?: Rarity): Monst
 	const baseStats = getBaseStatsForRarity(selectedRarity);
 
 	// Generate unique ID
-	const id = `${biome.toLowerCase()}-${element.toLowerCase()}-${Date.now()}`;
+	const id = crypto.randomUUID();
 
 	return {
 		id,
@@ -110,7 +116,7 @@ export function generateMonsterSpecies(biome: BiomeType, rarity?: Rarity): Monst
 export function createMonsterInstance(
 	species: MonsterSpecies,
 	level: number,
-	isTamed = false
+	isTamed = false,
 ): MonsterInstance {
 	// Scale stats by level
 	const levelMult = 1 + (level - 1) * 0.1;

@@ -1,20 +1,16 @@
-import React, { useEffect, useRef } from 'react';
 import {
-	Engine,
-	Scene,
 	ArcRotateCamera,
-	HemisphericLight,
-	Vector3,
-	Color4,
-	MeshBuilder,
-	StandardMaterial,
 	Color3,
+	Color4,
+	Engine,
+	HemisphericLight,
+	MeshBuilder,
+	Scene,
+	StandardMaterial,
+	Vector3,
 } from '@babylonjs/core';
-import {
-	generateWildEncounter,
-	type BiomeType,
-	type MonsterInstance,
-} from '@echoes-of-beastlight/game-core';
+import { type BiomeType, generateWildEncounter } from '@echoes-of-beastlight/game-core';
+import { useEffect, useRef } from 'react';
 
 interface GameCanvasProps {
 	mode: 'world' | 'combat';
@@ -60,13 +56,7 @@ export function GameCanvas({ mode }: GameCanvasProps) {
 		};
 	}, [mode]);
 
-	return (
-		<canvas
-			ref={canvasRef}
-			style={{ flex: 1, outline: 'none' }}
-			tabIndex={0}
-		/>
-	);
+	return <canvas ref={canvasRef} style={{ flex: 1, outline: 'none' }} tabIndex={0} />;
 }
 
 function setupWorldScene(scene: Scene) {
@@ -77,7 +67,7 @@ function setupWorldScene(scene: Scene) {
 		Math.PI / 3,
 		20,
 		Vector3.Zero(),
-		scene
+		scene,
 	);
 	camera.attachControl(true);
 	camera.lowerBetaLimit = Math.PI / 4;
@@ -103,7 +93,7 @@ function setupWorldScene(scene: Scene) {
 			const tile = MeshBuilder.CreateBox(
 				`tile-${x}-${z}`,
 				{ width: 0.95, height: 0.1, depth: 0.95 },
-				scene
+				scene,
 			);
 			tile.position = new Vector3(x - gridSize / 2, 0, z - gridSize / 2);
 
@@ -140,7 +130,7 @@ function setupCombatScene(scene: Scene) {
 		Math.PI / 3,
 		15,
 		Vector3.Zero(),
-		scene
+		scene,
 	);
 	camera.attachControl(true);
 
@@ -161,7 +151,11 @@ function setupCombatScene(scene: Scene) {
 		new Color3(0.5, 0.8, 1.0),
 	];
 	for (let i = 0; i < 3; i++) {
-		const fighter = MeshBuilder.CreateBox(`player-${i}`, { width: 1, height: 2, depth: 0.5 }, scene);
+		const fighter = MeshBuilder.CreateBox(
+			`player-${i}`,
+			{ width: 1, height: 2, depth: 0.5 },
+			scene,
+		);
 		fighter.position = new Vector3(-5, 1, (i - 1) * 2);
 		const mat = new StandardMaterial(`playerMat-${i}`, scene);
 		mat.diffuseColor = playerColors[i];

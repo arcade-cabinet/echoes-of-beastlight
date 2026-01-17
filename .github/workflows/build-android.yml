@@ -67,6 +67,10 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Build Android APK (Preview)
+        # NOTE: We intentionally use a local EAS build here to produce an APK on the runner
+        # so it can be uploaded as a workflow artifact and attached to releases.
+        # Local EAS builds are resource-intensive and may fail on smaller GitHub-hosted
+        # runners; consider using a larger or self-hosted runner if you encounter issues.
         run: |
           cd apps/mobile
           eas build --platform android --profile preview --non-interactive --local
