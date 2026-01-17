@@ -35,7 +35,7 @@
 | Tool | Purpose |
 |------|---------|
 | pnpm | Package manager (monorepo) |
-| TypeScript | Type safety (5.3.3) |
+| TypeScript | Type safety (~5.9.3) |
 | Biome | Linting and formatting |
 | EAS | Expo build service |
 
