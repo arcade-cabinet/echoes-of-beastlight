@@ -1,0 +1,27 @@
+{
+	"name": "echoes-of-beastlight",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"packageManager": "pnpm@10.20.0",
+	"scripts": {
+		"dev": "pnpm --filter @echoes-of-beastlight/mobile exec expo start --dev-client",
+		"dev:web": "pnpm --filter @echoes-of-beastlight/web dev",
+		"build": "pnpm -r run build",
+		"build:android": "pnpm --filter @echoes-of-beastlight/mobile exec eas build --platform android --profile preview",
+		"build:ios": "pnpm --filter @echoes-of-beastlight/mobile exec eas build --platform ios --profile preview",
+		"lint": "biome check .",
+		"format": "biome check --write .",
+		"test": "pnpm -r test",
+		"typecheck": "pnpm -r run typecheck"
+	},
+	"engines": {
+		"node": ">=22.0.0",
+		"pnpm": ">=10.0.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.11",
+		"@types/node": "^22.0.0",
+		"typescript": "~5.9.3"
+	}
+}
