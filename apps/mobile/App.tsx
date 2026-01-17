@@ -1,13 +1,12 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { GameScreen } from './screens/GameScreen';
-import { MainMenuScreen } from './screens/MainMenuScreen';
 import { LoadGameScreen } from './screens/LoadGameScreen';
+import { MainMenuScreen } from './screens/MainMenuScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 
 export type RootStackParamList = {

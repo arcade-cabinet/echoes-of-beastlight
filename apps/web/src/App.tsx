@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { GameCanvas } from './components/GameCanvas';
+import type React from 'react';
+import { useState } from 'react';
 import { DebugPanel } from './components/DebugPanel';
+import { GameCanvas } from './components/GameCanvas';
 import { useGameStore } from './stores/gameStore';
 
 type Screen = 'menu' | 'game' | 'combat';
@@ -26,10 +27,10 @@ export function App() {
 				<p style={styles.subtitle}>Web Test Environment (Chrome MCP)</p>
 
 				<div style={styles.buttonGroup}>
-					<button style={styles.button} onClick={handleNewGame}>
+					<button type="button" style={styles.button} onClick={handleNewGame}>
 						Test World Scene
 					</button>
-					<button style={styles.button} onClick={handleTestCombat}>
+					<button type="button" style={styles.button} onClick={handleTestCombat}>
 						Test Combat Scene
 					</button>
 				</div>

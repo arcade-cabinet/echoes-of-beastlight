@@ -1,9 +1,9 @@
-import { create } from 'zustand';
 import {
+	createNewPlayerSave,
 	type PlayerSave,
 	type PlayerSettings,
-	createNewPlayerSave,
 } from '@echoes-of-beastlight/game-core';
+import { create } from 'zustand';
 
 interface GameState {
 	// Player state
@@ -53,7 +53,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 		});
 	},
 
-	loadGame: (saveId: string) => {
+	loadGame: async (saveId: string) => {
 		set({ isLoading: true });
 
 		// TODO: Load from AsyncStorage
@@ -77,7 +77,7 @@ export const useGameStore = create<GameState>((set, get) => ({
 		}
 	},
 
-	saveGame: () => {
+	saveGame: async () => {
 		const { player, savedGames } = get();
 		if (!player) return;
 

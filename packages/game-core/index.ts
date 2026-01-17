@@ -8,11 +8,10 @@
  * - Server-side validation
  */
 
-// Re-export all schemas
-export * from './schemas/index.js';
-
 // Re-export generation utilities
 export * from './generation/index.js';
+// Re-export all schemas
+export * from './schemas/index.js';
 
 // Version info
 export const VERSION = '1.0.0';

@@ -1,11 +1,11 @@
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import React, { useCallback, useEffect, useRef } from 'react';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import type { RootStackParamList } from '../App';
-import { BabylonView } from '../game/BabylonView';
 import { GameHUD } from '../components/GameHUD';
+import { BabylonView } from '../game/BabylonView';
 import { useGameStore } from '../stores/gameStore';
 
 type GameScreenProps = {
@@ -29,7 +29,7 @@ export function GameScreen({ navigation, route }: GameScreenProps) {
 		// TODO: Show pause menu
 	}, []);
 
-	const handleBackToMenu = useCallback(() => {
+	const _handleBackToMenu = useCallback(() => {
 		navigation.navigate('MainMenu');
 	}, [navigation]);
 

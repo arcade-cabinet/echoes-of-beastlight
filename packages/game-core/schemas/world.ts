@@ -67,7 +67,7 @@ export const AreaSchema = z.object({
 			weight: z.number().min(0).max(1),
 			minLevel: z.number().int().min(1),
 			maxLevel: z.number().int().min(1),
-		})
+		}),
 	),
 	connections: z.array(
 		z.object({
@@ -76,7 +76,7 @@ export const AreaSchema = z.object({
 			exitTileY: z.number().int(),
 			entryTileX: z.number().int(),
 			entryTileY: z.number().int(),
-		})
+		}),
 	),
 	npcs: z.array(z.string()), // NPC IDs
 	isUnlocked: z.boolean().default(false),

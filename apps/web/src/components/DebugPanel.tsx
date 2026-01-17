@@ -1,5 +1,5 @@
-import React from 'react';
 import type { PlayerSave } from '@echoes-of-beastlight/game-core';
+import type React from 'react';
 
 interface DebugPanelProps {
 	player: PlayerSave | null;
@@ -11,7 +11,7 @@ export function DebugPanel({ player, onBack }: DebugPanelProps) {
 		<div style={styles.panel}>
 			<h2 style={styles.title}>Debug Panel</h2>
 
-			<button style={styles.backButton} onClick={onBack}>
+			<button type="button" style={styles.backButton} onClick={onBack}>
 				← Back to Menu
 			</button>
 
@@ -21,7 +21,9 @@ export function DebugPanel({ player, onBack }: DebugPanelProps) {
 					<>
 						<p>Name: {player.name}</p>
 						<p>Level: {player.level}</p>
-						<p>HP: {player.stats.hp}/{player.stats.maxHp}</p>
+						<p>
+							HP: {player.stats.hp}/{player.stats.maxHp}
+						</p>
 						<p>Attack: {player.stats.attack}</p>
 						<p>Defense: {player.stats.defense}</p>
 						<p>Gold: {player.inventory.gold}</p>
@@ -42,9 +44,7 @@ export function DebugPanel({ player, onBack }: DebugPanelProps) {
 
 			<div style={styles.section}>
 				<h3>Chrome DevTools</h3>
-				<p style={styles.hint}>
-					Open DevTools (F12) to:
-				</p>
+				<p style={styles.hint}>Open DevTools (F12) to:</p>
 				<ul style={styles.list}>
 					<li>View console.log output</li>
 					<li>Inspect game state</li>
