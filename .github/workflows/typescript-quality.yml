@@ -1,4 +1,6 @@
 name: TypeScript Quality
+permissions:
+  contents: read
 
 on:
   push:
