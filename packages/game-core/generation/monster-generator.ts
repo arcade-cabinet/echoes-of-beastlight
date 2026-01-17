@@ -29,6 +29,11 @@ const DEFAULT_RARITY_WEIGHTS: Record<Rarity, number> = {
 };
 
 /**
+ * Level stat multiplier - 10% increase per level
+ */
+const LEVEL_STAT_MULTIPLIER = 0.1;
+
+/**
  * Biome to element type mapping
  */
 const BIOME_ELEMENTS: Record<BiomeType, ElementType[]> = {
@@ -123,7 +128,6 @@ export function createMonsterInstance(
 	isTamed = false,
 ): MonsterInstance {
 	// Scale stats by level
-	const LEVEL_STAT_MULTIPLIER = 0.1;
 	const levelMult = 1 + (level - 1) * LEVEL_STAT_MULTIPLIER;
 
 	return {

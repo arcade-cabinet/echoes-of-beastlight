@@ -11,6 +11,8 @@ import type {
  * Ported from game/src/systems/combat.rs
  */
 export class CombatSystem {
+	private static readonly POISON_DAMAGE_PERCENT = 0.05;
+
 	private state: CombatState;
 	private onStateChange: (state: CombatState) => void;
 
@@ -182,15 +184,13 @@ export class CombatSystem {
 	 * Apply status effects at turn end
 	 */
 	private applyStatusEffects(): void {
-		const POISON_DAMAGE_PERCENT = 0.05;
-
 		const applyToParty = (party: CharacterStats[]) => {
 			for (const char of party) {
 				if (char.hp <= 0) continue;
 
 				switch (char.status) {
 					case 'Poisoned':
-						const poisonDamage = Math.max(1, Math.floor(char.maxHp * POISON_DAMAGE_PERCENT));
+						const poisonDamage = Math.max(1, Math.floor(char.maxHp * CombatSystem.POISON_DAMAGE_PERCENT));
 						char.hp = Math.max(0, char.hp - poisonDamage);
 						this.addBattleLog(`Poison deals ${poisonDamage} damage!`);
 						break;
