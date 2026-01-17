@@ -1,10 +1,10 @@
-import { View } from 'react-native';
+import App from '../App';
 import renderer from 'react-test-renderer';
 
 describe('mobile placeholder', () => {
-	it('renders correctly', () => {
-		const tree = renderer.create(<View />).toJSON();
-		expect(tree).toBeTruthy();
-		expect(tree).toMatchObject({ type: 'View' });
+	it('renders App component without crashing', () => {
+		const tree = renderer.create(<App />);
+		const root = tree.root;
+		expect(root).toBeDefined();
 	});
 });

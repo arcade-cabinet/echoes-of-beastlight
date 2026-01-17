@@ -123,7 +123,8 @@ export function createMonsterInstance(
 	isTamed = false,
 ): MonsterInstance {
 	// Scale stats by level
-	const levelMult = 1 + (level - 1) * 0.1;
+	const LEVEL_STAT_MULTIPLIER = 0.1;
+	const levelMult = 1 + (level - 1) * LEVEL_STAT_MULTIPLIER;
 
 	return {
 		id: getUUID(),
