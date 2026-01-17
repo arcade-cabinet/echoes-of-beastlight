@@ -24,8 +24,8 @@ interface GameState {
 
 	// Actions
 	initializeGame: (playerName: string) => void;
-	loadGame: (saveId: string) => void;
-	saveGame: () => void;
+	loadGame: (saveId: string) => Promise<void>;
+	saveGame: () => Promise<void>;
 	updateSettings: (settings: Partial<PlayerSettings>) => void;
 	updatePlayer: (updates: Partial<PlayerSave>) => void;
 }
