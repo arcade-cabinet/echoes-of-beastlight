@@ -7,9 +7,6 @@ on:
     branches: [release/1.0, main]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -60,8 +57,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Expo CLI
-        run: npm install -g expo-cli eas-cli
+      - name: Setup EAS CLI
+        run: npm install -g eas-cli
 
       - name: Setup EAS
         uses: expo/expo-github-action@v8
@@ -75,8 +72,8 @@ jobs:
         # Local EAS builds are resource-intensive and may fail on smaller GitHub-hosted
         # runners; consider using a larger or self-hosted runner if you encounter issues.
         run: |
-          cd apps/mobile
-          eas build --platform android --profile preview --non-interactive --local
+          cd packages/mobile
+          eas build --platform android --profile preview --non-interactive --local --output=app-release.apk
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
@@ -84,14 +81,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: echoes-of-beastlight-android
-          path: apps/mobile/build-*.apk
+          path: packages/mobile/app-release.apk
           retention-days: 30
 
       - name: Create Release (on tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: apps/mobile/build-*.apk
+          files: packages/mobile/app-release.apk
           draft: false
           prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') }}
         env:

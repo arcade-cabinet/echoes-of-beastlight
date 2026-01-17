@@ -5,6 +5,7 @@ import type {
 	MonsterSpecies,
 	Rarity,
 } from '../schemas/index.js';
+import { getUUID } from '../utils.js';
 
 /**
  * Monster generation parameters
@@ -47,6 +48,9 @@ const BIOME_ELEMENTS: Record<BiomeType, ElementType[]> = {
  * Select a random element from array
  */
 function randomChoice<T>(arr: T[]): T {
+	if (arr.length === 0) {
+		throw new Error('Cannot select random item from empty array');
+	}
 	return arr[Math.floor(Math.random() * arr.length)];
 }
 
@@ -95,7 +99,7 @@ export function generateMonsterSpecies(biome: BiomeType, rarity?: Rarity): Monst
 	const baseStats = getBaseStatsForRarity(selectedRarity);
 
 	// Generate unique ID
-	const id = crypto.randomUUID();
+	const id = getUUID();
 
 	return {
 		id,
@@ -122,7 +126,7 @@ export function createMonsterInstance(
 	const levelMult = 1 + (level - 1) * 0.1;
 
 	return {
-		id: crypto.randomUUID(),
+		id: getUUID(),
 		speciesId: species.id,
 		level,
 		experience: 0,

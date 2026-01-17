@@ -42,8 +42,8 @@ export type CombatResult = z.infer<typeof CombatResultSchema>;
  * Combat state for turn-based battles
  */
 export const CombatStateSchema = z.object({
-	playerParty: z.array(CharacterStatsSchema),
-	enemyParty: z.array(CharacterStatsSchema),
+	playerParty: z.array(CharacterStatsSchema).max(6),
+	enemyParty: z.array(CharacterStatsSchema).max(6),
 	currentTurn: z.number().int().min(0),
 	isPlayerTurn: z.boolean(),
 	battleLog: z.array(z.string()),

@@ -3,15 +3,16 @@ import { expect, test } from '@playwright/test';
 test('load game and check for visual glitches', async ({ page }) => {
 	// Go to the game URL (assuming it's served locally)
 	// Capture console logs
-	const logs: string[] = [];
 	page.on('console', (msg) => {
 		console.log(`BROWSER CONSOLE [${msg.type()}]: ${msg.text()}`);
-		logs.push(msg.text());
 	});
+
+	const logs: string[] = [];
+	page.on('console', (msg) => logs.push(msg.text()));
 
 	await page.goto('http://localhost:8000');
 
-	// Wait for the canvas to be present (Babylon.js renders to a canvas)
+	// Wait for the canvas to be present (Bevy uses a canvas)
 	// Increase timeout to 60s as WASM loading can be slow
 	const canvas = await page.waitForSelector('canvas', { timeout: 60000 });
 	expect(canvas).toBeDefined();

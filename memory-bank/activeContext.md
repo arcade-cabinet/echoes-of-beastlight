@@ -27,7 +27,7 @@
 - [x] Quest generator (procedural quests from templates)
 
 ### Mobile App ✅
-- [x] Expo + React Native 0.73 setup
+- [x] Expo + React Native 0.71.14 setup
 - [x] BabylonJS integration
 - [x] React Navigation (4 screens)
 - [x] Zustand state management
@@ -82,13 +82,13 @@
 | Blocker | Status | Resolution |
 |---------|--------|------------|
 | PR #12 needs review | Awaiting | Can self-approve and merge |
-| Babylon React Native 0.73 only | Known | Using compatible versions |
+| Babylon React Native 0.71.14 only | Known | Using compatible versions |
 | No placeholder assets | In scope | Will create simple PNGs |
 
 ## Key Decisions Made
 
-1. **React Native 0.73** (not 0.76) for Babylon compatibility
-2. **Expo SDK 50** for stable RN 0.73 support
+1. **React Native 0.71.14** (not 0.76) for Babylon compatibility
+2. **Expo SDK 48** for stable RN 0.73 support
 3. **Zustand over Redux** for simplicity
 4. **Zod for validation** at all data boundaries
 5. **Monorepo structure** for code sharing
@@ -113,7 +113,7 @@
 
 ## Files Modified Recently
 
-```
+```text
 apps/mobile/
 ├── package.json           # Downgraded to RN 0.73
 ├── App.tsx                # Navigation setup
@@ -123,7 +123,7 @@ apps/mobile/
 packages/game-core/
 ├── schemas/*.ts           # All game data schemas
 └── generation/*.ts        # Procedural generators
-```
+```text
 
 ## Next Actions
 

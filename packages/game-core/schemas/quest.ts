@@ -48,7 +48,7 @@ export const QuestRewardSchema = z.object({
 			itemId: z.string(),
 			quantity: z.number().int().min(1),
 		}),
-	),
+	).default([]),
 	unlocks: z.array(z.string()).default([]), // area/feature IDs
 });
 export type QuestReward = z.infer<typeof QuestRewardSchema>;
@@ -75,8 +75,8 @@ export type Quest = z.infer<typeof QuestSchema>;
  * Player's quest journal
  */
 export const QuestJournalSchema = z.object({
-	active: z.array(QuestSchema),
-	completed: z.array(z.string()), // quest IDs
-	failed: z.array(z.string()), // quest IDs
+	active: z.array(QuestSchema).default([]),
+	completed: z.array(z.string()).default([]), // quest IDs
+	failed: z.array(z.string()).default([]), // quest IDs
 });
 export type QuestJournal = z.infer<typeof QuestJournalSchema>;

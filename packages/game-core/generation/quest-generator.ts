@@ -5,6 +5,7 @@ import type {
 	QuestObjective,
 	QuestReward,
 } from '../schemas/index.js';
+import { getUUID } from '../utils.js';
 
 /**
  * Quest generation parameters
@@ -129,6 +130,9 @@ function calculateRewards(
 export function generateQuest(params: QuestGenParams): Quest {
 	const difficulty = params.difficulty ?? 'normal';
 	const template = QUEST_TEMPLATES[Math.floor(Math.random() * QUEST_TEMPLATES.length)];
+	const objectives = generateObjectives(template, difficulty);
+	const collectCount =
+		objectives.find((o) => o.type === 'CollectItem')?.targetCount ?? 1;
 
 	// Replace template placeholders
 	const title = template.titleTemplate
@@ -140,15 +144,15 @@ export function generateQuest(params: QuestGenParams): Quest {
 		.replace('{monster}', 'wild creature')
 		.replace('{biome}', params.biome.toLowerCase())
 		.replace('{item}', 'rare herbs')
-		.replace('{count}', '5')
+		.replace('{count}', String(collectCount))
 		.replace('{npc}', 'the Village Elder');
 
 	return {
-		id: crypto.randomUUID(),
+		id: getUUID(),
 		title,
 		description,
 		status: 'NotStarted',
-		objectives: generateObjectives(template, difficulty),
+		objectives,
 		rewards: calculateRewards(template, params.playerLevel, difficulty),
 		prerequisites: [],
 		isMainStory: params.isMainStory ?? false,
