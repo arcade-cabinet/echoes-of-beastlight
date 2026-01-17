@@ -1,0 +1,32 @@
+{
+	"expo": {
+		"name": "Echoes of Beastlight",
+		"slug": "echoes-of-beastlight",
+		"version": "1.0.0",
+		"orientation": "landscape",
+		"icon": "./assets/icon.png",
+		"userInterfaceStyle": "dark",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#1a1a2e"
+		},
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.arcadecabinet.echoesofbeastlight"
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#1a1a2e"
+			},
+			"package": "com.arcadecabinet.echoesofbeastlight"
+		},
+		"plugins": ["expo-font", "expo-asset", "expo-av"],
+		"extra": {
+			"eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+			}
+		}
+	}
+}

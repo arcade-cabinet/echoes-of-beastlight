@@ -13,5 +13,7 @@ export * from './generation/index.js';
 // Re-export all schemas
 export * from './schemas/index.js';
 
+export * from './utils.js';
+
 // Version info
 export const VERSION = '1.0.0';

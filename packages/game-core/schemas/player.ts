@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { getUUID } from '../utils.js';
 import { CharacterStatsSchema } from './combat.js';
 import { MonsterPartySchema } from './monster.js';
 import { QuestJournalSchema } from './quest.js';
@@ -70,7 +71,7 @@ export type PlayerSave = z.infer<typeof PlayerSaveSchema>;
 export const createNewPlayerSave = (name: string): PlayerSave => {
 	const now = new Date().toISOString();
 	return {
-		id: crypto.randomUUID(),
+		id: getUUID(),
 		name,
 		stats: {
 			hp: 100,

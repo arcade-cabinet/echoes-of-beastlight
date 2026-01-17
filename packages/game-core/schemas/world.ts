@@ -67,6 +67,10 @@ export const AreaSchema = z.object({
 			weight: z.number().min(0).max(1),
 			minLevel: z.number().int().min(1),
 			maxLevel: z.number().int().min(1),
+		})
+		.refine((data) => data.maxLevel >= data.minLevel, {
+			message: "maxLevel must be greater than or equal to minLevel",
+			path: ["maxLevel"],
 		}),
 	),
 	connections: z.array(

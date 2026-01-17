@@ -158,7 +158,8 @@ echoes-of-beastlight/
     "@babylonjs/addons": "^7.0.0",
     "expo": "~54.0.0",
     "expo-router": "~6.0.0",
-    "react": "19.1.0",
+    Target versions (not current):
+"react": "19.1.0",
     "react-native": "0.81.5",
     "zustand": "^5.0.0",
     "zod": "^4.0.0",
