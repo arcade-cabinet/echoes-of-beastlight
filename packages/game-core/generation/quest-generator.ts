@@ -131,8 +131,7 @@ export function generateQuest(params: QuestGenParams): Quest {
 	const difficulty = params.difficulty ?? 'normal';
 	const template = QUEST_TEMPLATES[Math.floor(Math.random() * QUEST_TEMPLATES.length)];
 	const objectives = generateObjectives(template, difficulty);
-	const collectCount =
-		objectives.find((o) => o.type === 'CollectItem')?.targetCount ?? 1;
+	const collectCount = objectives.find((o) => o.type === 'CollectItem')?.targetCount ?? 1;
 
 	// Replace template placeholders
 	const title = template.titleTemplate

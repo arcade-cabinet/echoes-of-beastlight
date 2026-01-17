@@ -43,12 +43,14 @@ export type QuestObjective = z.infer<typeof QuestObjectiveSchema>;
 export const QuestRewardSchema = z.object({
 	experience: z.number().int().min(0).default(0),
 	gold: z.number().int().min(0).default(0),
-	items: z.array(
-		z.object({
-			itemId: z.string(),
-			quantity: z.number().int().min(1),
-		}),
-	).default([]),
+	items: z
+		.array(
+			z.object({
+				itemId: z.string(),
+				quantity: z.number().int().min(1),
+			}),
+		)
+		.default([]),
 	unlocks: z.array(z.string()).default([]), // area/feature IDs
 });
 export type QuestReward = z.infer<typeof QuestRewardSchema>;
