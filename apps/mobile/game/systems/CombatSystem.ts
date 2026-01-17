@@ -114,7 +114,7 @@ export class CombatSystem {
 
 		// Calculate damage
 		const isCritical = Math.random() < attacker.critChance;
-		const baseDamage = Math.max(1, attacker.attack - target.defense / 2);
+		const baseDamage = Math.max(1, Math.floor(attacker.attack - target.defense / 2));
 		const damage = isCritical ? Math.floor(baseDamage * 1.5) : baseDamage;
 
 		// Apply damage
