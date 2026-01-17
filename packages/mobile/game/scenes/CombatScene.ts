@@ -7,7 +7,28 @@ import {
 	Animation,
 	type ArcRotateCamera,
 } from '@babylonjs/core';
-import type { CombatState, CharacterStats } from '@echoes-of-beastlight/game-core';
+
+/**
+ * Local combat types for scene rendering
+ */
+type Status = 'Normal' | 'Poisoned' | 'Stunned';
+
+interface CharacterStats {
+	hp: number;
+	maxHp: number;
+	attack: number;
+	defense: number;
+	critChance: number;
+	status: Status;
+}
+
+interface CombatState {
+	playerParty: CharacterStats[];
+	enemyParty: CharacterStats[];
+	currentTurn: number;
+	isPlayerTurn: boolean;
+	battleLog: string[];
+}
 
 /**
  * CombatScene - Turn-based battle system

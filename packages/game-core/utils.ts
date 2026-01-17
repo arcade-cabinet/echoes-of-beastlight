@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 export function getUUID(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return uuidv4();
+	if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+		return crypto.randomUUID();
+	}
+	return uuidv4();
 }

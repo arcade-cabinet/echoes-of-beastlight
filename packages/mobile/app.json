@@ -25,7 +25,7 @@
 		"plugins": ["expo-font", "expo-asset", "expo-av"],
 		"extra": {
 			"eas": {
-        "projectId": "00000000-0000-0000-0000-000000000000"
+				"projectId": "00000000-0000-0000-0000-000000000000"
 			}
 		}
 	}

@@ -1,10 +1,34 @@
-import type {
-	CombatState,
-	CombatResult,
-	CombatAction,
-	CharacterStats,
-	Status,
-} from '@echoes-of-beastlight/game-core';
+/**
+ * Local combat types for this system
+ * These match the original Rust combat system design
+ */
+type Status = 'Normal' | 'Poisoned' | 'Stunned';
+
+interface CharacterStats {
+	hp: number;
+	maxHp: number;
+	attack: number;
+	defense: number;
+	critChance: number;
+	status: Status;
+}
+
+type CombatAction = 'Attack' | 'Defend' | 'Flee';
+
+interface CombatResult {
+	damage: number;
+	isCritical: boolean;
+	statusApplied?: Status;
+	message: string;
+}
+
+interface CombatState {
+	playerParty: CharacterStats[];
+	enemyParty: CharacterStats[];
+	currentTurn: number;
+	isPlayerTurn: boolean;
+	battleLog: string[];
+}
 
 /**
  * CombatSystem - Turn-based combat logic

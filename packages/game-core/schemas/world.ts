@@ -46,7 +46,7 @@ export const TileSchema = z.object({
 	isWalkable: z.boolean(),
 	isInteractable: z.boolean(),
 	spriteKey: z.string(),
-	metadata: z.record(z.unknown()).optional(),
+	metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type Tile = z.infer<typeof TileSchema>;
 
@@ -62,16 +62,17 @@ export const AreaSchema = z.object({
 	height: z.number().int().min(1),
 	tiles: z.array(TileSchema),
 	monsterSpawnTable: z.array(
-		z.object({
-			speciesId: z.string(),
-			weight: z.number().min(0).max(1),
-			minLevel: z.number().int().min(1),
-			maxLevel: z.number().int().min(1),
-		})
-		.refine((data) => data.maxLevel >= data.minLevel, {
-			message: "maxLevel must be greater than or equal to minLevel",
-			path: ["maxLevel"],
-		}),
+		z
+			.object({
+				speciesId: z.string(),
+				weight: z.number().min(0).max(1),
+				minLevel: z.number().int().min(1),
+				maxLevel: z.number().int().min(1),
+			})
+			.refine((data) => data.maxLevel >= data.minLevel, {
+				message: 'maxLevel must be greater than or equal to minLevel',
+				path: ['maxLevel'],
+			}),
 	),
 	connections: z.array(
 		z.object({
@@ -91,7 +92,7 @@ export type Area = z.infer<typeof AreaSchema>;
  * World map containing all areas
  */
 export const WorldMapSchema = z.object({
-	areas: z.record(AreaSchema),
+	areas: z.record(z.string(), AreaSchema),
 	currentAreaId: z.string(),
 	discoveredAreas: z.array(z.string()),
 });
