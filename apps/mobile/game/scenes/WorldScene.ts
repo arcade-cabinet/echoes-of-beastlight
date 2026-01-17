@@ -106,7 +106,7 @@ export class WorldScene {
 	 * Clear all rendered tiles
 	 */
 	clearTiles(): void {
-		for (const [_key, mesh] of this.tiles) {
+		for (const mesh of this.tiles.values()) {
 			(mesh as { dispose: () => void }).dispose();
 		}
 		this.tiles.clear();
