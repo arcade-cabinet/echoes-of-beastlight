@@ -12,7 +12,7 @@ test('load game and check for visual glitches', async ({ page }) => {
 
 	await page.goto('http://localhost:8000');
 
-	// Wait for the canvas to be present (Bevy uses a canvas)
+	// Wait for the canvas to be present (Babylon.js renders to a canvas)
 	// Increase timeout to 60s as WASM loading can be slow
 	const canvas = await page.waitForSelector('canvas', { timeout: 60000 });
 	expect(canvas).toBeDefined();
