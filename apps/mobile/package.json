@@ -28,6 +28,7 @@
 		"expo-status-bar": "~1.6.0",
 		"react": "18.2.0",
 		"react-native": "0.71.14",
+		"react-native-version-note": "React Native is pinned to 0.71.x for compatibility with @babylonjs/react-native-iosandroid-0-71 and Expo SDK 48. Upgrade requires updating the Babylon React Native bridge and Expo SDK.",
 		"react-native-gesture-handler": "~2.12.1",
 		"react-native-reanimated": "~3.3.0",
 		"react-native-safe-area-context": "4.6.3",
