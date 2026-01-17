@@ -171,10 +171,10 @@ export class CombatScene {
 	 * Clear combat scene
 	 */
 	clearCombat(): void {
-		for (const [_, mesh] of this.playerMeshes) {
+		for (const mesh of this.playerMeshes.values()) {
 			(mesh as { dispose: () => void }).dispose();
 		}
-		for (const [_, mesh] of this.enemyMeshes) {
+		for (const mesh of this.enemyMeshes.values()) {
 			(mesh as { dispose: () => void }).dispose();
 		}
 		this.playerMeshes.clear();
