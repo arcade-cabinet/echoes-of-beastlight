@@ -1,60 +1,52 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":dependencyDashboard",
-    ":semanticCommitTypeAll(chore)"
-  ],
-  "timezone": "UTC",
-  "schedule": ["before 3am on Monday"],
-  "labels": ["dependencies", "renovate"],
-  "packageRules": [
-    {
-      "description": "Automatically merge minor and patch updates",
-      "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true,
-      "automergeType": "pr",
-      "platformAutomerge": true
-    },
-    {
-      "description": "Group Rust minor and patch updates",
-      "matchManagers": ["cargo"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "rust dependencies"
-    },
-    {
-      "description": "Group Bevy ecosystem updates",
-      "matchPackagePatterns": ["^bevy"],
-      "groupName": "bevy ecosystem"
-    },
-    {
-      "description": "Require approval for major updates",
-      "matchUpdateTypes": ["major"],
-      "dependencyDashboardApproval": true
-    },
-    {
-      "description": "Pin Rust toolchain updates",
-      "matchFiles": ["rust-toolchain.toml"],
-      "rangeStrategy": "pin"
-    }
-  ],
-  "cargo": {
-    "enabled": true
-  },
-  "github-actions": {
-    "enabled": true
-  },
-  "prConcurrentLimit": 3,
-  "prCreation": "immediate",
-  "semanticCommits": "enabled",
-  "postUpdateOptions": [
-    "gomodTidy",
-    "npmDedupe",
-    "yarnDedupeHighest"
-  ],
-  "ignoreDeps": [],
-  "vulnerabilityAlerts": {
-    "labels": ["security"],
-    "automerge": true
-  }
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:recommended", ":dependencyDashboard", ":semanticCommitTypeAll(chore)"],
+	"timezone": "UTC",
+	"schedule": ["before 3am on Monday"],
+	"labels": ["dependencies", "renovate"],
+	"packageRules": [
+		{
+			"description": "Automatically merge minor and patch updates",
+			"matchUpdateTypes": ["minor", "patch"],
+			"automerge": true,
+			"automergeType": "pr",
+			"platformAutomerge": true
+		},
+		{
+			"description": "Group Rust minor and patch updates",
+			"matchManagers": ["cargo"],
+			"matchUpdateTypes": ["minor", "patch"],
+			"groupName": "rust dependencies"
+		},
+		{
+			"description": "Group Bevy ecosystem updates",
+			"matchPackagePatterns": ["^bevy"],
+			"groupName": "bevy ecosystem"
+		},
+		{
+			"description": "Require approval for major updates",
+			"matchUpdateTypes": ["major"],
+			"dependencyDashboardApproval": true
+		},
+		{
+			"description": "Pin Rust toolchain updates",
+			"matchFiles": ["rust-toolchain.toml"],
+			"rangeStrategy": "pin"
+		}
+	],
+	"cargo": {
+		"enabled": true
+	},
+	"github-actions": {
+		"enabled": true
+	},
+	"prConcurrentLimit": 3,
+	"prCreation": "immediate",
+	"semanticCommits": "enabled",
+	"postUpdateOptions": ["gomodTidy", "npmDedupe", "yarnDedupeHighest"],
+	"ignoreDeps": [],
+	"vulnerabilityAlerts": {
+		"labels": ["security"],
+		"automerge": true
+	}
 }
